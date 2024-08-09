@@ -11,12 +11,7 @@ import cors from 'cors'
 import { initApp } from './src/initApp.js';
 import { dbConnection } from './DataBase/dbConnection.js';
 import env from "dotenv"
-// import { catchError } from './src/utilities/catchError.js';
-import { customAlphabet } from 'nanoid'
 import { socketConnect } from './src/services/socketConnection.js';
-const nanoid = customAlphabet('012345678', 10)
-import { Server } from "socket.io";
-
 
 env.config()
 
@@ -27,8 +22,8 @@ const port = process.env.PORT ||  5000 ;
 
 
 //& Express Middle Ware :
-app.use(express.json()) ;
 app.use(cors()) ;
+app.use(express.json()) ;
 app.use("/" , express.static("Uploads")) ;
 app.use("/pdf" , express.static("Docs")) ;
 
