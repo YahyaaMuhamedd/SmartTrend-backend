@@ -133,8 +133,8 @@ export let pdf_Report_data = (data)=>{
 
       
                               <ul style="font-weight:bold;  list-style:none; margin-top:20px ;">
-                                 <li>Created_At:  ${date}</li>
-                                 ${data.date?.start ? `<li>From   : ${data.date?.start} <span style="margin-left:300px;"> To : ${data.date?.end ? data.date?.end  : date }</span> </li>` : ""}
+                                 <li>Created At:  ${date}</li>
+                                 ${data.date?.start ? `<li>From   : ${data.date?.start.split("-").reverse().join("-")} <span style="margin-left:300px;"> To : ${data.date?.end ? data.date?.end.split("-").reverse().join("-")  : `Today ${date}`}</span> </li>` : ""}
                               </ul>
 
                   </tr>
@@ -170,7 +170,7 @@ export let pdf_Report_data = (data)=>{
                            <tr class="item">
                               <td>${index + 1}</td>
                               <td>${ele.company?.name}</td>
-                              <td>${ele.createdAt?.toString().slice(0 , 24)}</td>
+                              <td>${new Date(ele.createdAtOrder).toString().slice(0 , 24)}</td>
                               <td>${ele.total_Price }</td>
                               <td>${ele.total_Price_After_Discount}</td>
                               <td>${ele.Net_Amount}</td>

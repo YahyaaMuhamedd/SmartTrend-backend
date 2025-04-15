@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "@joi/date": "^2.1.0",
+    "axios": "^1.8.4",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.0.1",
     "cors": "^2.8.5",
@@ -33,7 +34,6 @@
     "qrcode": "^1.5.3",
     "slugify": "^1.6.6",
     "socket.io": "^4.7.5",
-    "stripe": "^15.4.0",
     "uuid": "^9.0.1"
   }
 }

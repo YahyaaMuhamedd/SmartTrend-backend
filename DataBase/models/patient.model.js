@@ -32,6 +32,9 @@ const schema = new Schema({
       street:String , 
       city :String
    } ,
+   creationTimeAt:{
+      type:Number 
+   } ,
    createdBy:{
       type:Types.ObjectId ,
       ref: "user" 
@@ -40,7 +43,14 @@ const schema = new Schema({
 
 
 
-// & Hash Password Before Save When Update User :
+//& Added Dynamic Creation Time At :
+schema.pre("save"  , function(next){   
+   if (!this.creationTimeAt) {
+      this.creationTimeAt = Date.now() ;
+   }
+   next()
+}) ;
+
 schema.pre(/^find/ , function(){
    this.populate("createdBy")
 }) ;

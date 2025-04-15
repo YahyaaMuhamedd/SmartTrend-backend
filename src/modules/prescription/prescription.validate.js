@@ -37,15 +37,3 @@ export const paramsIdVal = Joi.object({
 })
 
 
-
-
-export const updateTestVal = Joi.object({
-   id:Joi.string().hex().length(24).required() ,
-
-   name:Joi.string().min(1).max(100).trim(),
-   description:Joi.string().min(10).max(400).trim(),
-   condition:Joi.string().min(10).max(400).trim(),
-   company:Joi.string().hex().length(24)
-})
-
-

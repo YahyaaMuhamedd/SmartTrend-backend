@@ -4,14 +4,13 @@ import { AppError } from "../../utilities/AppError.js";
 import { catchError } from "../../utilities/catchError.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { customAlphabet } from 'nanoid'
 import QRCode  from'qrcode' ;
-import path from "path"
-import { companyModel } from "../../../DataBase/models/company.model.js";
+import { customAlphabet, } from 'nanoid' ;
+const nanoid = customAlphabet('0123456789', 6) ;
 
 
 
-const nanoid = customAlphabet('123456789', 6)
+
 
 
 
@@ -35,7 +34,12 @@ export const signUp = catchError(
       const user = await userModel.create({name , age  , phone , birthDay , email  , password}) ;
 
 
-      const token = jwt.sign({_id:user._id , name:user.name , phone: user.phone , email:user.email , role:user.role} , process.env.SECRET_KEY )
+      const token = jwt.sign(
+         {_id:user._id , name:user.name , phone: user.phone , email:user.email , role:user.role} , 
+         process.env.SECRET_KEY , 
+         {expiresIn:process.env.TOKEN_EXPIRATION} // expired Token After 2 hours or ==> expiresIn:"2h" 
+         
+      ) 
 
       !user && next(new AppError("User Not Added" , 404))
       user && res.json({message:"success" ,  token})
@@ -49,12 +53,14 @@ export const signIn = catchError(
    async (req , res , next)=>{
       const{email , password} = req.body ;
       const user = await userModel.findOne({email})
-      const loggedUser = await userModel.findById(user._id).select("name role  phone birthDay  email  age imgCover") ;
+      !user && next(new AppError("User Not Exist" , 401)) ;
+
+      const loggedUser = await userModel.findById(user._id).select("-_id name role  phone birthDay email  age imgCover") ;
       if(user && bcrypt.compareSync(password , user?.password)) {
          const token = jwt.sign(
             {_id:user._id , name:user.name , phone: user.phone , email:user.email , role:user.role} , 
             process.env.SECRET_KEY , 
-            {expiresIn:"2h"} // expired Token After 2 hours or ==> expiresIn:"2h" 
+            {expiresIn:process.env.TOKEN_EXPIRATION} // expired Token After 2 hours or ==> expiresIn:"2h" 
             // {expiresIn:60*60*2} // expired Token After 2 hours or ==> expiresIn:"2h" 
          ) 
 
@@ -66,6 +72,7 @@ export const signIn = catchError(
 
 
 
+//^ All Steps Change Password :
 //& Change Password :
 export const changePassword = catchError(
    async(req , res , next)=>{
@@ -80,8 +87,14 @@ export const changePassword = catchError(
             return next(new AppError("Email Or Old Password InCorrect" , 404)) ;
          }
 
+
          //& Generate Token :
-         const token = jwt.sign({_id:user._id , name:user.name , phone: user.phone , email:user.email , role:user.role} , process.env.SECRET_KEY )
+         const token = jwt.sign(
+            {_id:user._id , name:user.name , phone: user.phone , email:user.email , role:user.role} , 
+            process.env.SECRET_KEY , 
+            {expiresIn:process.env.TOKEN_EXPIRATION} // expired Token After 2 hours or ==> expiresIn:"2h" 
+            // {expiresIn:60*60*2} // expired Token After 2 hours or ==> expiresIn:"2h" 
+         ) 
 
       await user.save()
       return res.json({message:"success" , token})
@@ -89,45 +102,149 @@ export const changePassword = catchError(
 )
 
 
+
+
+
+
+
+//^ All Steps Activated Account Email :
 //& Send Code :
-export const sendCode = catchError(
+export const sendCodeToEmailActivation = catchError(
    async (req , res , next)=>{
 
-      const user = await userModel.findById(req.user._id) ;
-      if(!user) return next(new AppError("User Not Found")) ; 
-      let codeNum = nanoid()
+      const otp = nanoid() ;
+      const user = await userModel.findById(req.user._id)
+      if(!user) return next(new AppError("User Not Registration")) ; 
+
+      const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 دقائق
+
+      user.otp_code = otp;
+      user.otpExpiry = expiry;
+      await user.save();
+
+      const subject =  "Activate Your Account for - Fekrah Medical ✔"
+
       let codeHtml = ()=>{
          return `
-         <h2>${codeNum}</h2>
+            <p style="font-size:16px; font-weight:bold;">Submit this activated code : <span style="display:inline-block ;  padding:2px; letter-spacing: 2px; color:white;  background-color:rgb(143,84,201) ;font-size:18px;">${otp}</span> If you did not request activated account, please ignore this email!</p>
          `
       }
-      user.confirmedCode = codeNum ;
-      await userModel.updateOne({_id:user._id},{confirmedCode:codeNum})
-      sendEmail(req.user.email , codeHtml )
+      sendEmail(user.email , subject , codeHtml )
 
-      res.json({message:"success" , codeNum})
+      res.json({message:"success" , otp})
    }
 )
-
-
 //&  Confirmed Email :
 export const confirmedEmail = catchError(
    async (req , res , next)=>{
-      const {code} = req.body ;
+      const {OTP} = req.body ;
 
       const user = await userModel.findById(req.user._id) ;
-      if(!user) return next(new AppError("User Not Found")) ;
-      if(user?.confirmedCode == code){
-         await userModel.updateOne({_id:user._id},{confirmedEmail:true})
-         return res.json({message:"success"}) ;
-      }
-      return next(new AppError("InCorrect Code")) ;
+
+      if (!user || user.otp_code !== OTP || user.otpExpiry < new Date()) return next(new AppError("Invalid or expired OTP , Please Enter Correct valid OTP !")) ; 
+
+      await userModel.updateOne({_id:user._id},{
+         confirmedEmail:true ,
+         otp_code:null ,
+         otpExpiry:null ,
+      })
+      return res.json({message:"Activated Account Successfully"}) ;
    }
 )
 
 
 
-//&  Generate QR_Code :
+
+
+
+
+//^ All Steps Forget Password :
+   //& 1- Send Code To Email :
+   export const sendCodeToEmail = catchError(
+      async (req , res , next)=>{
+         const{email} = req.body ;
+
+         const otp = nanoid() ;
+         const user = await userModel.findOne({email})
+         if(!user) return next(new AppError("User Not Registration")) ; 
+
+
+
+         const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 دقائق
+
+         user.otp_code = otp;
+         user.otpExpiry = expiry;
+         await user.save();
+
+         let codeHtml = ()=>{
+            return `
+               <p style="font-size:16px; font-weight:bold;">Submit this reset password code : <span style="display:inline-block ;  padding:2px; letter-spacing: 2px; color:white;  background-color:rgb(143,84,201) ;font-size:18px;">${otp}</span> If you did not request a change of password, please ignore this email!</p>
+            `
+         }
+         const subject =  "Your Password Reset Code (valid for 10 minutes) To reset your password."
+         sendEmail(user.email , subject , codeHtml ) ;
+         // res.json({message:"Create OTP Successfully" , user_id:user._id}) ;
+         res.json({ message: "OTP sent to your email" });
+
+      }
+   )
+   //& 2- Verify OTP  :
+   export const verifyOTP = catchError(
+      async (req , res , next)=>{
+         const{email , OTP} = req.body ;
+
+         const user = await userModel.findOne({email})
+
+         if (!user || user.otp_code !== OTP || user.otpExpiry < new Date()) return next(new AppError("Invalid or expired OTP , Please Enter Correct valid OTP !")) ; 
+
+         const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz' , 20);
+
+         const resetToken = nanoid();
+         const expiry = new Date(Date.now() + 15 * 60 * 1000); // 15 دقيقة صلاحية
+
+         user.resetToken = resetToken;
+         user.resetTokenExpiry = expiry;
+         user.otp_code = null;
+         user.otpExpiry = null;
+         await user.save();
+
+         res.json({message:"OTP Verified Successfully" , resetToken})
+      }
+   )
+   //& 3- Reset New Password :
+   export const resetPassword = catchError(
+      async (req , res , next)=>{
+         const { resetToken , newPassword } = req.body;
+         const user = await userModel.findOne({
+            resetToken,
+            resetTokenExpiry: { $gt: new Date() },
+         });
+
+         if(!user) return next(new AppError("Invalid or expired token")) ; 
+
+         user.password = newPassword;
+         user.resetToken = null;
+         user.resetTokenExpiry = null;
+         user.passwordChangedAt = Date.now() ;
+         await user.save()
+
+         let codeHtml = ()=>{
+            return `
+               <p style="font-size:16px; font-weight:bold;">The new forgotten password has been changed. Please don't share this information with anyone and try again login now ! <span style="display:inline-block ;  padding:2px; letter-spacing: 2px; color:white;  background-color:rgb(143,84,201) ;font-size:18px;">${newPassword}</span> If you did not request a change of password, please ignore this email!</p>
+            `
+         }
+         const subject =  "Your password has been changed. Please do not share this information"
+         sendEmail(user.email , subject , codeHtml ) ;
+
+         return res.json({message:"Password reset successfully" , newPassword })
+      }
+   )
+
+
+
+
+
+   //&  Generate QR_Code :
 export const generateQR_Code = catchError(
    async (req , res , next)=>{
       const link = `Url_WebSite Good Morning! : https://eng-mahmoudothman.github.io/free-palestine-Front-End/`
@@ -135,31 +252,5 @@ export const generateQR_Code = catchError(
             res.send(`<img src='${url}'/>`)
             // res.json({message:"success" , url , link})
          })
-   }
-)
-
-
-//^===================== Authentication Online System ========================
-
-
-//& Sign In Company Branch :
-export const signInBranch = catchError(
-   async (req , res , next)=>{
-      const{email , password} = req.body ;
-      const company = await companyModel.findOne({email})
-
-      const loggedCompany = await companyModel.findById(company?._id).select("name  phone  email") ;
-      if(company && bcrypt.compareSync(password , company?.password)) {
-         const token = jwt.sign(
-            {_id:company._id , name:company.name , phone: company.phone , email:company.email} , 
-            process.env.SECRET_KEY , 
-            {expiresIn:"1h"} // expired Token After 2 hours or ==> expiresIn:"2h" 
-            // {expiresIn:60*60*2} // expired Token After 2 hours or ==> expiresIn:"2h" 
-         ) 
-
-         return res.json({message:"success"  , company:loggedCompany ,   token }) ;
-      }
-
-      return next(new AppError("Email Or Password InCorrect" , 401)) ;
    }
 )

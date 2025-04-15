@@ -8,7 +8,9 @@ export const addTestVal = Joi.object({
    company:Joi.string().hex().length(24).required() ,
    price:Joi.number().min(0).required() ,
    discount:Joi.number().min(0).required() ,
+   final_amount:Joi.number().min(0).required() ,
 })
+
 
 
 

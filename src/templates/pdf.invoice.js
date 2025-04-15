@@ -2,7 +2,6 @@ import { generate_Date } from "../services/generateDate_Time.js";
 
 const date = generate_Date() ;
 
-
 export let pdf_invoice = (data)=>{
    return (
       `
@@ -109,6 +108,11 @@ export let pdf_invoice = (data)=>{
 
 
          <div class="invoice-box">
+         
+
+
+         <img src="" alt="logo" />
+
          <table cellpadding="0" cellspacing="0">
             <tr class="top">
 
@@ -140,8 +144,8 @@ export let pdf_invoice = (data)=>{
    
                               <td>
                                  Patient Phone : ${data.patient_Phone} <br />
-                                 User Name: ${data.user.name} <br />
-                                 User email : ${data.user.email} <br />
+                                 User Name: ${data.user?.name} <br />
+                                 User email : ${data.user?.email} <br />
                                  ######### : ###################
                               </td>
                            </tr>
@@ -159,7 +163,7 @@ export let pdf_invoice = (data)=>{
                   <tr class="details">
                      <td style="font-weight:bold;">Check Total Price After Discount</td>
       
-                     <td style="font-weight:bold;">EGP ${data.total_Price_After_Discount}</td>
+                     <td style="font-weight:bold;"> ${data.total_Price_After_Discount} EGP</td>
                   </tr>
       
                   <tr class="heading">
@@ -170,8 +174,8 @@ export let pdf_invoice = (data)=>{
       
                   ${data.orderItems.map((ele)=>`
                            <tr class="item">
-                              <td>${ele.test.name}</td>
-                              <td>EGP ${ele.priceAfterDiscount}.00</td>
+                              <td>${ele?.test.name}</td>
+                              <td>${Math.trunc(ele.priceAfterDiscount) == ele.priceAfterDiscount ? `${ele.priceAfterDiscount}.00 EGP ` : `${ele.priceAfterDiscount} EGP `}</td>
                            </tr>
                         `
                   ).join(" ")}
@@ -179,7 +183,7 @@ export let pdf_invoice = (data)=>{
                   <tr class="total">
                   <td style="font-weight:bold;">Total Price</td>
    
-                  <td>Total: EGP ${data.total_Price_After_Discount}.00</td>
+                  <td>Total: ${Math.trunc(data.total_Price_After_Discount) == data.total_Price_After_Discount ? `${data.total_Price_After_Discount}.00 EGP ` : `${data.total_Price_After_Discount} EGP `}</td>
                </tr>
       
                </table>

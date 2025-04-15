@@ -3,24 +3,32 @@ import { ApiFeature } from "../../utilities/apiFeatures.js";
 import { catchError } from "../../utilities/catchError.js";
 import { orderModel } from "../../../DataBase/models/order.model.js";
 import { testModel } from "../../../DataBase/models/test.model.js";
-import { priceModel } from "../../../DataBase/models/price.model.js";
 import { cartModel } from "../../../DataBase/models/cart.model.js";
-import { userModel } from "../../../DataBase/models/user.model.js";
+
+
 import slugify from "slugify";
-
-
 import env from "dotenv"
 import fs from "fs" ;
 import path from "path" ;
+import axios from 'axios';
+
 
 import { customAlphabet } from 'nanoid'
 import { patientModel } from "../../../DataBase/models/patient.model.js";
 import { create_pdf } from "../../services/create_pdf.js";
 import {  pdf_invoice } from "../../templates/pdf.invoice.js";
-import { pdf_transform } from "../../templates/pdf.transform.js";
-const invoice_nanoid = customAlphabet(process.env.INVOICE_NUMBER, 10) ;
-const transform_nanoid = customAlphabet(process.env.TRANSFORM_NUMBER, 10) ;
 env.config()
+
+
+
+const invoice_nanoid = customAlphabet(process.env.INVOICE_NUMBER, 10) ;
+
+
+
+
+
+
+
 
 
 
@@ -51,8 +59,8 @@ export const getAllOrder = catchError(
          filterObj = {is_Cancel:true}
       }else if (filter == "new"){
          filterObj = {
-            is_Paid_Invoice_V_Cash :true  ,   
-            is_wrong_Invoice_V_Cash :false ,   
+            // is_Paid_Invoice_V_Cash :true  ,   
+            // is_wrong_Invoice_V_Cash :false ,   
             is_Paid :false   , 
             is_Done :false   , 
             is_Cancel:false    
@@ -167,21 +175,23 @@ export const getOrderCount = catchError(
 
       //& Get date By Specific Formate 0000-00-00 :
       const date = new Date();
-      const day = (date.getDate()).toString().length == 1 ? `0${(date.getDate() - 1)}` :  (date.getDate() -1 ) ;
-      const month = (date.getMonth()).toString().length == 1 ? `0${(date.getMonth() + 1)}` :  (date.getMonth() + 1) ;
+      const day = (date.getDate()).toString().length == 1 ? `0${(date.getDate() + 1)}` :  (date.getDate() ) ;
+      const month = (date.getMonth()).toString().length == 1 ? `0${(date.getMonth() + 1)}` :  (date.getMonth()) ;
       const year = date.getFullYear() ;
 
-      const todayDate = `${year}-${month}-${day}T00:00:00Z` ;
+      const todayDate = new Date(`${year}-${month}-${day}T00:00:00Z`) ;
+
+      // const todayDate = `${year}-${month}-${day}T00:00:00Z` ;
       const end = `${year}-${month}-${day}T24:00:00.000+00:00`  ;
 
       //! Get All Payment Orders Today's :
       const paymentOrder = await orderModel.find({
-         is_Paid_Invoice_V_Cash :true  ,   
+         // is_Paid_Invoice_V_Cash :true  ,   
          is_Paid :true   , 
          is_Done :true   , 
          createdAt:
             {
-               $gte: todayDate
+               $gt: todayDate
                // $gte:`${year}-${month}-${day}T00:00:00Z` ,
             }
       });
@@ -212,74 +222,6 @@ export const getOrderCount = catchError(
 )
 
 
-
-//& Get All Cancel Orders :
-export const  getCancelOrders = catchError(
-   async(req , res , next)=>{
-
-      //^ Merge Params
-      const{filter} = req.query ;
-      let filterObj = {};
-
-      if(filter == "received"){
-         filterObj = {
-            $or:[
-               {is_wrong_Invoice_V_Cash:true} , 
-               { is_Paid:true }, 
-               {is_Done:true }, 
-               {is_Cancel:true}
-            ]
-         }
-      }else if (filter == "sampling"){
-         filterObj = {
-            is_Paid_Invoice_V_Cash :true  ,   
-            is_Paid :true   , 
-            is_Done :true   , 
-            createdAt:
-               {
-                  $gte:start ,
-                  $lte:end 
-               }
-         }
-      }else if (filter == "cancel"){
-         filterObj = {is_Cancel:true}
-      }else if (filter == "new"){
-         filterObj = {
-            is_Paid_Invoice_V_Cash :true  ,   
-            is_wrong_Invoice_V_Cash :false ,   
-            is_Paid :false   , 
-            is_Done :false   , 
-            is_Cancel:false    
-         }
-      }
-
-      let result = await orderModel.find();
-      let apiFeature = new ApiFeature(orderModel.find(filterObj), req.query ).pagination().fields().search().filter().sort();
-      const orders = await apiFeature.mongooseQuery;
-
-      if(!orders.length) return next(new AppError("Orders is Empty" , 404))
-
-      let currentPag = apiFeature.pageNumber ;
-      let numberOfPages = Math.ceil(result.length  / apiFeature.limit)  ;
-      let limit = apiFeature.limit  ;
-      let nextPage = numberOfPages - apiFeature.pageNumber ;
-      let prevPage = (numberOfPages - nextPage) - 1 ;
-
-      let metadata = {
-         currentPag: currentPag ,
-         numberOfPages: numberOfPages || 1 ,
-         limit: limit ,
-         }
-
-         if(nextPage >  numberOfPages  && nextPage != 0){
-            metadata.nextPage  = nextPage
-         }
-         if(currentPag <=  numberOfPages  && prevPage != 0 ){
-            metadata.prevPage  = prevPage
-         }
-      res.json({message:"success" , results:result.length ,  metadata: metadata ,  orders}) ;
-   }
-)
 
 
 
@@ -334,6 +276,7 @@ export const createCashOrderLoggedUser = catchError(
             street: street ,
             city: city ,
          } ,
+         createdAtOrder : new Date().getTime()
       })
       
       //! Added invoice to this Order :
@@ -361,11 +304,12 @@ export const createCashOrderLoggedUser = catchError(
       await testModel.bulkWrite(options)
 
 
-
+      
       if(!order) return next(new AppError("Order Failed" , 400)) ;
       res.json({message:"success" , add_Invoice_Order , patient:req.patient})
    }
 )
+
 
 //& Check Patient Exist MiddleWare :
 export const checkExistPatient = catchError(
@@ -564,7 +508,7 @@ export const cancelCashOrder = catchError(
 
 
 
-//& Cancel Cash Order :
+//& Rejected Cash Order :
 export const rejectedCashOrder = catchError(
    async(req , res , next)=>{
       const {id} = req.params ;
@@ -665,72 +609,213 @@ export const deleteOrder = catchError(
 
 
 
-//^================ auth By Company Token ========================
 
-//& Confirmed Online System in Branch Laboratory :
-export const transformOnlineSystem = catchError(
+
+
+//^================================== Create Online Order And Payment With Paymob  ==================================
+
+
+const PAYMOB_API_KEY = process.env.PAYMOB_API_KEY;
+const PAYMOB_INTEGRATION_ID = process.env.PAYMOB_INTEGRATION_ID;
+let authToken = "";
+
+
+//& 1- Create Token In Paymob :
+const getAuthToken = async () => {
+   try {
+      const response = await axios.post("https://accept.paymob.com/api/auth/tokens", {
+         api_key: PAYMOB_API_KEY,
+      });
+      authToken = response.data.token;
+   } catch (error) {
+      console.error("Error getting auth token:", error.response?.data || error.message);
+   }
+};
+
+//& 2- Create Payment Method :
+export const create_payment = async (req , res , next) => {
+   try {
+      await getAuthToken();
+
+      const {patient_Name  , gender , street , city ,  patient_Phone , doctor_Name , patient_History , branch} = req.body ;
+
+      const cart = await cartModel.findOne({user:req.user._id}) ;
+      if(!cart) return next(new AppError("Cart Not Found" , 404)) ;
+
+      const phone = req.user.phone ;
+      const amount = cart.total_After_Discount ;
+
+      const orderData = {
+         user: req.user._id , 
+         patient_Name , 
+         patient_Age: req.patient.patient_Age , 
+         gender , 
+         street , 
+         city , 
+         patient_Phone , 
+         doctor_Name , 
+         patient_History ,
+         branch_Area : branch ,
+      } ;
+
+
+      // تحويل المبلغ إلى قروش (100 جنيه = 10000 قرش)
+      const orderResponse = await axios.post("https://accept.paymob.com/api/ecommerce/orders", {
+         auth_token: authToken,
+         delivery_needed: "false",
+         amount_cents: amount * 100 ,
+         // amount_cents: cart.total_After_Discount * 100 ,
+         currency: "EGP",
+         merchant_order_id: new Date().getTime(),
+         items: [],
+      });
+      const orderId = orderResponse.data.id;
+
+      // طلب Payment Key
+      const paymentKeyResponse = await axios.post("https://accept.paymob.com/api/acceptance/payment_keys", {
+         auth_token: authToken,
+         // amount_cents: amount * 100,
+         amount_cents: cart.total_After_Discount * 100,
+         expiration: 3600,
+         order_id: orderId,
+         extra:orderData ,
+         billing_data: {
+            phone_number: phone ,
+            first_name: "mahmoud" ,
+            last_name: "osman" ,
+            email: "email@example.com" ,
+            country: "EG",
+            city: "Cairo",
+            state: "Cairo", 
+            street: "123 Street",
+            building: "1",
+            apartment: "1",
+            floor: "1",
+         },
+         currency: "EGP",
+         integration_id: PAYMOB_INTEGRATION_ID ,
+      });
+
+      const paymentKey = paymentKeyResponse.data.token ;
+      res.json({
+         redirect_url: `https://accept.paymob.com/api/acceptance/iframes/865137?payment_token=${paymentKey}`,
+      });
+
+   } catch (error) {
+      console.error("Error creating payment:", error);
+      res.status(500).json({ error: "Payment creation failed" });
+   }
+};
+
+//& 3- Receive Webhook From Paymob :
+export const webhookMiddleWre = catchError(
    async(req , res , next)=>{
-      // console.log(req.body.invoice_number , req.body.email);
-      const {invoice_number , email} = req.body ;
-      console.log(req.company?.email);
-      const transform_number =  transform_nanoid();
-      
-      const order = await orderModel.findOne({
-         invoice_number , 
-         is_Cancel:false , 
-         is_Paid:true , 
-         is_Paid_Invoice_V_Cash:true , 
-         is_Done:false
-      }) ;
-
-      
-      if(!order) return next(new AppError("Order Not Found Please Connect On Hot line :3245" , 404)) ;
-      if(order.company?.email !== req.company?.email) return next(new AppError("Company Not Valid Please Connect On Hot line :3245" , 404)) ;
-      
-      console.log(order.company?.email);
-      const patient_Name_Slug = slugify(order.patient_Name) ;
-
-      order.is_Done = true ;
-      order.branch_Approved_Email = email
-      order.transform_number =  transform_number;
-      order.transform_pdf  = `transform_${patient_Name_Slug}_${order._id}.pdf`
-      await order.save() ;
-
-
-
-      //! Added Transformation to this Order :
-      // const add_transform_Order = await orderModel.findByIdAndUpdate(order._id , {transform_pdf  : `transform_${patient_Name_Slug}_${order._id}` } , {new:true})
-
-      //! Create Transformation invoice Pdf  Orders :
-      create_pdf(res , pdf_transform , order , `transform_${patient_Name_Slug}_${order._id}`);
-
-
-      // res.json({DownLoad_Link:`<a href='${process.env.BASE_URL}pdf/transform_${patient_Name_Slug}_${order._id}.pdf'>Download</a>`})
-      res.json({message:"success" , url:`${process.env.BASE_URL}pdf/transform_${patient_Name_Slug}_${order._id}.pdf`}) ;
+      const {success , pending , amount_cents , data , order , payment_key_claims} = req.body.obj ;  // البيانات اللي جاية من PayMob
+         console.log("Done Webhook");
+         console.log("Success" , success);
+         console.log("Pending" , pending);
+         // console.log("order_url" , order.order_url);
+         // console.log(req.body.obj);
+         console.log("Extra ==>" , payment_key_claims.extra);
+         
+      if (success) {
+         createOnlineOrder(payment_key_claims.extra)
+         console.log(`💰 Successfully Payment Message : ${data.message} ${amount_cents / 100} EGP`);
+      } else {
+         console.log(`❌ Failed Payment Message : ${data.message}`);
+      }
    }
 )
 
+//& 4- Create Online Order :
+export const createOnlineOrder = async (data)=>{
+   console.log("Order Successfully"  , data)
+   const{
+      user , 
+      patient_Name , 
+      patient_Age , 
+      doctor_Name , 
+      patient_Phone , 
+      patient_History , 
+      gender , 
+      branch_Area , 
+      street , 
+      city
+   } = data ;
+
+      const cart = await cartModel.findOne({user:user}) ;
+      if(!cart) return next(new AppError("Cart Not Found" , 404)) ;
+
+      const company = cart.cartItems[0].price.company ;
+      const invoice_number = invoice_nanoid() ;
+   
+      const order = await orderModel.create({
+         user:user ,
+         patient_Name ,
+         branch_Area , 
+         patient_Age , 
+         doctor_Name , 
+         cart:cart._id ,
+         patient_Phone ,
+         patient_History , 
+         gender ,
+         invoice_number ,
+         company ,
+         orderItems:cart.cartItems.map(({test , price:{price , priceAfterDiscount , final_amount}})=>({
+            test:test ,
+            price:price ,
+            priceAfterDiscount:priceAfterDiscount ,
+            final_amount
+         })) ,
+         shipping_Address:{
+            street: street ,
+            city: city ,
+         } ,
+      })
+
+      console.log("Order @@@==>" , order);
+      
+      //! Added invoice to this Order :
+      const patient_Name_Slug = slugify(`${order.patient_Name}`) ;
+      const add_Invoice_Order = await orderModel.findByIdAndUpdate(order._id , {invoice_pdf  : `invoice_${patient_Name_Slug}_${order._id}.pdf` } , {new:true})
+      
+      //! Create Invoice Pdf  orders :
+      let pdf = create_pdf(res , pdf_invoice , add_Invoice_Order , `invoice_${patient_Name_Slug}_${order._id}`);
 
 
-//& Get And Search Approved Order Confirmed Online System ion Branch :
-export const getApprovedOrder = catchError(
-   async(req , res , next)=>{
-      const {invoice_number} = req.query ;
-      
-      const order = await orderModel.findOne({invoice_number}) ;
-      !order &&  next(new AppError("Order Not Found Please Connect On Hot line :3245" , 404)) ;
-      
-      res.json({message:"success" , order:{
-         patient_Name:order.patient_Name ,
-         patient_Phone:order.patient_Phone ,
-         patient_Age:order.patient_Age ,
-         patient_History:order.patient_History ,
-         gender:order.gender ,
-         invoice_number:order.invoice_number ,
-         is_Paid:order.is_Paid ,
-         is_Cancel:order.is_Cancel ,
-         is_Done:order.is_Done ,
-      }}) ;
-   }
-)
+
+      //!Delete Cart After Create Order:
+      const cartDeleted = await cartModel.findByIdAndDelete(cart._id , {new:true})  ; 
+
+      //& Increase the number of times the test is done : 
+      const options =  order.orderItems.map(({test:{_id }})=>{
+         return (
+            {
+               updateOne:{
+                  filter:{_id} ,
+                  update:{$inc:{count:1}}
+               }
+            }
+         )
+      })
+      await testModel.bulkWrite(options)
+
+      console.log("Successfully Created New Orders By Paymob Online!");
+      console.log("Done" , add_Invoice_Order);
+}
+
+
+
+
+// https://paymob-method.vercel.app/webhook   
+
+// Mastercard Approved :
+// 5123456789012346
+// Test Account
+// 12/25
+// 123
+
+
+
+
 

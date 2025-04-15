@@ -139,14 +139,12 @@ export const getSingleUser = catchError(
 export const updateUser = catchError(
    async(req , res , next)=>{
       const {name , phone , email , birthDay} = req.body ;
-      const {id} = req.params ;
 
-      const user = await userModel.findById(id) ;
-      !user &&  next(new AppError("User Not Found" , 404))
+      const user = await userModel.findById(req.user._id)
+      if(!user) return next(new AppError("User Not Found" , 404)) ;
       
-      const userExist = await userModel.findOne({email}) ;
-      userExist && next(new AppError("Email Already Exist" , 401))
-
+      const userExist = await userModel.findOne({email}) ;      
+      if(userExist && user.email !== email) return next(new AppError("Email Already Exist" , 401))
 
       //& Calculation Age From BirthDay :
       let age = 0 ;
@@ -161,11 +159,15 @@ export const updateUser = catchError(
       if(name) user.name = name ;
       if(phone) user.phone = phone ;
       if(email) user.email = email ;
+      if(birthDay) user.birthDay = birthDay ;
+      user.age = age ;
       
       await user.save()
 
-      // !user &&  next(new AppError("Not Found User" , 404))
-      user && res.json({message:"success" , updateUser:user})
+      const userUpdated = await userModel.findById(req.user._id).select("-_id name role  phone birthDay email  age imgCover") ;
+
+      !userUpdated &&  next(new AppError("User Not Found After Updated" , 404)) ;
+      userUpdated &&  res.json({message:"success" , updateUser:userUpdated})
    }
 )
 
@@ -239,10 +241,21 @@ export const changeImgCover = catchError(
       }
 
 
-      const newUser = await userModel.findById(req.user._id) ;
+      const newUser = await userModel.findById(req.user._id).select("-_id name role  phone birthDay email  age imgCover") ;
 
       !newUser && next(new AppError("User Not Found After Change Cover", 404) ) ;
       newUser &&  res.json({message:"success" , newUser}) ;
    }
 
+)
+
+
+
+
+//& Deleted All Prices :
+export const deletedAllUsers = catchError(
+   async(req , res , next)=>{
+      // const users = await userModel.deleteMany();
+      res.json({message:"Successfully Deleted All Users"})
+   }
 )

@@ -55,6 +55,9 @@ const schema = new Schema({
       street:String ,
       city:String ,
    } ,
+   createdAtOrder:{
+      type:Number
+   }  ,
    branch_Area:{
       type:String ,
    } ,
@@ -62,8 +65,9 @@ const schema = new Schema({
       type:String ,
       default:"" ,
    } ,
-   branch_Approved_Email:{
-      type:String ,
+   branch_Approved:{
+      type:Types.ObjectId , 
+      ref:"branch"  ,
    } ,
    payment_Type:{
       type:String ,
@@ -106,6 +110,15 @@ const schema = new Schema({
 
 
 
+//& Added Dynamic Creation Time At :
+schema.pre("save"  , function(next){   
+   if (!this.createdAtOrder) {
+      this.createdAtOrder = Date.now() ;
+   }
+   next()
+}) ;
+
+
 schema.pre("init" , function (doc){
    doc.invoice_pdf = process.env.BASE_URL + "pdf/" +  doc.invoice_pdf
    doc.transform_pdf = process.env.BASE_URL + "pdf/" +   doc.transform_pdf
@@ -125,7 +138,8 @@ schema.pre(/^find/ , function (next){
    })
 
    this.populate("user" , "_id name age phone email role isBlocked")
-   this.populate("company")
+   this.populate("company" , "_id name email phone address logo description start")
+   this.populate("branch" , "_id name email phone address")
    next()
 })
 

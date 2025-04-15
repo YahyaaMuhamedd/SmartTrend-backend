@@ -17,9 +17,11 @@ export const generalFields = {
 	})
 }
 
-export const singleVal = {
-	file:generalFields.file.required() ,
-}
+
+
+export const singleVal = Joi.object({
+   file:generalFields.file.required() ,
+})
 
 
 export const addUserVal = Joi.object({
@@ -33,6 +35,8 @@ export const addUserVal = Joi.object({
 })
 
 export const updateUserRoleVal = Joi.object({
+   id:Joi.string().hex().length(24).required() ,
+
    role:Joi.string().valid("user" , "admin" , "moderator").required() ,
 })
 
@@ -57,8 +61,6 @@ export const blockedAndActiveUserVal = Joi.object({
 
 
 export const updateUserVal = Joi.object({
-   id:Joi.string().hex().length(24).required() ,
-
    name:Joi.string().min(2).max(50).trim() ,
    phone:Joi.string().pattern(/^(002)?01[0125][0-9]{8}$/).required().trim() ,
    birthDay:Joi.date().format('YYYY-MM-DD') , 

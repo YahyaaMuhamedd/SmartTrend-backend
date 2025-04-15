@@ -1,21 +1,36 @@
-const dataMethods = ["body", "params", "query", "headers", "file","files"] ;
+import { AppError } from "../utilities/AppError.js";
+
+
+
 
 
 export const validation = (schema) => {
 	return (req, res, next) => {
-		const validationErrors = []
-		dataMethods.forEach((key) => {
-			if (schema[key]) {
-				const validationRes = schema[key].validate(req[key], { abortEarly: false})
-				if (validationRes.error) {
-					validationErrors.push(validationRes)
-				}
-			}
-		})
-		if(validationErrors.length){
-			return res.json({ message: "Error", validationErrors })
+		const validationErrors = [] ;
+		let filter = {} ;
+		if(req.file){
+			filter = {...req.body , ...req.query , ...req.params , file:req.file }
+		}else if(req.files){
+			filter = {...req.body , ...req.query , ...req.params  , files:req.files}
+		}else {
+			filter = {...req.body , ...req.query , ...req.params  }
 		}
-		return next()
+
+		const {error} = schema.validate(filter, { abortEarly: false})
+			
+		if(!error){
+			return next()
+		}
+
+
+		error.details.forEach(ele => {
+			validationErrors.push(ele.message.split('"').join(""))
+		});
+		if(validationErrors.length){
+			return next(new AppError(validationErrors , 401))
+		}
 	}
 }
+
+
 

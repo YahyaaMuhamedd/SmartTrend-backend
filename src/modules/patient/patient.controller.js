@@ -53,6 +53,10 @@ export const add_Patient = catchError(
    async(req , res , next)=>{
       const {birthDay , street , city  , patient_Phone , patient_Name  , doctor_Name , patient_History , gender } = req.body ;
 
+      const patientExist = await patientModel.findOne({patient_Name:patient_Name}) ;
+      patientExist && next(new AppError("Patient Name Already Exist" , 404))
+
+
          //& Calculation Age From BirthDay :
          let age = 0 ;
          let nowAge = (birthDay)=>{
@@ -92,7 +96,7 @@ export const add_Patient = catchError(
 export const getSinglePatient = catchError(
    async(req , res , next)=>{
       const patient = await patientModel.findById(req.params?.id) ;
-      !patient && next(new AppError("patient Not Found" , 404))
+      !patient && next(new AppError("patient Not Exist" , 404))
       patient && res.json({message:"success" , patient})
    }
 )
@@ -106,8 +110,18 @@ export const updatePatient = catchError(
       const {birthDay , street , city  , patient_Phone , patient_Name  , doctor_Name , patient_History , gender } = req.body ;
       const {id} = req.params ;
 
-      const patient = await patientModel.findById(id) ;
-      !patient &&  next(new AppError("patient Not Found" , 404)) ;
+      let patient = await patientModel.findById(id) ;
+      if(!patient){
+         return next(new AppError("Patient Not Exist" , 404)) ;
+      }
+
+
+
+      //& Check On Patient Name Not Repeat the Name :
+      const patientExist = await patientModel.findOne({patient_Name:patient_Name}) ;
+      if(patientExist){
+         return next(new AppError("Patient Name Already Exist" , 404)) ;
+      } 
 
 
       //& Calculation Age From BirthDay :
@@ -122,20 +136,16 @@ export const updatePatient = catchError(
       age = nowAge(birthDay)
 
 
-      patient = new patientModel({
-         patient_Name , 
-         patient_Age:age , 
-         birthDay , 
-         gender ,
-         address:{
-            street ,
-            city  
-         } , 
-         patient_Phone , 
-         doctor_Name , 
-         patient_History , 
-      })
 
+      patient.patient_Name =  patient_Name ;
+      patient.patient_Age = age ; 
+      patient.birthDay = birthDay ;
+      patient.gender = gender ; 
+      patient.address.street = street ; 
+      patient.address.city = city ;
+      patient.patient_Phone = patient_Phone ; 
+      patient.doctor_Name = doctor_Name ;
+      patient.patient_History = patient_History ;
       await patient.save() ;
 
       res.json({message:"Successfully Updated Patient" , patient})

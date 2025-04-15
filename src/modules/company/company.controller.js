@@ -1,3 +1,4 @@
+import { branchModel } from "../../../DataBase/models/branch.model.js";
 import { companyModel } from "../../../DataBase/models/company.model.js";
 import { priceModel } from "../../../DataBase/models/price.model.js";
 import { AppError } from "../../utilities/AppError.js";
@@ -88,7 +89,7 @@ export const getCompanyCount = catchError(
 //& Add New Company :
 export const addCompany = catchError(
    async(req , res , next)=>{
-      const {name , email , password , phone, description , address} = req.body ;
+      const {name , email , phone, description , address} = req.body ;
       const companyExist = await companyModel.findOne({email}) ;
       if(companyExist) return next(new AppError("Company is Already Exist" , 402)) ;
 
@@ -108,7 +109,6 @@ export const addCompany = catchError(
       const company = await companyModel.create({
          name , 
          email , 
-         password ,
          phone, 
          description , 
          address ,
@@ -140,14 +140,14 @@ export const getSingleCompany = catchError(
 //& Update Company :
 export const updateCompany = catchError(
    async(req , res , next)=>{
-      const {name , email ,  address , phone , description , discount  , isActive} = req.body ;
+      const {name , email ,  address , phone , description  , isActive} = req.body ;
       if(email){
          const existCompany = await companyModel.findOne({email}) ;
          if(existCompany) return next(new AppError("Company Email Already Exist")) ;
       }
 
 
-      const company = await companyModel.findByIdAndUpdate(req.params.id , {name , address , phone  , email , description , discount , isActive} , {new:true}) ;
+      const company = await companyModel.findByIdAndUpdate(req.params.id , {name , address , phone  , email , description  , isActive} , {new:true}) ;
 
       !company && next(new AppError("Company Not Found", 404) ) ;
       company &&  res.json({message:"success" , company}) ;
@@ -158,23 +158,30 @@ export const updateCompany = catchError(
 //& change ImgCover :
 export const changeImgCover = catchError(
    async(req , res , next)=>{
+      const {id} = req.params;
       if(!req.file) return next(new AppError("Please Choose image Cover Your Company" , 404))
 
+
+      //! Check Image Size Before Uploaded :
       if((req.file.size > +process.env.UPLOAD_IMAGE_SIZE)){
          return next(new AppError("Size Media Should be Less than 200 k-Byte" , 404))
       }
 
-      const logo = req.file.filename ;
-
-      const company = await companyModel.findByIdAndUpdate(req.params.id , {logo}) ;
-      if(!company) return  next(new AppError("Company Not Found", 404) ) ;
       
-      //! Delete Image from Server Disk :
+      //! Update Old Image To New Image :
+      const logo = req.file.filename ;
+      const company = await companyModel.findByIdAndUpdate(id , {logo}) ;
+      if(!company) return  next(new AppError("Company Not Found", 404) ) ;
+
+      //! Check Old File Name if Exist Delete This Old File and Delete Old Image from Server Disk :
       const fileName = "Uploads/company/" + path.basename(company.logo)
-      fs.unlinkSync(path.resolve(fileName))
+      const destPath = path.resolve(fileName)
+      if(fs.existsSync(destPath)){
+         fs.unlinkSync(path.resolve(fileName))
+      }
 
-      const newCompany = await companyModel.findById(req.params.id) ;
-
+      //! Get New Company After Updated :
+      const newCompany = await companyModel.findById(id) ;
       !newCompany && next(new AppError("Company Not Found After Change Cover", 404) ) ;
       newCompany &&  res.json({message:"success" , newCompany}) ;
    }
@@ -185,15 +192,20 @@ export const changeImgCover = catchError(
 //& Delete company :
 export const deleteCompany = catchError(
    async(req , res , next)=>{
-      const company = await companyModel.findByIdAndDelete(req.params?.id , {new:true}) ;
-      if(!company) return next(new AppError("Not Found company" , 404))
+      const {id} = req.params ;
+      const company = await companyModel.findByIdAndDelete(id) ;
+      if(!company) return next(new AppError("Company Not Exist" , 404))
 
       //! Delete Image from Server Disk :
       const fileName = "Uploads/company/" + path.basename(company.logo)
-      fs.unlinkSync(path.resolve(fileName))
+      const destPath = path.resolve(fileName)
+      if(fs.existsSync(destPath)){
+         fs.unlinkSync(path.resolve(fileName))
+      }
 
-      //! Delete All Price In PriceModel By Company id :
-      const deleteAllPriceTest = await priceModel.deleteMany({company:req.params?.id})
+      //! Delete All Price And All Branch This Company By Company id :
+         await priceModel.deleteMany({company:id})
+         await branchModel.deleteMany({company:id})
 
       company && res.json({message:"success" , company })
    }

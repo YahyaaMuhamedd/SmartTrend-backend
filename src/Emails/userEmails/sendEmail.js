@@ -4,7 +4,7 @@ import { createTransport } from "nodemailer";
 
 
 
-export const sendEmail = async (sendTo , content)=>{
+export const sendEmail = async (sendTo , subject , content)=>{
    const transporter = createTransport({
       secure: true,
       service:"gmail" ,
@@ -27,7 +27,7 @@ export const sendEmail = async (sendTo , content)=>{
    const info = await transporter.sendMail({
       from: '"Fekrah Medical Website Configuration Email 👻" <mahmoud.osman440@gmail.com>', // sender address
       to: sendTo, // list of receivers
-      subject: "Activate Your Account for - Fekrah Medical ✔", // Subject line
+      subject: subject , // Subject line
       text: "Hello world?", // plain text body
       html: content(), // html body
       // attachments:''

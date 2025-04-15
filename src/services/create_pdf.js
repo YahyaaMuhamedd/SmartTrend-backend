@@ -1,6 +1,5 @@
 
 import { create } from 'pdf-creator-node';
-import { v4 as uuid } from 'uuid';
 import { generate_Date } from './generateDate_Time.js';
 
 
@@ -32,7 +31,7 @@ export let create_pdf = ( res , template , data , fileName)=>{
 
    let  document = {
       html: template(data),
-      data: {},
+      data: {data},
       path: `./Docs/${fullName}`,
    };
 
@@ -40,11 +39,4 @@ export let create_pdf = ( res , template , data , fileName)=>{
    
    create(document, options) ;
    return filePath ;
-      // .then((result) => {
-      //    // return filePath ;
-      //    // res.json({path:filePath})
-      //    // res.send(`<a download href='${filePath}'>Download</a>`)
-      // }).catch((error) => {
-      //    console.error(error)
-      // });
 }

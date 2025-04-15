@@ -2,7 +2,6 @@ import { AppError } from "../../utilities/AppError.js";
 import { ApiFeature } from "../../utilities/apiFeatures.js";
 import { catchError } from "../../utilities/catchError.js";
 import { cartModel } from "../../../DataBase/models/cart.model.js";
-import { testModel } from "../../../DataBase/models/test.model.js";
 import { priceModel } from "../../../DataBase/models/price.model.js";
 
 
@@ -51,10 +50,11 @@ export const getAllCart = catchError(
 
 //& Get Logged User Cart :
 export const getLoggedUserCart = catchError(
+   
    async(req , res , next)=>{
       const cart = await cartModel.findOne({user:req.user._id}) ;
 
-      !cart && next(new AppError("Cart Not Found" , 404))
+      !cart && next(new AppError("Empty Cart" , 404))
       cart && res.json({message:"success" ,  cart}) ;
    }
 )
@@ -79,6 +79,7 @@ export const addTestToCart = catchError(
                   price:priceTestExist._id ,
                }
             ] ,
+            company :company_id ,
          })
 
          await cart.save() ;
@@ -116,31 +117,80 @@ export const addTestToCart = catchError(
 
 
 
-//& Remove Test From Cart  :
-export const removeTestFromCart = catchError(
+//& Add All Tests To Cart  :
+export const addAllTestsToCart = catchError(
    async(req , res , next)=>{
-      const {id} = req.params ;
+      const {listIdTest ,  company_id} = req.body ;
+      
+      let priceList = [] ;
+      for (const element of listIdTest) {
+         const priceTestExist = await priceModel.findOne({test:element , company:company_id}) ;
+         if(!priceTestExist)  return next(new AppError(`Price Test Not Found in This Company id = ${element}` , 404)) ;
+         priceList.push(priceTestExist)
+      }
 
-      const cartExist = await cartModel.findOne({user:req.user._id}) ;
-      if(!cartExist)  return next(new AppError("Cart Not Found" , 404)) ;
-
-
-      let item = cartExist.cartItems.find((item)=>{
-         return item?.test._id.toString() == id
+      let cartExist = await cartModel.findOne({user:req.user._id}) ;
+      let cartItems = priceList.map((price)=>{
+         return {
+               test:price.test ,
+               price:price
+            }
       })
 
-      if(!item){
-         return next(new AppError("Test Already Deleted"))
+      if(!cartExist){
+         cartExist = new cartModel({
+            user:req.user._id ,
+            company :company_id ,
+            cartItems
+         })
+         await cartExist.save() ;
       }
-      
-      const exist = cartExist.cartItems.remove(item); 
-      // console.log(exist);
-
-      await cartExist.save() ; 
-
+      else{
+         cartExist.cartItems = cartItems
+         cartExist.company = company_id
+         await cartExist.save() ;
+      }
       res.json({message:"success" , cartExist})
    }
 )
+
+
+
+
+//& Remove Test From Cart  :
+export const removeTestFromCart = catchError(
+   async (req, res, next) => {
+      const { id } = req.params;
+
+      // التأكد من وجود السلة أولاً
+      const cartExist = await cartModel.findOne({ user: req.user._id });
+      if (!cartExist) return next(new AppError("Empty Cart", 404));
+
+      // البحث عن العنصر وحذفه باستخدام filter
+      const updatedCartItems = cartExist.cartItems.filter(item => item?.test._id.toString() !== id);
+
+      // إذا لم يتم العثور على العنصر في السلة
+      if (updatedCartItems.length === cartExist.cartItems.length) {
+         return next(new AppError("Test Already Deleted", 404));
+      }
+
+      // تحديث السلة أو حذفها إذا كانت فارغة
+      cartExist.cartItems = updatedCartItems;
+
+      // حفظ التحديثات
+      await cartExist.save();
+
+
+      
+      if (cartExist.cartItems.length === 0) {
+         await cartModel.findOneAndDelete({ user: req.user._id });
+      }
+
+
+      res.json({ message: "success", cartExist });
+   }
+);
+
 
 
 
@@ -149,7 +199,7 @@ export const clearLoggedUserCart = catchError(
    async(req , res , next)=>{
       const cart = await cartModel.findOneAndDelete({user:req.user._id} , {new:true}) ;
 
-      !cart && next(new AppError("Cart Not Found" , 404))
+      !cart && next(new AppError(" Empty Cart " , 404))
       cart &&  res.json({message:"success" , cart})
    }
 )

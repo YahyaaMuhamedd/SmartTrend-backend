@@ -1,6 +1,3 @@
-
-
-
 import {customAlphabet} from "nanoid";
 import fs from "fs";
 import path from "path";
@@ -9,12 +6,12 @@ import { AppError } from "../utilities/AppError.js";
 
 const uniqueNumber = customAlphabet("123456789" , 5)
 
+
 export let validExtension = {
-   image:["image/jpeg" , "image/png" , "image/jpg"] , 
+   image:["image/jpeg" , "image/png" , "image/webp" , "image.jpg"] , 
    audio:["audio/x-ms-wma" , "audio/mp4"] ,
    pdf:["application/pdf"]
 }
-
 
 
 export const multerLocal = (validationType , folderName)=>{
@@ -65,3 +62,4 @@ export const multerLocal = (validationType , folderName)=>{
    return upload ; 
 
 }
+

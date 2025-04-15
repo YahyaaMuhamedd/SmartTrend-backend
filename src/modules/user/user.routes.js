@@ -6,36 +6,54 @@ import { addUserVal, blockedAndActiveUserVal , paramsIdVal, singleVal, updateUse
 import { protectedRoutes } from "../../middleWare/authentication.js";
 import { authorize } from "../../middleWare/authorization.js";
 import { multerLocal, validExtension } from "../../services/multer.Local.js";
+import { ROLES } from "../../utilities/enums.js";
 
 
 
 const router  = Router() ; 
 
 
-
+//^=========================== Get Users, Add User, Change Image ==============================================
 router.route("/")
-      // .get(UC.getAllUser)
-      .get(protectedRoutes , authorize("admin" , "moderator") ,UC.getAllUser)
-      .post (protectedRoutes , authorize("admin" , "moderator") , validation(addUserVal) ,  emailExist ,  UC.addUser) 
-      .patch (protectedRoutes , authorize("admin" , "moderator" , "user") , multerLocal(validExtension.image , "users").single("image") ,  validation(singleVal) ,  UC.changeImgCover) 
-      
-      
-      
-router.route("/userCount")
-      // .get(UC.getUserCount)
-      .get(protectedRoutes , authorize("admin" , "moderator") , UC.getUserCount)
+		// .get(UC.getAllUser)
+		.get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) , UC.getAllUser)
 
-router.route("/:id")
-      .get(protectedRoutes , authorize("admin" , "moderator" , "user") , validation(paramsIdVal) , UC.getSingleUser)
-      .put (protectedRoutes , authorize("admin" , "moderator" , "user") ,  validation(updateUserVal) , UC.updateUser) 
-      .delete (protectedRoutes , authorize("admin" , "moderator") ,  validation(paramsIdVal) , UC.deleteUser) 
-      .patch (protectedRoutes , authorize("admin" , "moderator") ,  validation(blockedAndActiveUserVal) , UC.blockUser) 
+		.post (protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) , validation(addUserVal) ,  emailExist ,  UC.addUser) 
+		.patch (protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) ,multerLocal(validExtension.image , "users").single("file") ,  validation(singleVal) ,  UC.changeImgCover) 
+		.put (protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER ) ,  validation(updateUserVal) , UC.updateUser) 
+
+
+		
+//^=========================== Get Information Users To Dashboard =============================================
+	router.route("/userCount")
+		// .get(UC.getUserCount)
+		.get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) , UC.getUserCount)
 
 
 
-router.route("/role/:id")
-      .patch (protectedRoutes , authorize("admin" , "moderator") ,  validation(updateUserRoleVal) , UC.updateUserRole) 
 
+//^=========================== Deleted All Users In Database ==================================================
+	router.route("/deleted_all_users_in_database")
+		.delete( UC.deletedAllUsers)
+
+
+
+
+
+
+//^=========================== Get User, Update, Block, Delete User ===========================================
+	router.route("/:id")
+		.get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER ) , validation(paramsIdVal) , UC.getSingleUser)
+		.delete (protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) ,  validation(paramsIdVal) , UC.deleteUser) 
+		.patch (protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) ,  validation(blockedAndActiveUserVal) , UC.blockUser) 
+
+
+
+
+
+//^=========================== Update User Role ===============================================================
+	router.route("/role/:id")
+		.patch (protectedRoutes , authorize(ROLES.ADMIN) ,  validation(updateUserRoleVal) , UC.updateUserRole) 
 
 
 export default router ;

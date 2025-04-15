@@ -3,9 +3,9 @@ import * as orderControl from "./order.controller.js";
 import {validation} from "../../middleWare/validation.js";
 import { protectedRoutes } from "../../middleWare/authentication.js";
 import { authorize } from "../../middleWare/authorization.js";
-import { createCashOrderVal, invoiceVodafoneVal, onlineSystemVal, paramsIdVal } from "./order.validate.js";
+import { createCashOrderVal , invoiceVodafoneVal , paramsIdVal } from "./order.validate.js";
 import { multerLocal, validExtension } from "../../services/multer.Local.js";
-import { authenticateCompany } from "../../middleWare/authCompany.js";
+import { ROLES } from "../../utilities/enums.js";
 
 
 
@@ -15,8 +15,8 @@ const router = Router() ;
 
 //^=============================== Get All Order ====================================================
    router.route("/")
-      // .get( orderControl.getAllOrder)
-   .get(protectedRoutes , authorize("admin" , "moderator") ,  orderControl.getAllOrder)
+   .get( orderControl.getAllOrder)
+   // .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) ,  orderControl.getAllOrder)
    
 
 
@@ -24,17 +24,8 @@ const router = Router() ;
 
    //^============================ Get Order Count ==================================================
    router.route("/orderCount")
-      // .get( orderControl.getOrderCount)
-   .get(protectedRoutes , authorize("admin" , "moderator") ,  orderControl.getOrderCount)
+   .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) ,  orderControl.getOrderCount)
 
-
-
-
-
-   //^============================ Get Cancel Orders ================================================
-   router.route("/cancel")
-      // .get( orderControl.getCancelOrders)
-   .get(protectedRoutes , authorize("admin" , "moderator") ,  orderControl.getCancelOrders)
 
 
 
@@ -42,15 +33,12 @@ const router = Router() ;
 
    //^=========================== Get Logged User Order =============================================
    router.route("/LoggedUserOrder")
-      .get(protectedRoutes , authorize("admin" , "moderator" , "user") , orderControl.getLoggedUserOrder)
+      .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) ,  orderControl.getLoggedUserOrder)
 
 
 
 
-   //^ =========================== Online System ====================================================
-   router.route("/transform_Online_System")
-      .get(authenticateCompany  , validation(onlineSystemVal)  ,  orderControl.getApprovedOrder) 
-      .post(authenticateCompany  , validation(onlineSystemVal)  ,  orderControl.transformOnlineSystem) 
+
 
 
 
@@ -58,18 +46,32 @@ const router = Router() ;
    //^============== Add Invoice V_Cash - Confirm order - GetOrder - DeleteOrder ====================   
    router.route("/:id")
       .put(protectedRoutes , 
-         authorize("admin" , "moderator" , "user") , 
+         authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , 
          multerLocal(validExtension.image , "Invoice.V_Cash").single("image") , 
          validation(invoiceVodafoneVal) ,  
          orderControl.invoice_VodafoneCash) 
 
-      .patch(protectedRoutes , authorize("admin" , "moderator")  , validation(paramsIdVal)   ,  orderControl.confirmCashOrder) 
 
-      // .get( orderControl.getSpecificOrder)
 
-      .get(protectedRoutes , authorize("admin" , "moderator" , "user") , validation(paramsIdVal) , orderControl.getSpecificOrder)
+      .patch(protectedRoutes , 
+         authorize(ROLES.ADMIN , ROLES.MODERATOR)  , 
+         validation(paramsIdVal)   ,  
+         orderControl.confirmCashOrder) 
 
-      .delete(protectedRoutes , authorize("admin" , "moderator")  ,  validation(paramsIdVal) , orderControl.deleteOrder) 
+
+
+
+      .get(protectedRoutes , 
+         authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , 
+         validation(paramsIdVal) , 
+         orderControl.getSpecificOrder)
+
+
+
+      .delete(protectedRoutes , 
+         authorize(ROLES.ADMIN , ROLES.MODERATOR)  ,  
+         validation(paramsIdVal) , 
+         orderControl.deleteOrder) 
 
 
 
@@ -78,7 +80,7 @@ const router = Router() ;
 
    //^================================== Cancel Cash Order ==========================================
    router.route("/cancel/:id")
-      .patch(protectedRoutes , authorize("admin" , "moderator")  ,  validation(paramsIdVal) , orderControl.cancelCashOrder) 
+      .patch(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR)  ,  validation(paramsIdVal) , orderControl.cancelCashOrder) 
    
    
 
@@ -87,7 +89,7 @@ const router = Router() ;
 
    //^================================== Rejected Cash Order ========================================
    router.route("/rejected/:id")
-      .patch(protectedRoutes , authorize("admin" , "moderator")  ,  validation(paramsIdVal) , orderControl.rejectedCashOrder) 
+      .patch(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR)   ,  validation(paramsIdVal) , orderControl.rejectedCashOrder) 
    
 
 
@@ -95,7 +97,7 @@ const router = Router() ;
 
    //^================================== Update Order ===============================================
    router.route("/updateOrder/:id")
-      .patch(protectedRoutes , authorize("admin" , "moderator")  ,  validation(paramsIdVal) , orderControl.updateOrder) 
+      .patch(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR)  ,  validation(paramsIdVal) , orderControl.updateOrder) 
    
 
 
@@ -104,7 +106,7 @@ const router = Router() ;
 
    //^================================== Check Exist Patient ========================================
    router.route("/orderLoggedUser")
-      .post(protectedRoutes , authorize("user" , "admin" , "moderator") , validation(createCashOrderVal) , orderControl.checkExistPatient , orderControl.createCashOrderLoggedUser)
+      .post(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(createCashOrderVal) , orderControl.checkExistPatient , orderControl.createCashOrderLoggedUser)
 
 
 
@@ -113,7 +115,28 @@ const router = Router() ;
 
    //^================================== Generate Invoice Order =====================================
    router.route("/generateInvoiceOrder/:id")
-      .post(protectedRoutes , authorize("user" , "admin" , "moderator") , validation(createCashOrderVal) , orderControl.generateInvoiceOrder)
+   .post(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(paramsIdVal) , orderControl.generateInvoiceOrder)
+   
+   
+
+
+
+
+
+
+
+
+
+
+   
+
+   //^================================== Create Online Order And Payment With Paymob =====================================
+   // & Create Payment Method :
+      // router.route("/create-payment")
+      // .post(orderControl.create_payment);
+
+   router.route("/create-payment")
+      .post(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(createCashOrderVal) , orderControl.checkExistPatient , orderControl.create_payment )
 
 
 export default router ;

@@ -18,6 +18,7 @@ const schema = new Schema({
    email:{
       type:String ,
       required:true ,
+      lowercase:true ,
       unique:[true , "Email is Required"]
    } ,
    password :{
@@ -27,6 +28,18 @@ const schema = new Schema({
    age: {
       type:Number , 
    } ,
+   otp_code :{
+      type:String
+   } ,
+   otpExpiry: {
+      type:Date
+   },
+   resetToken: {
+      type:String
+   },
+   resetTokenExpiry : {
+      type:Date
+   },
    birthDay:{
       type:Date , 
       required : true ,
@@ -47,23 +60,17 @@ const schema = new Schema({
       type:Boolean ,
       default:false
    } ,
-   confirmedCode:{
-      type:String
-   } ,
    role:{
       type:String ,
       lowercase:true , 
       enum:["user" , "admin" , "moderator"] ,
       default:"user"
    } ,
-   // confirmedCode:{
-   //    type:Number 
-   // } ,
-   // passwordChangedAt:{
-   //    type:Number 
-   // } ,
    passwordChangedAt:{
       type:Date 
+   } ,
+   creationTimeAt:{
+      type:Number 
    } ,
    createdBy:{
       type:Types.ObjectId ,
@@ -72,16 +79,23 @@ const schema = new Schema({
 } , { timestamps:true } )
 
 
-//& Hash Password Before Save When Add User :
-schema.pre("save"  , function(){
-   if(this.password) this.password = bcrypt.hashSync(this.password , 8) ;
+//& Hash Password Before Save When Add User And Added Dynamic Creation Time At :
+schema.pre("save"  , function(next){
+   //I use this code so that the password is not forgotten every time 
+   // I save it, even if I don’t send the password. 
+   // If I don’t even send the password, its value at the beginning is undefined, 
+   // and thus the undefined is forgotten, and of course the result is wrong.
+   if(this.isModified('password')) this.password = bcrypt.hashSync(this.password , 8) ;
+   if (!this.creationTimeAt) {
+      this.creationTimeAt = Date.now() ;
+   }
+   next()
 }) ;
 
 
 // & Hash Password Before Save When Update User :
 schema.pre("findOneAndUpdate" , function(){
    if(this._update.password) this._update.password = bcrypt.hashSync(this._update.password , 8) ; 
-   // this.populate("wishList")
 }) ;
 
 

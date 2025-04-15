@@ -105,18 +105,31 @@ export const addPrice = catchError(
       
       
       const testExist = await testModel.findById(test) ;
-      !testExist && next(new AppError("Test Not Found", 404) ) ;
-
-      const companyExist = await companyModel.findById(company) ;
-      !companyExist && next(new AppError("Company Not Found", 404) ) ;
+      if(!testExist) return next(new AppError("Test Not Exist", 404) ) ;
       
-      const priceExist = await priceModel.findOne({company , test}) ;
-      if( priceExist )return next(new AppError("Test Already Added To Price In This Company", 404) ) ;
+      
+      const companyExist = await companyModel.findById(company) ;
+      if(!companyExist) return next(new AppError("Company Not Exist", 404) ) ;
+      
 
-      req.body.testName = testExist.name ;
-      req.body.companyName = companyExist.name ;
+      const priceExist = await priceModel.findOne({company , test}) ;
+      if( priceExist ) return next(new AppError("Test Already Added To Price In This Company", 404) ) ;
+
+      const testName = testExist.name ;
+      const companyName = companyExist.name ;
       const priceAfterDiscount = price -  ((price * discount) / 100) ;
-      const newPrice = await priceModel.create(req.body) ;
+      
+      const newPrice = await priceModel.create({
+         price ,
+         discount ,
+         final_amount ,
+         test ,
+         company ,
+         testName ,
+         companyName ,
+         priceAfterDiscount ,
+         createdBy:req.user._id
+      }) ;
       
       !newPrice && next(new AppError("Price Not Added", 404) ) ;
       newPrice &&  res.json({message:"success" , newPrice}) ;
@@ -151,7 +164,17 @@ export const deletePrice = catchError(
 
       const price = await priceModel.findByIdAndDelete(id , {new:true}) ;
 
-      !price && next(new AppError("Not Found price" , 404))
+      !price && next(new AppError("Price Not Exist" , 404))
       price && res.json({message:"success" , price})
+   }
+)
+
+
+
+//& Deleted All Prices :
+export const deletedAllPrices = catchError(
+   async(req , res , next)=>{
+      const prices = await priceModel.deleteMany();
+      res.json({message:"Successfully Deleted All Prices"})
    }
 )

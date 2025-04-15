@@ -15,17 +15,16 @@ export const generalFields = {
 		finalDest:Joi.string()
 	})
 }
-
 export const singleVal = {
 	file:generalFields.file.required() ,
 }
 
 
-export const invoiceVodafoneVal = {
-   id:Joi.string().hex().length(24).required() ,
+export const invoiceVodafoneVal = Joi.object({
+	id:Joi.string().hex().length(24).required() ,
 
 	file:generalFields.file.required() 
-}
+})
 
 
 export const createCashOrderVal = Joi.object({
@@ -40,15 +39,6 @@ export const createCashOrderVal = Joi.object({
 	city:Joi.string() ,
    branch :Joi.string() , 
 })
-
-
-
-
-export const onlineSystemVal = Joi.object({
-   email:Joi.string().email().required().trim() ,
-   invoice_number:Joi.string().min(10).max(10).required() 
-})
-
 
 
 export const paramsIdVal = Joi.object({

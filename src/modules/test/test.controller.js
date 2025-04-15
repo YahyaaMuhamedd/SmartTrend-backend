@@ -12,7 +12,7 @@ export const getAllTest = catchError(
    async(req , res , next)=>{
       const{filter} = req.query ;
 
-      let result = await testModel.find();
+      let result = await testModel.find() ;
 
       //^ Merge Params
       let filterObj = {};
@@ -27,7 +27,7 @@ export const getAllTest = catchError(
       let apiFeature = new ApiFeature(testModel.find(filterObj), req.query ).pagination().fields().search().filter().sort();
       const tests = await apiFeature.mongooseQuery.select("");
 
-      if(!tests.length) return next(new AppError("tests is Empty" , 404))
+      if(!tests.length) return next(new AppError("Tests is Empty" , 404))
 
       let currentPag = apiFeature.pageNumber ;
       let numberOfPages = Math.ceil(result.length  / apiFeature.limit)  ;
@@ -84,43 +84,26 @@ export const getTestCount = catchError(
 
 
 
-
-//& Add New Test :
-export const testMiddleWare = catchError(
+export const addNewTest = catchError(
    async(req , res , next)=>{
-      
-      const testExist = await testModel.findOne({ name:req.body.name}) ;
-      if(testExist){
-         req.test = testExist ;
-         return next() ;
-      }
-      
-      
-      const {name , condition , description , isActive} = req.body ;
+      const {name , condition , description  , company , discount , price , final_amount} = req.body ;
+
+
+      const companyExist = await companyModel.findById(company) ;
+      if(!companyExist) return next(new AppError("Company Not Exist" , 404))
+
+      const testExist = await testModel.findOne({name}) ;
+      if(testExist) return next(new AppError("Test Name Already Exist" , 404))
+
+
       //&Create slug By Test Name : 
       const slug = slugify(name) ;
 
-      const test = await testModel.create({name , condition , description , isActive , slug , createdBy:req.user._id}) ;
-      !test && next(new AppError("Test Not Added", 404) ) ;
-      req.test = test
-      return next()
-   }
-)
-
-export const addNewTest = catchError(
-   async(req , res , next)=>{
-
-      const {company , discount , price , final_amount} = req.body ;
-      const {_id , name } = req.test ;
-
-      const testExist = await testModel.findById(_id) ;
-      if(!testExist) return next(new AppError("Test Not Found [Not Added New Test]" , 404))
-
-      const companyExist = await companyModel.findById(company) ;
-      if(!companyExist) return next(new AppError("Company Not Found" , 404))
+      const newTest = await testModel.create({name , condition , description  , slug , createdBy:req.user._id}) ;
+      if(!newTest)  next(new AppError("Test Not Added", 404) ) ;
 
       const testName = name
-      const test = _id
+      const test = newTest._id
       const createdBy = req.user._id
       const companyName = companyExist.name
       const existPriceTestSameCompany = await priceModel.findOne({ test , company}) ;
@@ -134,10 +117,9 @@ export const addNewTest = catchError(
       const newTestAndPrice = await priceModel.create({testName , price , final_amount , priceAfterDiscount , companyName  , test , company , discount , createdBy }) ;
 
       !newTestAndPrice && next(new AppError("Test Not Added", 404) ) ;
-      newTestAndPrice &&  res.json({message:"success" ,testExist ,  newTestAndPrice}) ;
+      newTestAndPrice &&  res.json({message:"success" ,newTest ,  newTestAndPrice}) ;
    }
 )
-
 
 
 //& Get Single Test :
@@ -198,12 +180,6 @@ export const deleteTest = catchError(
 
 
 
-
-
-
-
-
-
 //& Add Test Only  :
 export const addTestOnly = catchError(
    async(req , res , next)=>{
@@ -220,5 +196,17 @@ export const addTestOnly = catchError(
 
       !test && next(new AppError("Test Not Added", 404) ) ;
       test && res.json({message:"success" , test})
+   }
+)
+
+
+
+
+
+//& Deleted All Prices :
+export const deletedAllTests = catchError(
+   async(req , res , next)=>{
+      const tests = await testModel.deleteMany();
+      res.json({message:"Successfully Deleted All Tests"})
    }
 )

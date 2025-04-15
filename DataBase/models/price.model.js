@@ -41,6 +41,9 @@ const schema = new Schema({
       type:Types.ObjectId ,
       ref: "company" 
    } ,
+   creationTimeAt:{
+      type:Number 
+   } ,
    createdBy:{
       type:Types.ObjectId ,
       ref: "user" 
@@ -48,13 +51,17 @@ const schema = new Schema({
 } , { timestamps:true } )
 
 
+//& Added Dynamic Creation Time At :
+schema.pre("save"  , function(next){   
+   if (!this.creationTimeAt) {
+      this.creationTimeAt = Date.now() ;
+   }
+   next()
+}) ;
+
 schema.pre("findOne" , function(){
    this.populate("test company createdBy")
 }) ;
-
-// userSchema.post("save" , function(){
-//    console.log(this);
-// }) ;
 
 
 export const priceModel = model("price" , schema)

@@ -11,8 +11,10 @@ import { initApp } from './src/initApp.js';
 import { dbConnection } from './DataBase/dbConnection.js';
 import env from "dotenv"
 import { socketConnect } from './src/services/socketConnection.js';
-
+import { webhookMiddleWre } from './src/modules/order/order.controller.js';
+import bcrypt from "bcrypt";
 env.config()
+
 
 const app = express()
 const port = process.env.PORT ||  5000 ;
@@ -20,29 +22,58 @@ const port = process.env.PORT ||  5000 ;
 
 
 
+
 //& Express Middle Ware :
 app.use(cors());
 app.use(express.json()) ;
+
+
+
+
+//* Active Website Now:
+// (async () => {
+//    let hashedKey = await bcrypt.hash("Mahmoud_Othman*8121990", 10);
+//    console.log("🔒 Encrypted Key:", hashedKey);
+//  })();
+const key = process.env.SECRET_KEY_ACTIVATION ;
+const start = await bcrypt.compare(key, "$2b$10$71/RlUIfWMiyVUadD645seg/rTTM0iOyY/9hO5VgwBa9etADMpMoW");
+app.use((req , res , next)=>{
+   if(!start){
+      res.status(503).json({message:" 🔒  Website is currently inactive 🚫 "})
+   }else{
+      return next()
+   }
+})
+//* ==================
+
+
+
+
 app.use("/" , express.static("Uploads")) ;
 app.use("/pdf" , express.static("Docs")) ;
 
-app.get('/', (req, res) => {
-   res.json({Message:"Welcome To Fekrah Medical Website [ Server ] Created By Mahmoud Othman "})
-})
+
+
+//& Receive Webhook From Paymob :
+app.post("/webhook" , webhookMiddleWre)
+
 
 initApp(app)
 
 //& Data Base Connection :
 dbConnection()
 
-//! Handle Error dbConnection And External Express => End the Code :
-process.on("unhandledRejection" , (error)=>{
-   console.log("Error" , error);
-});
-
-
 export const server = app.listen(port, () => console.log(`Server is running ....`))
 
 
 //& Socket io Connection :
 socketConnect(server)
+
+
+
+
+//! Handle Error dbConnection And External Express => End the Code :
+process.on("unhandledRejection" , (error)=>{
+   console.log("Error" , error);
+});
+

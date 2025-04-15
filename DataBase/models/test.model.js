@@ -35,6 +35,9 @@ const schema = new Schema({
       type:Number ,
       default:0
    } ,
+   creationTimeAt:{
+      type:Number 
+   } ,
    createdBy:{
       type:Types.ObjectId ,
       ref: "user" 
@@ -43,6 +46,14 @@ const schema = new Schema({
 } , { timestamps:true , toJSON: { virtuals: true }  } )
 
 
+
+//& Added Dynamic Creation Time At :
+schema.pre("save"  , function(next){   
+   if (!this.creationTimeAt) {
+      this.creationTimeAt = Date.now() ;
+   }
+   next()
+}) ; 
 
 
 //& Virtual Populate in Mongoose Virtuals :
@@ -54,31 +65,10 @@ schema.virtual('all_Prices', {
 });
 
 
-// schema.pre("findOne" , function(){
-//    this.populate("all_Prices")
-// })
-
-
 schema.pre(/^find/ , function(){
    this.populate("all_Prices")
 })
 
-
-
-
-
-
-
-
-
-
-// schema.pre(/^find/ , function(){
-//    this.populate("company")
-// }) ;
-
-// userSchema.post("save" , function(){
-//    console.log(this);
-// }) ;
 
 
 export const testModel = model("test" , schema)

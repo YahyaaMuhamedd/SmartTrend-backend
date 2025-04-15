@@ -11,12 +11,9 @@ const schema = new Schema({
       maxLength:[100 , "Should be Character Count Less Than 50 Character"] ,
    } ,
    email:{
-         type:String ,
-         unique:[true , "company Name is Required"] ,
-      },
-   password :{
       type:String ,
-      required :[true , "Password is required"] 
+      lowercase:true ,
+      unique:[true , "company Name is Unique"] ,
    } ,
    passwordChangedAt:{
       type:Date 
@@ -44,6 +41,9 @@ const schema = new Schema({
    start:{
       type:Date
    } ,   
+   creationTimeAt:{
+      type:Number 
+   } ,
    createdBy:{
       type:Types.ObjectId ,
       ref: "user" 
@@ -52,32 +52,16 @@ const schema = new Schema({
 
 
 
-// } , { timestamps:true , toJSON: { virtuals: true }  } )   
-
-
-// //& Virtual Populate in Mongoose Virtuals :
-// schema.virtual('all_Tests', {
-//    ref: 'test',
-//    localField: '_id',
-//    foreignField: 'company',
-//    justOne: true
-// });   
-
-// schema.pre("findOne" , function(){
-//    this.populate("all_Tests")
-// })   
 
 
 
-//& Hash Password Before Save When Add User :
-schema.pre("save"  , function(){
-   if(this.password) this.password = bcrypt.hashSync(this.password , 8) ;
-}) ;
 
-
-// & Hash Password Before Save When Update User :
-schema.pre("findOneAndUpdate" , function(){
-   if(this._update.password) this._update.password = bcrypt.hashSync(this._update.password , 8) ; 
+//& Added Dynamic Creation Time At :
+schema.pre("save"  , function(next){   
+   if (!this.creationTimeAt) {
+      this.creationTimeAt = Date.now() ;
+   }
+   next()
 }) ;
 
 

@@ -5,6 +5,7 @@ import { protectedRoutes } from "../../middleWare/authentication.js";
 import { authorize } from "../../middleWare/authorization.js";
 import { multerLocal, validExtension } from "../../services/multer.Local.js";
 import { addPrescriptionVal, paramsIdVal } from "./prescription.validate.js";
+import { ROLES } from "../../utilities/enums.js";
 
 
 
@@ -12,21 +13,25 @@ import { addPrescriptionVal, paramsIdVal } from "./prescription.validate.js";
 
 const router = Router() ;
 
+
+//^=========================== Get All Prescription, Add Prescription =====================================
    router.route("/")
-      // .get( prescriptionControl.getAllPrescription)
-      .get(protectedRoutes , authorize("admin" , "moderator") , prescriptionControl.getAllPrescription)
+      .get( prescriptionControl.getAllPrescription)
+      // .get(protectedRoutes , authorize("admin" , "moderator") , prescriptionControl.getAllPrescription)
+
 
       //& Add Prescription :
-      .post(protectedRoutes , authorize("admin" , "moderator" , "user") , multerLocal(validExtension.image , "Prescription").single("image"), validation(addPrescriptionVal) ,prescriptionControl.addPrescription)
+      .post(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) ,  multerLocal(validExtension.image , "Prescription").single("image"), validation(addPrescriptionVal) ,prescriptionControl.addPrescription)
       
 
+
+
+//^=========================== Delete Prescription, Seen Prescription =====================================
    router.route("/:id")
       // .delete(validation(paramsIdVal)  , prescriptionControl.deletePrescription)
-      .delete(protectedRoutes , authorize("admin" , "moderator") , validation(paramsIdVal)  , prescriptionControl.deletePrescription)
+      .delete(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) ,  validation(paramsIdVal)  , prescriptionControl.deletePrescription)
 
       // .patch(validation(paramsIdVal)  , prescriptionControl.seenPrescription)
-      .patch(protectedRoutes , authorize("admin" , "moderator") , validation(paramsIdVal)  , prescriptionControl.seenPrescription)
-
-
+      .patch(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) ,  validation(paramsIdVal)  , prescriptionControl.seenPrescription)
 
 export default router ;
