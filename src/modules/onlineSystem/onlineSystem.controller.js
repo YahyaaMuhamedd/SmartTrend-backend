@@ -9,10 +9,10 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import slugify from "slugify";
 import env from "dotenv"
+env.config()
 
 const alphabet = process.env.INVOICE_NUMBER || '012345678';
 const transform_nanoid = customAlphabet(alphabet , 10) ;
-env.config()
 
 
 
