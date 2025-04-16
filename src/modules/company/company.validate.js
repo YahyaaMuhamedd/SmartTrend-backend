@@ -1,10 +1,11 @@
 import Joi from "joi";
 
+const uploadImageSize = Number(process.env.UPLOAD_IMAGE_SIZE) || 2000000 ;
 
 
 export const generalFields = {
 	file:Joi.object({
-		size:Joi.number().positive().max(+process.env.UPLOAD_IMAGE_SIZE),
+		size:Joi.number().positive().max(uploadImageSize),
 		path:Joi.string(),
 		filename:Joi.string(),
 		destination:Joi.string(),
