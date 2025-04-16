@@ -17,7 +17,7 @@ env.config()
 
 
 const app = express()
-const port = process.env.PORT ||  5000 ;
+const PORT = process.env.PORT || 5000;
 
 
 
@@ -63,7 +63,7 @@ initApp(app)
 //& Data Base Connection :
 dbConnection()
 
-export const server = app.listen(port, () => console.log(`Server is running ....`))
+export const server = app.listen(PORT, () => console.log(`Server is running ....`))
 
 
 //& Socket io Connection :
