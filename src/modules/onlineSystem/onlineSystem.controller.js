@@ -10,8 +10,8 @@ import jwt from "jsonwebtoken";
 import slugify from "slugify";
 import env from "dotenv"
 
-
-const transform_nanoid = customAlphabet(process.env.TRANSFORM_NUMBER, 10) ;
+const alphabet = process.env.INVOICE_NUMBER || '012345678';
+const transform_nanoid = customAlphabet(alphabet , 10) ;
 env.config()
 
 

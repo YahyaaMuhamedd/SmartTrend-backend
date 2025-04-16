@@ -20,8 +20,8 @@ import {  pdf_invoice } from "../../templates/pdf.invoice.js";
 env.config()
 
 
-
-const invoice_nanoid = customAlphabet(process.env.INVOICE_NUMBER, 10) ;
+const alphabet = process.env.INVOICE_NUMBER || '123456789';
+const invoice_nanoid = customAlphabet(alphabet , 10) ;
 
 
 
