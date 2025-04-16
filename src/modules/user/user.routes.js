@@ -15,8 +15,8 @@ const router  = Router() ;
 
 //^=========================== Get Users, Add User, Change Image ==============================================
 router.route("/")
-		// .get(UC.getAllUser)
-		.get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) , UC.getAllUser)
+		.get(UC.getAllUser)
+		// .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) , UC.getAllUser)
 
 		.post (protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) , validation(addUserVal) ,  emailExist ,  UC.addUser) 
 		.patch (protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) ,multerLocal(validExtension.image , "users").single("file") ,  validation(singleVal) ,  UC.changeImgCover) 

@@ -3,6 +3,8 @@ import cloudinary from "../../services/cloudinary.config.js";
 import { AppError } from "../../utilities/AppError.js";
 import { ApiFeature } from "../../utilities/apiFeatures.js";
 import { catchError } from "../../utilities/catchError.js";
+import jwt from "jsonwebtoken";
+
 import fs from "fs";
 import path from "path";
 
@@ -239,12 +241,17 @@ export const changeImgCover = catchError(
          const fileName = "Uploads/users/" + path.basename(user.imgCover)
          fs.unlinkSync(path.resolve(fileName))
       }
+      
+      const newUser = await userModel.findById(req.user._id).select("_id name role  phone birthDay email  age imgCover") ;
+      
+      const token = jwt.sign( 
+         {_id:newUser._id , name:newUser.name ,  role:newUser.role ,  phone:newUser.phone ,  birthDay:newUser.birthDay ,  email:newUser.email ,  age:newUser.age , imgCover:newUser.imgCover} 
+         , process.env.SECRET_KEY , {expiresIn:process.env.TOKEN_EXPIRATION}); // expired Token After 1 hours 
+console.log(token);
 
-
-      const newUser = await userModel.findById(req.user._id).select("-_id name role  phone birthDay email  age imgCover") ;
 
       !newUser && next(new AppError("User Not Found After Change Cover", 404) ) ;
-      newUser &&  res.json({message:"success" , newUser}) ;
+      newUser &&  res.json({message:"success" , token }) ;
    }
 
 )

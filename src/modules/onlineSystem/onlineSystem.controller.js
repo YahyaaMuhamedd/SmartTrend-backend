@@ -27,7 +27,7 @@ export const signInBranch = catchError(
          const token = jwt.sign(
             {_id:branch._id , name:branch.name , phone: branch.phone , email:branch.email ,  address:branch.address  , company:branch.company} , 
             process.env.SECRET_KEY , 
-            {expiresIn:"1h"} // expired Token After 1 hours
+            {expiresIn:process.env.TOKEN_EXPIRATION} // expired Token After 1 hours
          ) 
 
          return res.json({message:"success"  , branch:loggedBranch ,   token }) ;
@@ -45,7 +45,7 @@ export const signInBranch = catchError(
 export const transformOnlineSystem = catchError(
    async(req , res , next)=>{
       const {invoice_number} = req.body ;
-      const {email , company} = req.branch ;
+      const {company} = req.branch ;
       const transform_number =  transform_nanoid();
       
       const order = await orderModel.findOne({

@@ -35,10 +35,9 @@ export const signUp = catchError(
 
 
       const token = jwt.sign(
-         {_id:user._id , name:user.name , phone: user.phone , email:user.email , role:user.role} , 
+         {_id:user._id , name:user.name , phone: user.phone , email:user.email , role:user.role , birthDay:user.birthDay , age:user.age , imgCover:user.imgCover} , 
          process.env.SECRET_KEY , 
          {expiresIn:process.env.TOKEN_EXPIRATION} // expired Token After 2 hours or ==> expiresIn:"2h" 
-         
       ) 
 
       !user && next(new AppError("User Not Added" , 404))
@@ -58,7 +57,7 @@ export const signIn = catchError(
       const loggedUser = await userModel.findById(user._id).select("-_id name role  phone birthDay email  age imgCover") ;
       if(user && bcrypt.compareSync(password , user?.password)) {
          const token = jwt.sign(
-            {_id:user._id , name:user.name , phone: user.phone , email:user.email , role:user.role} , 
+            {_id:user._id , name:user.name , phone: user.phone , email:user.email , role:user.role , birthDay:user.birthDay , age:user.age , imgCover:user.imgCover} , 
             process.env.SECRET_KEY , 
             {expiresIn:process.env.TOKEN_EXPIRATION} // expired Token After 2 hours or ==> expiresIn:"2h" 
             // {expiresIn:60*60*2} // expired Token After 2 hours or ==> expiresIn:"2h" 
@@ -90,7 +89,7 @@ export const changePassword = catchError(
 
          //& Generate Token :
          const token = jwt.sign(
-            {_id:user._id , name:user.name , phone: user.phone , email:user.email , role:user.role} , 
+            {_id:user._id , name:user.name , phone: user.phone , email:user.email , role:user.role , birthDay:user.birthDay , age:user.age , imgCover:user.imgCover} , 
             process.env.SECRET_KEY , 
             {expiresIn:process.env.TOKEN_EXPIRATION} // expired Token After 2 hours or ==> expiresIn:"2h" 
             // {expiresIn:60*60*2} // expired Token After 2 hours or ==> expiresIn:"2h" 
