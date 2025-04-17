@@ -65,7 +65,7 @@ const schema = new Schema({
       type:String ,
       default:"" ,
    } ,
-   branch_Approved:{
+   branch:{
       type:Types.ObjectId , 
       ref:"branch"  ,
    } ,
@@ -146,7 +146,7 @@ schema.pre(/^find/ , function (next){
 
 //& Calculate Total Price Before Discount : 
 schema.virtual("total_Price").get(function (){
-   // return  1000
+   
    const total = this.orderItems.reduce((acc , entry)=>{
       return acc + entry.price
    } , 0)
@@ -156,7 +156,7 @@ schema.virtual("total_Price").get(function (){
 
 //& Calculate Net Amount : 
 schema.virtual("Net_Amount").get(function (){
-   // return  1000
+   
    const total = this.orderItems.reduce((acc , entry)=>{
       return acc + entry.final_amount
    } , 0)
@@ -165,7 +165,7 @@ schema.virtual("Net_Amount").get(function (){
 
 //& Calculate Total Price After Discount : 
 schema.virtual("total_Price_After_Discount").get(function (){
-   // return  1000
+   
    const total = this.orderItems.reduce((acc , entry)=>{
       return acc + entry.priceAfterDiscount
    } , 0)

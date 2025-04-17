@@ -13,6 +13,8 @@ import env from "dotenv"
 import { socketConnect } from './src/services/socketConnection.js';
 import { webhookMiddleWre } from './src/modules/order/order.controller.js';
 import bcrypt from "bcrypt";
+import { pdf_invoice } from './src/templates/pdf.invoice.js';
+import { create_pdf } from './src/services/create_pdf.js';
 env.config()
 
 
@@ -77,3 +79,12 @@ process.on("unhandledRejection" , (error)=>{
    console.log("Error" , error);
 });
 
+
+
+      const data  = {};
+      try {
+         await create_pdf(pdf_invoice , data , `invoice_MahmoudOthman_123`);
+      } catch (error) {
+         console.log(error);
+      }
+      

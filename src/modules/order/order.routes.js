@@ -97,7 +97,8 @@ const router = Router() ;
 
    //^================================== Update Order ===============================================
    router.route("/updateOrder/:id")
-      .patch(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR)  ,  validation(paramsIdVal) , orderControl.updateOrder) 
+      .patch(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) , orderControl.updateOrder) 
+      // .patch(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR)  ,  validation(paramsIdVal) , orderControl.updateOrder) 
    
 
 
@@ -106,7 +107,12 @@ const router = Router() ;
 
    //^================================== Check Exist Patient ========================================
    router.route("/orderLoggedUser")
-      .post(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(createCashOrderVal) , orderControl.checkExistPatient , orderControl.createCashOrderLoggedUser)
+      .post(protectedRoutes , 
+         authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , 
+         validation(createCashOrderVal) , 
+         orderControl.checkExistPatient , 
+         orderControl.createCashOrderLoggedUser
+      )
 
 
 

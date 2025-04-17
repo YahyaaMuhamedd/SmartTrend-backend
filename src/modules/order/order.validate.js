@@ -39,11 +39,9 @@ export const createCashOrderVal = Joi.object({
    patient_History:Joi.string().min(2).max(500).trim().required() ,
 	street:Joi.string() ,
 	city:Joi.string() ,
-   branch :Joi.string() , 
 })
 
 
 export const paramsIdVal = Joi.object({
-   id:Joi.string().hex().length(24).required() 
+	id:Joi.string().hex().length(24).required() 
 })
-

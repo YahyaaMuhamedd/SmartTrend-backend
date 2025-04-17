@@ -242,14 +242,13 @@ export const getSpecificOrder = catchError(
 
 //*     ============================================ Cash Order ============================================== 
 
-
 //& Create Cash Order Logged User Or Old User :
 export const createCashOrderLoggedUser = catchError(
    async(req , res , next)=>{
-      const {patient_Name  , patient_Age  , gender , address:{street , city} , patient_Phone , doctor_Name , patient_History } = req.patient ;
-      const { branch } = req.body ;
+
+      const {patient_Name, patient_Age, gender, address:{street, city}, patient_Phone, doctor_Name, patient_History } = req.patient ;
       const cart = await cartModel.findOne({user:req.user._id}) ;
-      if(!cart) return next(new AppError("Cart Not Found" , 404)) ;
+      if(!cart) return next(new AppError("Cart Not Found", 404)) ;
 
       const company = cart.cartItems[0].price.company ;
       const invoice_number = invoice_nanoid() ;
@@ -271,7 +270,6 @@ export const createCashOrderLoggedUser = catchError(
             priceAfterDiscount:priceAfterDiscount ,
             final_amount
          })) ,
-         branch_Area: branch ,
          shipping_Address:{
             street: street ,
             city: city ,
@@ -281,34 +279,108 @@ export const createCashOrderLoggedUser = catchError(
       
       //! Added invoice to this Order :
       const patient_Name_Slug = slugify(order.patient_Name) ;
-      const add_Invoice_Order = await orderModel.findByIdAndUpdate(order._id , {invoice_pdf  : `invoice_${patient_Name_Slug}_${order._id}.pdf` } , {new:true})
+      const add_Invoice_Order = await orderModel.findByIdAndUpdate(order._id , {invoice_pdf  : `invoice_${patient_Name_Slug}_${order._id}.pdf`} , {new:true})
       
       //! Create Invoice Pdf  orders :
-      create_pdf(res , pdf_invoice , add_Invoice_Order , `invoice_${patient_Name_Slug}_${order._id}`);
-      
+      try {
+         await create_pdf(pdf_invoice , add_Invoice_Order , `invoice_${patient_Name_Slug}_${order._id}`);
+      } catch (error) {
+         return next(new AppError("Invoice PDF creation failed", 500));
+      }
 
-      //!Delete Cart After Create Order:
-      const cartDeleted = await cartModel.findByIdAndDelete(cart._id , {new:true})  ; 
+      //! Delete Cart After Create Order:
+      const cartDeleted = await cartModel.findByIdAndDelete(cart._id , {new:true}) ;
 
       //& Increase the number of times the test is done : 
-      const options =  order.orderItems.map(({test:{_id }})=>{
-         return (
-            {
-               updateOne:{
-                  filter:{_id} ,
-                  update:{$inc:{count:1}}
-               }
-            }
-         )
-      })
-      await testModel.bulkWrite(options)
+      const options =  order.orderItems.map(({test:{_id }})=>({
+         updateOne:{
+            filter:{_id} ,
+            update:{$inc:{count:1}}
+         }
+      }));
+      await testModel.bulkWrite(options);
+
+      if(!order) return next(new AppError("Order Failed", 400)) ;
+      res.json({message:"success", add_Invoice_Order, patient:req.patient});
+   }
+)
+
+
+
+
+
+
+
+
+
+
+
+// //& Create Cash Order Logged User Or Old User :
+// export const createCashOrderLoggedUser = catchError(
+//    async(req , res , next)=>{
+//       const {patient_Name  , patient_Age  , gender , address:{street , city} , patient_Phone , doctor_Name , patient_History } = req.patient ;
+//       const { branch } = req.body ;
+//       const cart = await cartModel.findOne({user:req.user._id}) ;
+//       if(!cart) return next(new AppError("Cart Not Found" , 404)) ;
+
+//       const company = cart.cartItems[0].price.company ;
+//       const invoice_number = invoice_nanoid() ;
+   
+//       const order = await orderModel.create({
+//          user:req.user._id ,
+//          patient_Name , 
+//          patient_Age , 
+//          doctor_Name , 
+//          cart:cart._id ,
+//          patient_Phone ,
+//          patient_History , 
+//          gender ,
+//          invoice_number ,
+//          company ,
+//          orderItems:cart.cartItems.map(({test , price:{price , priceAfterDiscount , final_amount}})=>({
+//             test:test ,
+//             price:price ,
+//             priceAfterDiscount:priceAfterDiscount ,
+//             final_amount
+//          })) ,
+//          branch_Area: branch ,
+//          shipping_Address:{
+//             street: street ,
+//             city: city ,
+//          } ,
+//          createdAtOrder : new Date().getTime()
+//       })
+      
+//       //! Added invoice to this Order :
+//       const patient_Name_Slug = slugify(order.patient_Name) ;
+//       const add_Invoice_Order = await orderModel.findByIdAndUpdate(order._id , {invoice_pdf  : `invoice_${patient_Name_Slug}_${order._id}.pdf` } , {new:true})
+      
+//       //! Create Invoice Pdf  orders :
+//       create_pdf(res , pdf_invoice , add_Invoice_Order , `invoice_${patient_Name_Slug}_${order._id}`);
+      
+
+//       //!Delete Cart After Create Order:
+//       const cartDeleted = await cartModel.findByIdAndDelete(cart._id , {new:true})  ; 
+
+//       //& Increase the number of times the test is done : 
+//       const options =  order.orderItems.map(({test:{_id }})=>{
+//          return (
+//             {
+//                updateOne:{
+//                   filter:{_id} ,
+//                   update:{$inc:{count:1}}
+//                }
+//             }
+//          )
+//       })
+//       await testModel.bulkWrite(options)
 
 
       
-      if(!order) return next(new AppError("Order Failed" , 400)) ;
-      res.json({message:"success" , add_Invoice_Order , patient:req.patient})
-   }
-)
+//       if(!order) return next(new AppError("Order Failed" , 400)) ;
+//       res.json({message:"success" , add_Invoice_Order , patient:req.patient})
+//    }
+// )
 
 
 //& Check Patient Exist MiddleWare :
