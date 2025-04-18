@@ -13,14 +13,14 @@ import env from "dotenv"
 import { socketConnect } from './src/services/socketConnection.js';
 import { webhookMiddleWre } from './src/modules/order/order.controller.js';
 import bcrypt from "bcrypt";
-// import { pdf_invoice } from './src/templates/pdf.invoice.js';
-// import { create_pdf } from './src/services/create_pdf.js';
+import { create_pdf } from './src/services/create_pdf.js';
+import { pdf_invoice } from './src/templates/pdf.invoice.js';
+import { temp_test } from './src/templates/temp_test.js';
 env.config()
 
 
 const app = express()
 const PORT = process.env.PORT || 5000;
-
 
 
 
@@ -83,8 +83,9 @@ process.on("unhandledRejection" , (error)=>{
 
       // const data  = {};
       // try {
-      //    await create_pdf(pdf_invoice , data , `invoice_MahmoudOthman_123`);
+      //    await create_pdf(temp_test , data , `invoice_MahmoudOthman_123`);
       // } catch (error) {
       //    console.log(error);
       // }
       
+

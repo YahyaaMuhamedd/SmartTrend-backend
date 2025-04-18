@@ -709,7 +709,7 @@ export const create_payment = async (req , res , next) => {
    try {
       await getAuthToken();
 
-      const {patient_Name  , gender , street , city ,  patient_Phone , doctor_Name , patient_History , branch} = req.body ;
+      const {patient_Name  , gender , street , city ,  patient_Phone , doctor_Name , patient_History} = req.body ;
 
       const cart = await cartModel.findOne({user:req.user._id}) ;
       if(!cart) return next(new AppError("Cart Not Found" , 404)) ;
@@ -727,7 +727,6 @@ export const create_payment = async (req , res , next) => {
          patient_Phone , 
          doctor_Name , 
          patient_History ,
-         branch_Area : branch ,
       } ;
 
 
@@ -735,8 +734,8 @@ export const create_payment = async (req , res , next) => {
       const orderResponse = await axios.post("https://accept.paymob.com/api/ecommerce/orders", {
          auth_token: authToken,
          delivery_needed: "false",
-         amount_cents: amount * 100 ,
-         // amount_cents: cart.total_After_Discount * 100 ,
+         // amount_cents: amount * 100 ,
+         amount_cents: cart.total_After_Discount * 100 ,
          currency: "EGP",
          merchant_order_id: new Date().getTime(),
          items: [],

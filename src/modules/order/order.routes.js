@@ -141,7 +141,7 @@ const router = Router() ;
       // router.route("/create-payment")
       // .post(orderControl.create_payment);
 
-   router.route("/create-payment")
+   router.route("/createSession")
       .post(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(createCashOrderVal) , orderControl.checkExistPatient , orderControl.create_payment )
 
 

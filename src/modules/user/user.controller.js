@@ -193,15 +193,22 @@ export const updateUserRole = catchError(
 //& Delete User :
 export const deleteUser = catchError(
    async(req , res , next)=>{
-      const user = await userModel.findByIdAndDelete(req.params.id , {new:true}) ;
+      const user = await userModel.findByIdAndDelete(req.params.id) ;
 
       //^ Delete Image From cloudinary:
-      if(user.imgCover?.public_id){
-         //! Delete image From Cloudinary :
-         await cloudinary.uploader.destroy(user.imgCover.public_id);
+      // if(user.imgCover?.public_id){
+      //    //! Delete image From Cloudinary :
+      //    await cloudinary.uploader.destroy(user.imgCover.public_id);
          
-         //! Delete Folder image From Cloudinary :
-         await cloudinary.api.delete_folder(`Fekrah/users/imgCover/${user.name}`)
+      //    //! Delete Folder image From Cloudinary :
+      //    await cloudinary.api.delete_folder(`Fekrah/users/imgCover/${user.name}`)
+      // }
+
+
+      //^ Delete Image from Server Disk Local :
+      if(user.imgCover){
+         const fileName = "Uploads/users/" + path.basename(user.imgCover)
+         fs.unlinkSync(path.resolve(fileName))
       }
 
       !user && next(new AppError("Not Found User" , 404))
@@ -247,8 +254,6 @@ export const changeImgCover = catchError(
       const token = jwt.sign( 
          {_id:newUser._id , name:newUser.name ,  role:newUser.role ,  phone:newUser.phone ,  birthDay:newUser.birthDay ,  email:newUser.email ,  age:newUser.age , imgCover:newUser.imgCover} 
          , process.env.SECRET_KEY , {expiresIn:process.env.TOKEN_EXPIRATION}); // expired Token After 1 hours 
-console.log(token);
-
 
       !newUser && next(new AppError("User Not Found After Change Cover", 404) ) ;
       newUser &&  res.json({message:"success" , token }) ;

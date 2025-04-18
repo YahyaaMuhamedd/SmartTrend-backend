@@ -12,7 +12,9 @@ export let create_pdf = async (template, data, fileName) => {
    const content = template(data);
 
    // Set up the page content
-   await page.setContent(content);
+   // await page.setContent(content);
+   await page.setContent(content, { waitUntil: 'networkidle0' });
+
 
    // PDF options
    const options = {
