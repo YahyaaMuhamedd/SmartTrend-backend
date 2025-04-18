@@ -284,7 +284,8 @@ export const createCashOrderLoggedUser = catchError(
       try {
          await create_pdf(pdf_invoice , add_Invoice_Order , `invoice_${patient_Name_Slug}_${order._id}`);
       } catch (error) {
-         return next(new AppError("Invoice PDF creation failed", 500));
+         return next(new AppError(error.message, 500));
+         // return next(new AppError("Invoice PDF creation failed", 500));
       }
 
       //! Delete Cart After Create Order:
