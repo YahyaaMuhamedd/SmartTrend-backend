@@ -705,7 +705,7 @@ const getAuthToken = async () => {
 };
 
 //& 2- Create Payment Method :
-export const create_payment = async (req , res , next) => {
+export const createSession = async (req , res , next) => {
    try {
       await getAuthToken();
 
@@ -778,7 +778,7 @@ export const create_payment = async (req , res , next) => {
    } catch (error) {
       // console.error("Error creating payment:", error);
       console.error('Error creating order:', error.response?.data || error.message);
-      res.status(500).json({ error: "Payment creation failed" });
+      res.status(500).json({ error: "Payment creation failed !" });
    }
 };
 
