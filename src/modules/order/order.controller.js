@@ -714,10 +714,10 @@ export const createSession = async (req , res , next) => {
       const cart = await cartModel.findOne({user:req.user._id}) ;
       if(!cart) return next(new AppError("Cart Not Found" , 404)) ;
 
-      const phone = req.user.phone ;
+      // const phone = req.user.phone ;
       const amount_num = cart.total_After_Discount ; 
-      // const amount = Math.round(amount_num) * 100 ; 
-      const amount = 124 * 100 ; 
+      const amount = Math.round(amount_num) * 100 ; 
+      // const amount = 124 * 100 ; 
 
 
       const orderData = {
@@ -752,9 +752,9 @@ export const createSession = async (req , res , next) => {
          amount_cents: amount ,
          expiration: 3600,
          order_id: orderId,
-         extra:orderData ,
+         // extra:orderData ,
          billing_data: {
-            phone_number: phone ,
+            phone_number: patient_Phone ,
             first_name: "mahmoud" ,
             last_name: "osman" ,
             email: "email@example.com" ,
