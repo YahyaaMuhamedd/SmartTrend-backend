@@ -13,6 +13,7 @@ import env from "dotenv"
 import { socketConnect } from './src/services/socketConnection.js';
 import { webhookMiddleWre } from './src/modules/order/order.controller.js';
 import bcrypt from "bcrypt";
+import path from 'path';
 // import { create_pdf } from './src/services/create_pdf.js';
 // import { pdf_invoice } from './src/templates/pdf.invoice.js';
 // import { temp_test } from './src/templates/temp_test.js';
@@ -51,10 +52,12 @@ app.use((req , res , next)=>{
 
 
 
-app.use("/" , express.static("Uploads")) ;
-app.use("/pdf" , express.static("Docs")) ;
+// app.use("/" , express.static("Uploads")) ;
+// app.use("/pdf" , express.static("Docs")) ;
 
-
+// Serve static files from specific directories
+app.use("/", express.static(path.join(process.cwd(), 'Uploads')));
+app.use("/pdf", express.static(path.join(process.cwd(), 'Docs')));
 
 //& Receive Webhook From Paymob :
 app.post("/webhook" , webhookMiddleWre)
