@@ -13,6 +13,16 @@ import { ROLES } from "../../utilities/enums.js";
 const router = Router() ;
 
 
+
+
+//^================================== Create Online Order And Payment With Paymob =====================================
+// & Create Payment Method :
+
+router.route("/create-payment")
+   .post(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(createCashOrderVal) , orderControl.checkExistPatient , orderControl.createSession )
+
+
+
 //^=============================== Get All Order ====================================================
    router.route("/")
    .get( orderControl.getAllOrder)
@@ -135,12 +145,5 @@ const router = Router() ;
 
 
    
-
-   //^================================== Create Online Order And Payment With Paymob =====================================
-   // & Create Payment Method :
-
-   router.route("/create-session")
-      .post(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(createCashOrderVal) , orderControl.checkExistPatient , orderControl.createSession )
-
 
 export default router ;
