@@ -89,3 +89,5 @@ process.on("unhandledRejection" , (error)=>{
       // }
       
 
+// let num = 124.6099999999998 ;
+// console.log(Math.round(num));
