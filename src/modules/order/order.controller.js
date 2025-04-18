@@ -773,7 +773,8 @@ export const create_payment = async (req , res , next) => {
       });
 
    } catch (error) {
-      console.error("Error creating payment:", error);
+      // console.error("Error creating payment:", error);
+      console.error('Error creating order:', error.response?.data || error.message);
       res.status(500).json({ error: "Payment creation failed" });
    }
 };

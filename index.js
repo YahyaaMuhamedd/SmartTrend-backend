@@ -13,9 +13,9 @@ import env from "dotenv"
 import { socketConnect } from './src/services/socketConnection.js';
 import { webhookMiddleWre } from './src/modules/order/order.controller.js';
 import bcrypt from "bcrypt";
-import { create_pdf } from './src/services/create_pdf.js';
-import { pdf_invoice } from './src/templates/pdf.invoice.js';
-import { temp_test } from './src/templates/temp_test.js';
+// import { create_pdf } from './src/services/create_pdf.js';
+// import { pdf_invoice } from './src/templates/pdf.invoice.js';
+// import { temp_test } from './src/templates/temp_test.js';
 env.config()
 
 
