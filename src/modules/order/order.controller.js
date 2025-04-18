@@ -717,7 +717,6 @@ export const createSession = async (req , res , next) => {
       // const phone = req.user.phone ;
       const amount_num = cart.total_After_Discount ; 
       const amount = Math.round(amount_num) * 100 ; 
-      // const amount = 124 * 100 ; 
 
 
       const orderData = {
@@ -737,7 +736,6 @@ export const createSession = async (req , res , next) => {
       const orderResponse = await axios.post("https://accept.paymob.com/api/ecommerce/orders", {
          auth_token: authToken,
          delivery_needed: "false",
-         // amount_cents: amount ,
          amount_cents: amount ,
          currency: "EGP",
          merchant_order_id: new Date().getTime(),
@@ -748,11 +746,10 @@ export const createSession = async (req , res , next) => {
       // طلب Payment Key
       const paymentKeyResponse = await axios.post("https://accept.paymob.com/api/acceptance/payment_keys", {
          auth_token: authToken,
-         // amount_cents: amount * 100,
          amount_cents: amount ,
          expiration: 3600,
          order_id: orderId,
-         // extra:orderData ,
+         extra:orderData ,
          billing_data: {
             phone_number: patient_Phone ,
             first_name: "mahmoud" ,
@@ -819,7 +816,7 @@ export const createOnlineOrder = async (data)=>{
    } = data ;
 
       const cart = await cartModel.findOne({user:user}) ;
-      if(!cart) return next(new AppError("Cart Not Found" , 404)) ;
+      // if(!cart) return next(new AppError("Cart Not Found" , 404)) ;
 
       const company = cart.cartItems[0].price.company ;
       const invoice_number = invoice_nanoid() ;
