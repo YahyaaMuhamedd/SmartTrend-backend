@@ -13,10 +13,6 @@ import env from "dotenv"
 import { socketConnect } from './src/services/socketConnection.js';
 import { webhookMiddleWre } from './src/modules/order/order.controller.js';
 import bcrypt from "bcrypt";
-import path from 'path';
-// import { create_pdf } from './src/services/create_pdf.js';
-// import { pdf_invoice } from './src/templates/pdf.invoice.js';
-// import { temp_test } from './src/templates/temp_test.js';
 env.config()
 
 
@@ -84,13 +80,3 @@ process.on("unhandledRejection" , (error)=>{
 
 
 
-      // const data  = {};
-      // try {
-      //    await create_pdf(temp_test , data , `invoice_MahmoudOthman_123`);
-      // } catch (error) {
-      //    console.log(error);
-      // }
-      
-
-// let num = 124.6099999999998 ;
-// console.log(Math.round(num));
