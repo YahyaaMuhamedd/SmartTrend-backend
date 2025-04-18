@@ -274,7 +274,6 @@ export const createCashOrderLoggedUser = catchError(
             street: street ,
             city: city ,
          } ,
-         createdAtOrder : new Date().getTime()
       })
       
       //! Added invoice to this Order :
@@ -810,7 +809,6 @@ export const createOnlineOrder = async (data)=>{
       patient_Phone , 
       patient_History , 
       gender , 
-      branch_Area , 
       street , 
       city
    } = data ;
@@ -824,7 +822,6 @@ export const createOnlineOrder = async (data)=>{
       const order = await orderModel.create({
          user:user ,
          patient_Name ,
-         branch_Area , 
          patient_Age , 
          doctor_Name , 
          cart:cart._id ,
@@ -852,25 +849,23 @@ export const createOnlineOrder = async (data)=>{
       const add_Invoice_Order = await orderModel.findByIdAndUpdate(order._id , {invoice_pdf  : `invoice_${patient_Name_Slug}_${order._id}.pdf` } , {new:true})
       
       //! Create Invoice Pdf  orders :
-      let pdf = create_pdf(res , pdf_invoice , add_Invoice_Order , `invoice_${patient_Name_Slug}_${order._id}`);
-
-
+      try {
+         await create_pdf(pdf_invoice , add_Invoice_Order , `invoice_${patient_Name_Slug}_${order._id}`);
+      } catch (error) {
+         return next(new AppError("Invoice PDF creation failed", 500));
+      }
 
       //!Delete Cart After Create Order:
       const cartDeleted = await cartModel.findByIdAndDelete(cart._id , {new:true})  ; 
 
       //& Increase the number of times the test is done : 
-      const options =  order.orderItems.map(({test:{_id }})=>{
-         return (
-            {
-               updateOne:{
-                  filter:{_id} ,
-                  update:{$inc:{count:1}}
-               }
-            }
-         )
-      })
-      await testModel.bulkWrite(options)
+      const options =  order.orderItems.map(({test:{_id }})=>({
+         updateOne:{
+            filter:{_id} ,
+            update:{$inc:{count:1}}
+         }
+      }));
+      await testModel.bulkWrite(options);
 
       console.log("Successfully Created New Orders By Paymob Online!");
       console.log("Done" , add_Invoice_Order);
