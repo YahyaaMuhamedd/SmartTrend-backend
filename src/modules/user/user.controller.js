@@ -245,8 +245,14 @@ export const changeImgCover = catchError(
       
       //! Delete Image from Server Disk :
       if(user.imgCover){
-         const fileName = "Uploads/users/" + path.basename(user.imgCover)
-         fs.unlinkSync(path.resolve(fileName))
+      const destPath = path.resolve(`Uploads/users/${path.basename(user.imgCover)}`)
+      if(fs.existsSync(destPath)){
+         fs.unlinkSync(path.resolve(destPath))
+      }
+
+
+         // const fileName = "Uploads/users/" + path.basename(user.imgCover)
+         // fs.unlinkSync(path.resolve(fileName))
       }
       
       const newUser = await userModel.findById(req.user._id).select("_id name role  phone birthDay email  age imgCover") ;
