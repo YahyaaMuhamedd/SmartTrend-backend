@@ -41,7 +41,7 @@ schema.pre(/^find/ , function(){
 
 schema.pre("init" , function(doc){
    if(doc.image) {
-      doc.image = process.env.BASE_URL + "Prescription/" + doc.image
+      doc.image = process.env.BASE_URL + "/Prescription/" + doc.image
    }
 })
 

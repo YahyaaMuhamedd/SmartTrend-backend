@@ -102,7 +102,7 @@ schema.pre("findOneAndUpdate" , function(){
 
 schema.pre("init" , function(doc){
    if(doc.imgCover) {
-      doc.imgCover = process.env.BASE_URL + "users/" + doc.imgCover
+      doc.imgCover = process.env.BASE_URL + "/users/" + doc.imgCover
    }
 })
 

@@ -852,7 +852,7 @@ export const createOnlineOrder = async (data)=>{
       try {
          await create_pdf(pdf_invoice , add_Invoice_Order , `invoice_${patient_Name_Slug}_${order._id}`);
       } catch (error) {
-         return next(new AppError("Invoice PDF creation failed", 500));
+         console.log("Invoice PDF creation failed");
       }
 
       //!Delete Cart After Create Order:

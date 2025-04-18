@@ -67,7 +67,7 @@ schema.pre("save"  , function(next){
 
 schema.pre("init" , function(doc){
    if(doc.logo) {
-      doc.logo = process.env.BASE_URL + "company/" + doc.logo
+      doc.logo = process.env.BASE_URL + "/company/" + doc.logo
    }
 })
 
