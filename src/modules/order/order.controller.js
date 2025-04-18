@@ -278,11 +278,11 @@ export const createCashOrderLoggedUser = catchError(
       
       //! Added invoice to this Order :
       const patient_Name_Slug = slugify(order.patient_Name) ;
-      const add_Invoice_Order = await orderModel.findByIdAndUpdate(order._id , {invoice_pdf  : `invoice_${patient_Name_Slug}_${order._id}.pdf`} , {new:true})
       
       //! Create Invoice Pdf  orders :
       try {
          await create_pdf(pdf_invoice , add_Invoice_Order , `invoice_${patient_Name_Slug}_${order._id}`);
+         const add_Invoice_Order = await orderModel.findByIdAndUpdate(order._id , {invoice_pdf  : `invoice_${patient_Name_Slug}_${order._id}.pdf`} , {new:true})
       } catch (error) {
          return next(new AppError(error.message, 500));
          // return next(new AppError("Invoice PDF creation failed", 500));

@@ -5,7 +5,12 @@ const date = generate_Date();
 
 export let create_pdf = async (template, data, fileName) => {
    let fullName = `${fileName}.pdf`;
-   const browser = await puppeteer.launch();
+   // const browser = await puppeteer.launch();
+   const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+   });
+   
    const page = await browser.newPage();
 
    // Generate the HTML content from the template and data
