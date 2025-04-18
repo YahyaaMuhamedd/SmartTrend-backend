@@ -17,7 +17,7 @@ import { customAlphabet } from 'nanoid'
 import { patientModel } from "../../../DataBase/models/patient.model.js";
 import { create_pdf } from "../../services/create_pdf.js";
 import {  pdf_invoice } from "../../templates/pdf.invoice.js";
-env.config()
+env.config() ;
 
 
 const alphabet = process.env.INVOICE_NUMBER || '123456789';
