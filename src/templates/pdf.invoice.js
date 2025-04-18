@@ -122,7 +122,7 @@ export let pdf_invoice = (data) => {
          <div class="invoice-box">
 
             <!-- شعار الشركة -->
-            <img src="file://" alt="Logo" style="max-width: 150px; margin-bottom: 20px;" />
+            <img src="http://localhost:5000/images/logo.jpg" alt="Logo" style="max-width: 150px; margin-bottom: 20px;" />
 
             <table cellpadding="0" cellspacing="0">
                <tr class="top">
