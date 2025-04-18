@@ -6,6 +6,8 @@ const date = generate_Date();
 
 
 export let pdf_invoice = (data) => {
+   console.log("Template pdf Ya Mahmoud");
+
    return (
       `
       <!DOCTYPE html>

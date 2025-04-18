@@ -42,7 +42,9 @@ export let create_pdf = async (template, data, fileName) => {
    // Close the browser
    await browser.close();
 
-   let filePath = `${process.env.BASE_URL}pdf/${fullName}`;
+   let filePath = `${process.env.BASE_URL}/pdf/${fullName}`;
+   console.log("path pdf Ya Mahmoud", filePath);
+   
    return filePath;
 };
 
