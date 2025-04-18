@@ -715,11 +715,10 @@ export const create_payment = async (req , res , next) => {
       if(!cart) return next(new AppError("Cart Not Found" , 404)) ;
 
       const phone = req.user.phone ;
-      const amount = Math.round(cart.total_After_Discount) * 100 ; 
-      console.log(cart.total_After_Discount);
-      console.log(cart.total_After_Discount  * 100);
-      console.log(amount);
-      
+      const amount_num = cart.total_After_Discount ; 
+      // const amount = Math.round(amount_num) * 100 ; 
+      const amount = 124 * 100 ; 
+
 
       const orderData = {
          user: req.user._id , 
