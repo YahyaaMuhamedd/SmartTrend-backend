@@ -4,13 +4,22 @@ import { generate_Date } from './generateDate_Time.js';
 const date = generate_Date();
 
 export let create_pdf = async (template, data, fileName) => {
+
+
+   // Check Exist Docs Folder And Create Folder Docs When Not Exist :
+   const destPath = path.resolve(`Docs/`)
+   if(!fs.existsSync(destPath)){
+      fs.mkdirSync( destPath , {recursive:true})
+   }
+
+
    let fullName = `${fileName}.pdf`;
    // const browser = await puppeteer.launch();
    const browser = await puppeteer.launch({
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox']
    });
-   
+
    const page = await browser.newPage();
 
    // Generate the HTML content from the template and data
