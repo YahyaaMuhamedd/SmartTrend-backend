@@ -141,7 +141,7 @@ const router = Router() ;
 //^================================== Create Online Order And Payment With Paymob =====================================
 // & Create Payment Method :
 
-router.route("/create-session")
+router.route("/create-payment")
 .post(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(createCashOrderVal) , orderControl.checkExistPatient , orderControl.createSession )
 
 
