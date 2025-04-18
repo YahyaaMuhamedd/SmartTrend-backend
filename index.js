@@ -59,6 +59,7 @@ app.use("/pdf" , express.static("Docs")) ;
 //& Receive Webhook From Paymob :
 app.post("/webhook" , webhookMiddleWre)
 
+console.log("🚀 New version deployed!");
 
 initApp(app)
 
@@ -66,7 +67,6 @@ initApp(app)
 dbConnection()
 
 export const server = app.listen(PORT, () => console.log(`Server is running ....`))
-
 
 //& Socket io Connection :
 socketConnect(server)
