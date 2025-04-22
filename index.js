@@ -58,7 +58,7 @@ app.use("/pdf" , express.static("Docs")) ;
 //& Receive Webhook From Paymob :
 app.post("/webhook" , webhookMiddleWre)
 
-console.log("🚀 New version deployed!");
+console.log("🚀 New version deployed !!!");
 
 initApp(app)
 
