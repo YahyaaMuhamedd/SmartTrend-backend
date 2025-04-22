@@ -19,7 +19,7 @@ const schema = new Schema({
       type:String ,
       required:true ,
       lowercase:true ,
-      unique:[true , "Email is Required"]
+      unique:[true , "Email is Unique"]
    } ,
    password :{
       type:String ,

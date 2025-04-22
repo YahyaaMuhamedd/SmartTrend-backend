@@ -29,13 +29,13 @@ export const generate_Date = ()=>{
   //   const dateTime = currentDate.toUTCString('en-EG', options)             //  ==> toUTCString (UTC): Fri, 24 Jan 2025 07:24:54 GMT
   //   const dateTime = currentDate.toLocaleDateString('en-EG', options)      //  ==> toLocaleDateString: 01/24/2025
   //   const dateTime = currentDate.toLocaleTimeString('en-EG', options)      //  ==> toLocaleTimeString: 09:24:54 AM
-   return dateTime ;
+   // return dateTime ;
+
+
+
+   const [datePart, timePart] = dateTime.split(', ') ;
+   const [month, day, year] = datePart.split('/') ;
+
+
+   return `${day}/${month}/${year}, ${timePart}`;
 }
-
-
-
-
-// convert from date to millisecond
-// const dateString = "2025-01-24T07:24:54.154Z";
-// const milliseconds = new Date(dateString).getTime();
-// console.log(milliseconds);

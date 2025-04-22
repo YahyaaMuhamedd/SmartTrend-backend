@@ -57,3 +57,4 @@ export const updateBranchVal = Joi.object({
    area:Joi.string().min(1).max(100).trim() ,
 	company:Joi.string().hex().length(24) 
 })
+

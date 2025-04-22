@@ -10,12 +10,8 @@ import { catchError } from "../../utilities/catchError.js";
 //& Get All Branches :
 export const getAllBranches = catchError(
    async(req , res , next)=>{
-      const{filter} = req.query ;
-
       let result = await branchModel.find();
-
       let apiFeature = new ApiFeature(branchModel.find(), req.query ).pagination().fields().search().filter().sort();
-      // const branches = await apiFeature.mongooseQuery;
       const branches = await apiFeature.mongooseQuery.select("-password");
 
       if(!branches.length) return next(new AppError("Branches is Empty" , 404))
@@ -90,7 +86,7 @@ export const getSingleBranch = catchError(
 )
 
 
-//& Update Company :
+//& Update Branch :
 export const updateBranch = catchError(
    async(req , res , next)=>{
 
@@ -147,7 +143,7 @@ export const updateBranch = catchError(
 
 
 
-//& Delete company :
+//& Delete Branch :
 export const deleteBranch = catchError(
    async(req , res , next)=>{
       const {id} = req.params ;

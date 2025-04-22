@@ -5,6 +5,7 @@ import { prescriptionModel } from "../../../DataBase/models/prescription.model.j
 import  path from "path";
 import  fs from "fs";
 
+const uploadImageSize = Number(process.env.UPLOAD_IMAGE_SIZE) || 2000000;
 
 
 
@@ -45,12 +46,26 @@ export const getAllPrescription = catchError(
 
 
 
+//& Get Logged User Prescription :
+export const getLoggedUserPrescription = catchError(
+   async(req , res , next)=>{
+      const{_id} = req.user ;
+
+
+      let prescription = await prescriptionModel.find({createdBy:_id});
+      if(!prescription.length > 0) return next(new AppError("Prescription is Empty!" , 404)) ;
+      res.json({message:"success" ,  prescription }) ;
+   }
+)
+
+
+
 
 
 //& Add New Prescription :
 export const addPrescription = catchError(
    async(req , res , next)=>{
-      const {phone , description} = req.body ;
+      const {phone , message} = req.body ;
 
       const createdBy = req.user._id
       let image = "" ;
@@ -60,7 +75,7 @@ export const addPrescription = catchError(
 
       //& Check On Size File Media Before Convert From k-byte to Mega byte :
       if(req.file){
-         if((req.file.size > +process.env.UPLOAD_IMAGE_SIZE)){
+         if((req.file.size > uploadImageSize)){
             return next(new AppError("Size Media Should be Less than 200 k-Byte" , 404))
          }
          image = req.file.filename ;
@@ -69,9 +84,10 @@ export const addPrescription = catchError(
       if(existPrescription){
          const prescription = await prescriptionModel.findByIdAndUpdate( existPrescription._id , {
             phone, 
-            description , 
+            message , 
             image , 
-            createdBy
+            createdBy ,
+            download_URL:`${process.env.BASE_URL}/api/v1/prescription/download/${image}`
          }) ;
 
          //! Delete Image And Update Image in Folder :
@@ -87,9 +103,10 @@ export const addPrescription = catchError(
       }else{
          const prescription = await prescriptionModel.create({
             phone, 
-            description , 
+            message , 
             image , 
-            createdBy
+            createdBy ,
+            download_URL:`${process.env.BASE_URL}/api/v1/prescription/download/${image}`
          }) ;
    
          !prescription && next(new AppError("Prescription Not Added", 404) ) ;
@@ -97,6 +114,24 @@ export const addPrescription = catchError(
       }
    }
 )
+
+
+
+
+export const downloadPrescription = catchError(
+   async (req, res, next) => {
+      const { imageName } = req.params;
+      const filePath = path.resolve(`Uploads/Prescription/${imageName}`);
+
+      if (!fs.existsSync(filePath)) {
+         return next(new AppError("Image not found", 404));
+      }
+
+      const imageExt = path.extname(imageName); //  .png أو .jpg أو .webp
+      const fileName = `prescription-${Date.now()}${imageExt}`;
+      res.download(filePath, fileName);
+   }
+);
 
 
 

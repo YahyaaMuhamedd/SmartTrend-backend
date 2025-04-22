@@ -17,15 +17,13 @@ import { customAlphabet } from 'nanoid'
 import { patientModel } from "../../../DataBase/models/patient.model.js";
 import { create_pdf } from "../../services/create_pdf.js";
 import {  pdf_invoice } from "../../templates/pdf.invoice.js";
+import { getNextOrderNumber } from "../../handlers/getNextOrderNumber.js";
+import { getTodayRange } from "../../utilities/getTodayRange.js";
 env.config() ;
 
 
 const alphabet = process.env.INVOICE_NUMBER || '123456789';
 const invoice_nanoid = customAlphabet(alphabet , 10) ;
-
-
-
-
 
 
 
@@ -44,26 +42,13 @@ export const getAllOrder = catchError(
       let filterObj = {};
 
       //^ Filter By Order Type :
-      if(filter == "received"){
-         filterObj = {
-            $or:[
-               {is_wrong_Invoice_V_Cash:true} , 
-               { is_Paid:true }, 
-               {is_Done:true }, 
-               {is_Cancel:true}
-            ]
-         }
-      }else if (filter == "sampling"){
-         filterObj = {is_Done :true }
+      if (filter == "sampling"){
+         filterObj = {is_Approved :true , is_Paid :true }
       }else if (filter == "cancel"){
          filterObj = {is_Cancel:true}
       }else if (filter == "new"){
-         filterObj = {
-            // is_Paid_Invoice_V_Cash :true  ,   
-            // is_wrong_Invoice_V_Cash :false ,   
-            is_Paid :false   , 
-            is_Done :false   , 
-            is_Cancel:false    
+         filterObj = {   
+            is_Paid :true   , 
          }
       }
 
@@ -142,67 +127,39 @@ export const getOrderCount = catchError(
       const cancelOrder = await orderModel.find({is_Cancel:true});
 
       //! Done Orders :
-      const doneOrder = await orderModel.find({is_Done:true });
+      const approvedOrder = await orderModel.find({is_Approved:true , is_Paid:true , is_Cancel:false});
 
-      //! Received Orders :
-      const receivedOrder = await orderModel.find({
-         $or:[
-            {is_wrong_Invoice_V_Cash:true} , 
-            { is_Paid:true }, 
-            {is_Done:true }, 
-            {is_Cancel:true}
-         ]
-      });
 
       //! Executed Orders :
       const executedOrder = await orderModel.find({
-         is_Paid_Invoice_V_Cash:true ,  
-         is_Paid:false , 
-         is_Done:false ,
+         is_Paid:true ,
          is_Cancel:false
       });
 
 
-      //! New Orders :
-      const newOrder = await orderModel.find({
-         is_Paid_Invoice_V_Cash :true  ,   
-         is_wrong_Invoice_V_Cash :false ,   
-         is_Paid :false   , 
-         is_Done :false   , 
-         is_Cancel:false    
-      });
+      //& Get Today :
+      const start = getTodayRange().start
+      const end = getTodayRange().end
 
-
-      //& Get date By Specific Formate 0000-00-00 :
-      const date = new Date();
-      const day = (date.getDate()).toString().length == 1 ? `0${(date.getDate() + 1)}` :  (date.getDate() ) ;
-      const month = (date.getMonth()).toString().length == 1 ? `0${(date.getMonth() + 1)}` :  (date.getMonth()) ;
-      const year = date.getFullYear() ;
-
-      const todayDate = new Date(`${year}-${month}-${day}T00:00:00Z`) ;
-
-      // const todayDate = `${year}-${month}-${day}T00:00:00Z` ;
-      const end = `${year}-${month}-${day}T24:00:00.000+00:00`  ;
 
       //! Get All Payment Orders Today's :
-      const paymentOrder = await orderModel.find({
-         // is_Paid_Invoice_V_Cash :true  ,   
-         is_Paid :true   , 
-         is_Done :true   , 
-         createdAt:
-            {
-               $gt: todayDate
-               // $gte:`${year}-${month}-${day}T00:00:00Z` ,
-            }
+      const paymentOrder = await orderModel.find({ 
+         is_Paid :true   ,
+         is_Cancel:false , 
+         // is_Approved :true   , 
+         createdAtOrder: {
+            $gte: start,
+            $lte: end
+         }
       });
 
       //! Total Price After Discount All Orders :
-      const total_Price_After_Discount = paymentOrder.slice(-20).reduce((acc , order)=>{
+      const total_Price_After_Discount = paymentOrder.reduce((acc , order)=>{
          return acc + order.total_Price_After_Discount
       } , 0)
       
       //! Total Price Net Amount All Orders :
-      const Net_Amount = paymentOrder.slice(-20).reduce((acc , order)=>{
+      const Net_Amount = paymentOrder.reduce((acc , order)=>{
          return acc + order.Net_Amount
       } , 0)
       
@@ -212,10 +169,9 @@ export const getOrderCount = catchError(
 
       res.json({message:"success" , Order_Data :{
          cancel_Order:{count:cancelOrder.length , cancelOrder} ,
-         done_Order:{count:doneOrder.length , doneOrder} ,
-         received_Order:{count:receivedOrder.length , receivedOrder} ,
+         approvedOrder:{count:approvedOrder.length , approvedOrder} ,
          executed_Order:{count:executedOrder.length , executedOrder} ,
-         new_Order:{count:newOrder.length , newOrder} ,
+         new_Order:{count:paymentOrder.length , paymentOrder} ,
          finish_Profits:finishProfits ,
       }}) ;
    }
@@ -243,7 +199,7 @@ export const getSpecificOrder = catchError(
 //*     ============================================ Cash Order ============================================== 
 
 //& Create Cash Order Logged User Or Old User :
-export const createCashOrderLoggedUser = catchError(
+export const createCashOrder = catchError(
    async(req , res , next)=>{
 
       const {patient_Name, patient_Age, gender, address:{street, city}, patient_Phone, doctor_Name, patient_History } = req.patient ;
@@ -252,8 +208,10 @@ export const createCashOrderLoggedUser = catchError(
 
       const company = cart.cartItems[0].price.company ;
       const invoice_number = invoice_nanoid() ;
-   
+      const order_Number = await getNextOrderNumber() ;
+
       const order = await orderModel.create({
+         order_Number ,
          user:req.user._id ,
          patient_Name , 
          patient_Age , 
@@ -262,6 +220,7 @@ export const createCashOrderLoggedUser = catchError(
          patient_Phone ,
          patient_History , 
          gender ,
+         is_Paid:true ,
          invoice_number ,
          company ,
          orderItems:cart.cartItems.map(({test , price:{price , priceAfterDiscount , final_amount}})=>({
@@ -315,7 +274,7 @@ export const createCashOrderLoggedUser = catchError(
 
 
 
-// //& Create Cash Order Logged User Or Old User :
+//& Create Cash Order Logged User Or Old User :
 // export const createCashOrderLoggedUser = catchError(
 //    async(req , res , next)=>{
 //       const {patient_Name  , patient_Age  , gender , address:{street , city} , patient_Phone , doctor_Name , patient_History } = req.patient ;
@@ -384,7 +343,7 @@ export const createCashOrderLoggedUser = catchError(
 
 
 //& Check Patient Exist MiddleWare :
-export const checkExistPatient = catchError(
+export const checkExistPatientMiddleWare = catchError(
    async(req , res , next)=>{
       const {patient_Name , birthDay , gender , street , city , patient_Phone , doctor_Name , patient_History } = req.body ;
 
@@ -443,97 +402,21 @@ export const checkExistPatient = catchError(
 
 
 
-//& Send Invoice Image Vodafone Cash :
-export const invoice_VodafoneCash = catchError(
-   async(req , res , next)=>{
-      const {id} = req.params ;
 
-      const order = await orderModel.findById(id) ;
-      if(!order) return next(new AppError("Order Not Found" , 404)) ;
-
-      if(order.user._id.toString() !== req.user._id.toString()){
-         return next(new AppError("User Not Owner To Order" , 404)) ;
-      }
-
-         if(!req.file) return next(new AppError("Please Enter Image Vodafone Cash Invoice" , 404))
-   
-         if((req.file.size > +process.env.UPLOAD_IMAGE_SIZE)){
-            return next(new AppError("Size Media Should be Less than 200 k-Byte" , 404))
-         }
-   
-         order.invoice_VodafoneCash = req.file.filename ;
-         order.is_Paid_Invoice_V_Cash = true
-         order.is_wrong_Invoice_V_Cash = false
-
-         await order.save() ;
-         
-         //! Delete Image from Server Disk :
-         // const fileName = "Uploads/company/" + path.basename(company.logo)
-         // fs.unlinkSync(path.resolve(fileName))
-
-      res.json({message:"Success Added Image Cash Order" })
-   }
-)
-
-
-
-//& Confirmed Cash Order :
-export const confirmCashOrder = catchError(
-   async(req , res , next)=>{
-      const {id} = req.params ;
-
-      const order = await orderModel.findById(id) ;
-      if(!order) return next(new AppError("Order Not Found" , 404)) ;
-
-      if(order.is_Paid)  return next(new AppError("The order has already been paid" , 404)) ;
-      order.is_Paid = true;
-      await order.save() ;
-
-
-
-      //& Increase the number of times the test is done : 
-      const options =  order.orderItems.map(({test:{_id}})=>{
-         return (
-            {
-               updateOne:{
-                  filter:{_id} ,
-                  update:{$inc:{count:1}}
-               }
-            }
-         )
-      })
-      await testModel.bulkWrite(options)
-
-      res.json({message:"success" })
-   }
-)
 
 
 
 //& Change Wrong Invoice True Or False :
-export const updateOrder = catchError(
+export const addHouseCall = catchError(
    async(req , res , next)=>{
-      const {isHouse_Call , approved , reSendInvoice_V_Cash} = req.query ;
+      const {isHouse_Call } = req.query ;
       const {id} = req.params ;
 
       const order = await orderModel.findById(id) ;
       if(!order) return next(new AppError("Order Not Found" , 404)) ;
 
-      // if(reSendInvoice_V_Cash && order.is_wrong_Invoice_V_Cash.toString() === reSendInvoice_V_Cash){
-      //    return next(new AppError(`Is Wrong Invoice Vodafone Cash Already ${reSendInvoice_V_Cash} ` , 404)) ;
-      // }
       if(isHouse_Call){
          order.isHouse_Call = isHouse_Call;
-         await order.save() ;
-      }
-
-      if(approved){
-         order.is_Paid = approved;
-         await order.save() ;
-      }
-
-      if(reSendInvoice_V_Cash){
-         order.is_wrong_Invoice_V_Cash = reSendInvoice_V_Cash;
          await order.save() ;
       }
       res.json({message:"success" })
@@ -543,8 +426,8 @@ export const updateOrder = catchError(
 
 
 
-//& Cancel Cash Order :
-export const cancelCashOrder = catchError(
+//& Cancel Order :
+export const cancelOrder = catchError(
    async(req , res , next)=>{
       const {id} = req.params ;
       const {message} = req.body ;
@@ -553,50 +436,19 @@ export const cancelCashOrder = catchError(
       if(!order) return next(new AppError("Order Not Found" , 404)) ;
 
       if(!order.is_Cancel)  {
-         order.is_Paid = false ;
+         order.invoice_number = null ;
+         order.transform_number = null ;
          order.is_Cancel = true ;
+         order.cancel_At = Date.now()
          order.message = message ;
          await order.save() ;
       }else{
          return next(new AppError("Order Already Canceled" , 404)) ;
       }
 
-      //& Increase the number of times the test is done : 
-      const options =  order.orderItems.map(({test:_id})=>{
-         return (
-            {
-               updateOne:{
-                  filter:{test:{_id}} ,
-                  update:{$inc:{count:-1}}
-               }
-            }
-         )
-      })
-      await testModel.bulkWrite(options)
 
-      res.json({message:"success" })
-   }
-)
-
-
-
-//& Rejected Cash Order :
-export const rejectedCashOrder = catchError(
-   async(req , res , next)=>{
-      const {id} = req.params ;
-      const {message} = req.body ;
-
-      const order = await orderModel.findById(id) ;
-      if(!order) return next(new AppError("Order Not Found" , 404)) ;
-
-      if(!order.is_wrong_Invoice_V_Cash)  {
-      order.is_Paid = false ;
-      order.is_wrong_Invoice_V_Cash = true
-      order.message = message ;
-      await order.save() ;
-      }else{
-         return next(new AppError("Order Already Rejected" , 404)) ;
-      }
+      // 1- Deleted Invoice Pdf
+      // 2- Deleted transform Pdf
 
       //& Increase the number of times the test is done : 
       const options =  order.orderItems.map(({test:_id})=>{
@@ -610,21 +462,22 @@ export const rejectedCashOrder = catchError(
          )
       })
       await testModel.bulkWrite(options)
-
       res.json({message:"success" })
    }
 )
 
 
 
-//& Generate Invoice Cash Order :
+
+//& Generate Invoice Order manually :
 export const generateInvoiceOrder = catchError(
    async(req , res , next)=>{
 
-      const {id} = req.params;
+      const {order_Number} = req.query;
 
-      const order =  await orderModel.findById(id)
-      if(!order) return next(new AppError("Order Not Found" , 404));
+      const order =  await orderModel.findOne({order_Number})
+      // const order =  await orderModel.findById(id)
+      if(!order) return next(new AppError("Order Not Exist" , 404));
 
       
       //! Added invoice to this Order :
@@ -632,16 +485,15 @@ export const generateInvoiceOrder = catchError(
       const add_Invoice_Order = await orderModel.findByIdAndUpdate(order._id , {invoice_pdf  : `invoice_${patient_Name_Slug}_${order._id}.pdf` } , {new:true})
       
       //! Create Invoice Pdf  orders :
-      create_pdf(res , pdf_invoice , add_Invoice_Order , `invoice_${patient_Name_Slug}_${order._id}`);
+      create_pdf(pdf_invoice , add_Invoice_Order , `invoice_${patient_Name_Slug}_${order._id}`);
       
-      
-      res.json({message:" Generate Invoice Cash Order successfully"  , add_Invoice_Order})
+      res.json({message:" Generate Invoice Cash Order successfully"})
    }
 )
 
 
 
-//& Cancel Cash Order :
+//& Delete Order :
 export const deleteOrder = catchError(
    async(req , res , next)=>{
       const {id} = req.params ;
@@ -662,17 +514,9 @@ export const deleteOrder = catchError(
             fs.unlinkSync(path.resolve(fileNameTransformation))
          }
 
-
-         // //! Delete Image V_Cash from Server Disk :
-         if(!(path.basename(order.invoice_VodafoneCash) === "undefined")){
-            const fileNameV_Cash = "Uploads/Invoice.V_Cash/" + path.basename(order.invoice_VodafoneCash)
-            fs.unlinkSync(path.resolve(fileNameV_Cash))
-         }
-
       }else{
-         return next(new AppError("Order Not Found" , 404)) ;
+         return next(new AppError("Order Not Exist" , 404)) ;
       }
-
       res.json({message:"success" })
    }
 )
@@ -687,9 +531,9 @@ export const deleteOrder = catchError(
 //^================================== Create Online Order And Payment With Paymob  ==================================
 
 
-const PAYMOB_API_KEY = process.env.PAYMOB_API_KEY;
-const PAYMOB_INTEGRATION_ID = process.env.PAYMOB_INTEGRATION_ID;
-let authToken = "";
+const PAYMOB_API_KEY = process.env.PAYMOB_API_KEY ;
+const PAYMOB_INTEGRATION_ID = process.env.PAYMOB_INTEGRATION_ID ;
+let authToken = "" ;
 
 
 //& 1- Create Token In Paymob :
@@ -774,7 +618,7 @@ export const createSession = async (req , res , next) => {
 
    } catch (error) {
       // console.error("Error creating payment:", error);
-      console.error('Error creating order:', error.response?.data || error.message);
+      console.error("Error Payment creation failed !", error.response?.data || error.message);
       res.status(500).json({ error: "Payment creation failed !" });
    }
 };
@@ -801,7 +645,6 @@ export const webhookMiddleWre = catchError(
 
 //& 4- Create Online Order :
 export const createOnlineOrder = async (data)=>{
-   console.log("Order Successfully"  , data)
    const{
       user , 
       patient_Name , 
@@ -811,65 +654,65 @@ export const createOnlineOrder = async (data)=>{
       patient_History , 
       gender , 
       street , 
-      city
+      city 
    } = data ;
 
-      const cart = await cartModel.findOne({user:user}) ;
-      // if(!cart) return next(new AppError("Cart Not Found" , 404)) ;
-
-      const company = cart.cartItems[0].price.company ;
-      const invoice_number = invoice_nanoid() ;
+   const cart = await cartModel.findOne({user:user}) ;
    
-      const order = await orderModel.create({
-         user:user ,
-         patient_Name ,
-         patient_Age , 
-         doctor_Name , 
-         cart:cart._id ,
-         patient_Phone ,
-         patient_History , 
-         gender ,
-         invoice_number ,
-         company ,
-         orderItems:cart.cartItems.map(({test , price:{price , priceAfterDiscount , final_amount}})=>({
-            test:test ,
-            price:price ,
-            priceAfterDiscount:priceAfterDiscount ,
-            final_amount
-         })) ,
-         shipping_Address:{
-            street: street ,
-            city: city ,
-         } ,
-      })
+   const company = cart.cartItems[0].price.company ;
+   const invoice_number = invoice_nanoid() ;
+   const order_Number = await getNextOrderNumber() ;
 
-      console.log("Order @@@==>" , order);
-      
-      //! Added invoice to this Order :
-      const patient_Name_Slug = slugify(`${order.patient_Name}`) ;
-      const add_Invoice_Order = await orderModel.findByIdAndUpdate(order._id , {invoice_pdf  : `invoice_${patient_Name_Slug}_${order._id}.pdf` } , {new:true})
-      
-      //! Create Invoice Pdf  orders :
-      try {
-         await create_pdf(pdf_invoice , add_Invoice_Order , `invoice_${patient_Name_Slug}_${order._id}`);
-      } catch (error) {
-         console.log("Invoice PDF creation failed");
+   const order = await orderModel.create({
+      order_Number ,
+      user:user ,
+      patient_Name ,
+      patient_Age , 
+      doctor_Name , 
+      cart:cart._id ,
+      patient_Phone ,
+      patient_History , 
+      gender ,
+      invoice_number ,
+      is_Paid : true ,
+      company ,
+      orderItems:cart.cartItems.map(({test , price:{price , priceAfterDiscount , final_amount}})=>({
+         test:test ,
+         price:price ,
+         priceAfterDiscount:priceAfterDiscount ,
+         final_amount
+      })) ,
+      shipping_Address:{
+         street: street ,
+         city: city ,
+      } ,
+   })
+
+   //! Added invoice to this Order :
+   const patient_Name_Slug = slugify(`${order.patient_Name}`) ;
+   const add_Invoice_Order = await orderModel.findByIdAndUpdate(order._id , {invoice_pdf  : `invoice_${patient_Name_Slug}_${order._id}.pdf` } , {new:true})
+   
+   //! Create Invoice Pdf  orders :
+   try {
+      await create_pdf(pdf_invoice , add_Invoice_Order , `invoice_${patient_Name_Slug}_${order._id}`);
+   } catch (error) {
+      console.error('Invoice PDF creation failed', error.response?.data || error.message);
+   }
+
+   //!Delete Cart After Create Order:
+   const cartDeleted = await cartModel.findByIdAndDelete(cart._id , {new:true})  ; 
+
+   //& Increase the number of times the test is done : 
+   const options =  order.orderItems.map(({test:{_id }})=>({
+      updateOne:{
+         filter:{_id} ,
+         update:{$inc:{count:1}}
       }
+   }));
+   await testModel.bulkWrite(options);
 
-      //!Delete Cart After Create Order:
-      const cartDeleted = await cartModel.findByIdAndDelete(cart._id , {new:true})  ; 
-
-      //& Increase the number of times the test is done : 
-      const options =  order.orderItems.map(({test:{_id }})=>({
-         updateOne:{
-            filter:{_id} ,
-            update:{$inc:{count:1}}
-         }
-      }));
-      await testModel.bulkWrite(options);
-
-      console.log("Successfully Created New Orders By Paymob Online!");
-      console.log("Done" , add_Invoice_Order);
+   console.log("Successfully Created New Orders By Paymob Online!");
+   console.log("Done" , add_Invoice_Order);
 }
 
 

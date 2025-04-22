@@ -3,17 +3,13 @@ import * as orderControl from "./order.controller.js";
 import {validation} from "../../middleWare/validation.js";
 import { protectedRoutes } from "../../middleWare/authentication.js";
 import { authorize } from "../../middleWare/authorization.js";
-import { createCashOrderVal , invoiceVodafoneVal , paramsIdVal } from "./order.validate.js";
-import { multerLocal, validExtension } from "../../services/multer.Local.js";
+import { addHouseCallVal , cancelOrderVal , createOrderVal , generateInvoiceOrderVal , paramsIdVal } from "./order.validate.js";
 import { ROLES } from "../../utilities/enums.js";
 
 
 
 
 const router = Router() ;
-
-
-
 
 
 //^=============================== Get All Order ====================================================
@@ -25,7 +21,7 @@ const router = Router() ;
 
 
 
-   //^============================ Get Order Count ==================================================
+   //^============================ Get Order Count Admin Dashboard ==================================================
    router.route("/orderCount")
    .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) ,  orderControl.getOrderCount)
 
@@ -35,42 +31,59 @@ const router = Router() ;
 
 
    //^=========================== Get Logged User Order =============================================
-   router.route("/LoggedUserOrder")
+   router.route("/getLoggedUserOrder")
       .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) ,  orderControl.getLoggedUserOrder)
 
 
 
 
 
-
-
-
-
-   //^============== Add Invoice V_Cash - Confirm order - GetOrder - DeleteOrder ====================   
-   router.route("/:id")
-      .put(protectedRoutes , 
+   //^================================== Create Online Order And Payment With Paymob =====================================
+   // & Create Payment Method :
+   router.route("/create-session")
+      .post(protectedRoutes , 
          authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , 
-         multerLocal(validExtension.image , "Invoice.V_Cash").single("image") , 
-         validation(invoiceVodafoneVal) ,  
-         orderControl.invoice_VodafoneCash) 
-
-
-
-      .patch(protectedRoutes , 
-         authorize(ROLES.ADMIN , ROLES.MODERATOR)  , 
-         validation(paramsIdVal)   ,  
-         orderControl.confirmCashOrder) 
+         validation(createOrderVal) , 
+         orderControl.checkExistPatientMiddleWare , 
+         orderControl.createSession )
 
 
 
 
+
+         
+   //^================================== Create Cash Order ========================================
+   router.route("/createCashOrder")
+      .post(protectedRoutes , 
+         authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , 
+         validation(createOrderVal) , 
+         orderControl.checkExistPatientMiddleWare , 
+         orderControl.createCashOrder
+      )
+
+
+
+
+   //^============== Add House Call order - Cancel order - GetOrder - DeleteOrder ====================   
+   router.route("/:id")
       .get(protectedRoutes , 
          authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , 
          validation(paramsIdVal) , 
          orderControl.getSpecificOrder)
 
 
+      .patch(protectedRoutes , 
+         authorize(ROLES.ADMIN , ROLES.MODERATOR) ,  
+         validation(addHouseCallVal) ,  
+         orderControl.addHouseCall) 
+         
 
+      .put(protectedRoutes , 
+         authorize(ROLES.ADMIN , ROLES.MODERATOR)  ,  
+         validation(cancelOrderVal) , 
+         orderControl.cancelOrder) 
+
+         
       .delete(protectedRoutes , 
          authorize(ROLES.ADMIN , ROLES.MODERATOR)  ,  
          validation(paramsIdVal) , 
@@ -80,71 +93,12 @@ const router = Router() ;
 
 
 
-
-   //^================================== Cancel Cash Order ==========================================
-   router.route("/cancel/:id")
-      .patch(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR)  ,  validation(paramsIdVal) , orderControl.cancelCashOrder) 
-   
-   
-
-
-
-
-   //^================================== Rejected Cash Order ========================================
-   router.route("/rejected/:id")
-      .patch(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR)   ,  validation(paramsIdVal) , orderControl.rejectedCashOrder) 
-   
-
-
-
-
-   //^================================== Update Order ===============================================
-   router.route("/updateOrder/:id")
-      .patch(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) , orderControl.updateOrder) 
-      // .patch(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR)  ,  validation(paramsIdVal) , orderControl.updateOrder) 
-   
-
-
-
-
-
-   //^================================== Check Exist Patient ========================================
-   router.route("/orderLoggedUser")
-      .post(protectedRoutes , 
-         authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , 
-         validation(createCashOrderVal) , 
-         orderControl.checkExistPatient , 
-         orderControl.createCashOrderLoggedUser
-      )
-
-
-
-
-
-
    //^================================== Generate Invoice Order =====================================
-   router.route("/generateInvoiceOrder/:id")
-   .post(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(paramsIdVal) , orderControl.generateInvoiceOrder)
+   router.route("/generateInvoiceOrder")
+   .post(protectedRoutes , 
+      authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , 
+      validation(generateInvoiceOrderVal) , 
+      orderControl.generateInvoiceOrder)
    
    
-
-
-
-
-
-
-
-
-
-
-   
-//^================================== Create Online Order And Payment With Paymob =====================================
-// & Create Payment Method :
-
-router.route("/create-session")
-.post(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(createCashOrderVal) , orderControl.checkExistPatient , orderControl.createSession )
-
-
-
-
 export default router ;

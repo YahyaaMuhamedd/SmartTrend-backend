@@ -29,7 +29,7 @@ export const protectedRoutes = catchError(
       if(user.passwordChangedAt){
          //& 4- Change Password And Token Expired
          let time = parseInt(user?.passwordChangedAt / 1000) ;
-         //& console.log(time , "|" , decoded.iat);
+         // console.log(time , "|" , decoded.iat);
          if(time > decoded.iat) return next(new AppError("Token Not Valid..Login again" , 401)) ;
       }
 

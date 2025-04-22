@@ -6,7 +6,7 @@ import path from 'path';
 
 const date = generate_Date();
 
-export let create_pdf = async (template, data, fileName) => {
+export let create_pdf = async (template , data , fileName) => {
 
 
    // Check Exist Docs Folder And Create Folder Docs When Not Exist :
@@ -59,85 +59,7 @@ export let create_pdf = async (template, data, fileName) => {
    // Close the browser
    await browser.close();
 
-   let filePath = `${process.env.BASE_URL}pdf/${fullName}`;
-   console.log("path pdf Ya Mahmoud", filePath);
-   
+   let filePath = `${process.env.BASE_URL}/pdf/${fullName}`; 
+
    return filePath;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import { create } from 'pdf-creator-node';
-// import { generate_Date } from './generateDate_Time.js';
-
-
-// const date = generate_Date()
-
-// export let create_pdf = ( res , template , data , fileName)=>{
-//    var options = {
-//       format: "A4",
-//       orientation: "portrait",
-//       border: "10px",
-//       header: {
-//          height: "50px",
-//          contents: '<div style="text-align: center; color:blue;">Email: Fekrah_Company@gmail.com</div>'
-//       },
-//       footer: {
-//          height: "30px",
-//          contents: {
-//             // first: "cover Page",
-//             first: date,
-//             // 2: 'Second page', // Any page number is working. 1-based index
-//             default: '<span style="color: #444;">{{page}}</span>/<span>{{pages}}</span>', // fallback value
-//             // last: 'Last Page'
-//             // last: new Date()
-//          }
-//       }
-//    };
-
-//    let fullName = `${fileName}.pdf`
-
-//    let  document = {
-//       html: template(data),
-//       data: {data},
-//       path: `./Docs/${fullName}`,
-//    };
-
-//    let filePath = `${process.env.BASE_URL}pdf/${fullName}`
-   
-//    create(document, options) ;
-//    return filePath ;
-// }

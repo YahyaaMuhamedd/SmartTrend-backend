@@ -2,6 +2,10 @@ import { Schema, Types, model } from "mongoose";
 
 
 const schema = new Schema({
+   order_Number:{
+      type:String ,
+      unique:[true , "Order Order Number is Unique"]
+   } , 
    user:{
       type:Types.ObjectId , 
       ref:"user"  ,
@@ -31,7 +35,6 @@ const schema = new Schema({
       enum :["male" , "female"] ,
       default:"male"
    } ,
-   invoice_VodafoneCash:String ,
    invoice_pdf:String ,
    transform_pdf:String ,
    orderItems:[
@@ -58,9 +61,6 @@ const schema = new Schema({
    createdAtOrder:{
       type:Number
    }  ,
-   branch_Area:{
-      type:String ,
-   } ,
    message:{
       type:String ,
       default:"" ,
@@ -74,6 +74,14 @@ const schema = new Schema({
       enum:["cash" , "card"] ,
       default:"cash" ,
    } ,
+   invoice_number:{
+      type:Number ,
+   } ,
+   transform_number:{
+      type:Number ,
+   } ,
+   // invoiceExpiryDate: Date ,
+   invoiceExpiryDate: Number ,
    isHouse_Call:{
       type:Boolean ,
       default:false
@@ -82,30 +90,17 @@ const schema = new Schema({
       type:Boolean ,
       default:false
    } ,
-   invoice_number:{
-      type:Number ,
-   } ,
-   transform_number:{
-      type:Number ,
-   } ,
-   is_Paid_Invoice_V_Cash:{
-      type:Boolean ,
-      default:false
-   } ,
-   is_wrong_Invoice_V_Cash:{
-      type:Boolean ,
-      default:false
-   } ,
-   paidAt:Date ,
    is_Cancel:{
       type:Boolean ,
       default:false
    } ,
-   is_Done:{
+   // cancel_At:Number , // Return MilliSecond Format
+   cancel_At:Date ,      // Return Date Time Format 
+   is_Approved:{
       type:Boolean ,
       default:false
    } ,
-   cancelAt:Date ,
+   approved_At:Date ,
 } , { timestamps:true , toJSON:{virtuals:true} , toObject:{virtuals:true} } )
 
 
@@ -115,14 +110,20 @@ schema.pre("save"  , function(next){
    if (!this.createdAtOrder) {
       this.createdAtOrder = Date.now() ;
    }
+   if (!this.invoiceExpiryDate) {
+      const expiry = new Date(this.createdAt || Date.now());
+      expiry.setDate(expiry.getDate() + 30);
+      this.invoiceExpiryDate = expiry;
+   }
    next()
 }) ;
+
+
 
 
 schema.pre("init" , function (doc){
    doc.invoice_pdf = process.env.BASE_URL + "/pdf/" +  doc.invoice_pdf
    doc.transform_pdf = process.env.BASE_URL + "/pdf/" +   doc.transform_pdf
-   doc.invoice_VodafoneCash = process.env.BASE_URL + "/Invoice.V_Cash/" +   doc.invoice_VodafoneCash
 })
 
 

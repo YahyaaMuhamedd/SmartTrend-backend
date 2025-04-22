@@ -32,19 +32,13 @@ router.route("/")
 
 
 
-//^=========================== Deleted All Users In Database ==================================================
-	router.route("/deleted_all_users_in_database")
-		.delete( UC.deletedAllUsers)
-
-
-
-
 
 
 //^=========================== Get User, Update, Block, Delete User ===========================================
 	router.route("/:id")
 		.get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER ) , validation(paramsIdVal) , UC.getSingleUser)
-		.delete (protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) ,  validation(paramsIdVal) , UC.deleteUser) 
+		.delete (validation(paramsIdVal) , UC.deleteUser) 
+		// .delete (protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) ,  validation(paramsIdVal) , UC.deleteUser) 
 		.patch (protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) ,  validation(blockedAndActiveUserVal) , UC.blockUser) 
 
 

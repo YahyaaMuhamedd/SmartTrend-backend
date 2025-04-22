@@ -8,7 +8,10 @@ const schema = new Schema({
    phone :{
       type:String
    } , 
-   description :{
+   message :{
+      type:String
+   } , 
+   download_URL :{
       type:String
    } , 
    is_seen:{

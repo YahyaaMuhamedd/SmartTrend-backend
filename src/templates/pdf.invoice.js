@@ -1,10 +1,9 @@
-
 import { generate_Date } from "../services/generateDate_Time.js";
 
 
-const date = generate_Date();
 
 
+const date = generate_Date()
 export let pdf_invoice = (data) => {
    return (
       `
@@ -115,6 +114,15 @@ export let pdf_invoice = (data) => {
                body:first-of-type header {
                   display: none;
                }
+
+               .attention{
+                  font-weight:bold;
+                  margin:10px 0px ;
+               }
+
+               .endDate {
+                  font-size: 10px ;
+               }
             </style>
          </head>
          <body>
@@ -130,9 +138,9 @@ export let pdf_invoice = (data) => {
 
                   <ul style="font-weight:bold; list-style:none;">
                      <li>Invoice Num: ${data.invoice_number}</li>
-                     <li>Created_At: ${date}</li>
+                     <li>Created_At: ${new Date(data.createdAt).toISOString().split('T')[0] }</li>
                      <li>Company Name: ${data.company.name}</li>
-                     <li>Branch Name: .............</li>
+                     <li>Branch Name: .................</li>
                   </ul>
                </tr>
                <hr/>
@@ -145,14 +153,14 @@ export let pdf_invoice = (data) => {
                               Patient Name : ${data.patient_Name} <br />
                               Patient Street : ${data.shipping_Address.street} <br />
                               Patient City : ${data.shipping_Address.city} <br />
-                              ******** : ****************
+                              Patient Phone : ${data.patient_Phone} <br />
                            </td>
    
                            <td>
-                              Patient Phone : ${data.patient_Phone} <br />
                               User Name: ${data.user?.name} <br />
                               User email : ${data.user?.email} <br />
-                              ######### : ###################
+                              User Phone : ${data.user?.phone} <br />
+                              ######### : ###################  <br />
                            </td>
                         </tr>
                      </table>
@@ -193,100 +201,17 @@ export let pdf_invoice = (data) => {
                <p>Address: [Your Company Address]</p>
                <p>Authorized Signature</p>
                <p>____________________</p>
+               </div>
+               
+            <div class="attention">
+               <h3 >Attention!</h3>
+               <strong class="">The validity of this invoice is 30 days from the time the order is created</strong>
             </div>
+
+            <p class="endDate"> Print At :${date}</p>
 
          </body>
       </html>
       `
    );
 };
-
-
-
-
-
-
-
-
-
-
-
-export let temp_test = (data) => {
-   return (`
-      <!DOCTYPE html>
-      <html>
-         <head>
-            <meta charset="utf-8" />
-            
-         </head>
-         <body>
-
-
-         <div class="invoice-box">
-
-            <!-- أول صفحة -->
-            <img src="/Docs/images/logo.jpg" class="logo" alt="Logo" />
-
-            <h1 style="text-align: center;">Fekrah Medical</h1>
-
-            <ul>
-               <li>Invoice Num: 0000</li>
-               <li>Created_At: ${data.date || "2025-04-17"}</li>
-               <li>Company Name: 123456</li>
-               <li>Branch Name: العياط</li>
-            </ul>
-
-            <hr/>
-
-            <table>
-               <tr>
-                  <td>
-                     Patient Name : محمود عثمان ابو بكر <br />
-                     Patient Street : cairo <br />
-                     Patient City : cairo <br />
-                     ******** : ****************
-                  </td>
-                  <td>
-                     Patient Phone : 0112323234 <br />
-                     User Name: Mahmoud Othman <br />
-                     User email : email.gmail.com <br />
-                     ######### : ###################
-                  </td>
-               </tr>
-            </table>
-
-            <br />
-
-            <table>
-               <tr class="heading">
-                  <td>Payment Method</td>
-                  <td>Cash</td>
-               </tr>
-               <tr class="item">
-                  <td><strong>Check Total Price After Discount</strong></td>
-                  <td><strong>1232 EGP</strong></td>
-               </tr>
-
-               <tr class="heading">
-                  <td>Item</td>
-                  <td>Price</td>
-               </tr>
-
-               <!-- البيانات -->
-               ${Array(30).fill(`<tr class="item"><td>mahmoud Othman</td><td>132.00 EGP</td></tr>`).join('')}
-
-               <tr class="total">
-                  <td>Total Price</td>
-                  <td>Total: ${data.total || '2343.00'} EGP</td>
-               </tr>
-            </table>
-
-
-
-
-         </div>
-         </body>
-      </html>
-   `);
-};
-

@@ -52,28 +52,27 @@ export const transformOnlineSystem = catchError(
          invoice_number , 
          is_Cancel:false , 
          is_Paid:true , 
-         is_Paid_Invoice_V_Cash:true , 
-         is_Done:false
+         is_Approved:false ,
+         invoiceExpiryDate: { $gte: Date.now() }
       }) ;
 
       
-      if(!order) return next(new AppError("Order Not Found Please Connect On Hot line :3245" , 404)) ;
+      if(!order) return next(new AppError("Order Expired or Not Exist,  Please Connect On Hot line :3245" , 404)) ;
       if(order.company?._id.toString() !== company._id.toString()) return next(new AppError("Company Not Valid In This Order Please Connect On Hot line :3245 !" , 404)) ;
 
       const patient_Name_Slug = slugify(order?.patient_Name) ;
 
-      order.is_Done = true ;
-      order.branch_Approved = req.branch._id
+      order.is_Approved = true ;
+      order.approved_At = Date.now() ;
+      order.branch = req.branch._id
       order.transform_number =  transform_number;
       order.transform_pdf  = `transform_${patient_Name_Slug}_${order._id}.pdf`
       await order.save() ;
 
       //! Create Transformation invoice Pdf  Orders :
-      create_pdf(res , pdf_transform , order , `transform_${patient_Name_Slug}_${order._id}`);
+      create_pdf(pdf_transform , order , `transform_${patient_Name_Slug}_${order._id}`);
 
-
-      // res.json({DownLoad_Link:`<a href='${process.env.BASE_URL}pdf/transform_${patient_Name_Slug}_${order._id}.pdf'>Download</a>`})
-      res.json({message:"success" , url:`${process.env.BASE_URL}pdf/transform_${patient_Name_Slug}_${order._id}.pdf`}) ;
+      res.json({message:"success" , url:`${process.env.BASE_URL}/pdf/transform_${patient_Name_Slug}_${order._id}.pdf`}) ;
    }
 )
 
@@ -87,8 +86,6 @@ export const getApprovedOrderInfo = catchError(
       const {invoice_number} = req.query ;
       const {email} = req.branch ;
       
-      
-
       
       const order = await orderModel.findOne({invoice_number}) ;
       if(!order) return next(new AppError("Order Not Found Please Connect On Hot line :3245 !" , 404)) ;
@@ -105,7 +102,7 @@ export const getApprovedOrderInfo = catchError(
          invoice_number:order.invoice_number ,
          is_Paid:order.is_Paid ,
          is_Cancel:order.is_Cancel ,
-         is_Done:order.is_Done ,
+         is_Approved:order.is_Approved ,
       }}) ;
    }
 )

@@ -22,7 +22,20 @@ const router = Router() ;
 
       //& Add Prescription :
       .post(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) ,  multerLocal(validExtension.image , "Prescription").single("image"), validation(addPrescriptionVal) ,prescriptionControl.addPrescription)
-      
+
+
+
+//^=========================== Get All Prescription, Add Prescription =====================================
+   router.route("/getLoggedUserPrescription")
+      .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) ,  prescriptionControl.getLoggedUserPrescription)
+
+
+
+
+//^=========================== Download Prescription =====================================
+      router.route("/download/:imageName")
+         .get(prescriptionControl.downloadPrescription);
+
 
 
 

@@ -7,7 +7,10 @@ import jwt from "jsonwebtoken";
 
 import fs from "fs";
 import path from "path";
+import { orderModel } from "../../../DataBase/models/order.model.js";
+import { prescriptionModel } from "../../../DataBase/models/prescription.model.js";
 
+const uploadImageSize = Number(process.env.UPLOAD_IMAGE_SIZE) || 2000000;
 
 
 
@@ -194,25 +197,74 @@ export const updateUserRole = catchError(
 export const deleteUser = catchError(
    async(req , res , next)=>{
       const user = await userModel.findByIdAndDelete(req.params.id) ;
-
-      //^ Delete Image From cloudinary:
-      // if(user.imgCover?.public_id){
-      //    //! Delete image From Cloudinary :
-      //    await cloudinary.uploader.destroy(user.imgCover.public_id);
-         
-      //    //! Delete Folder image From Cloudinary :
-      //    await cloudinary.api.delete_folder(`Fekrah/users/imgCover/${user.name}`)
-      // }
-
+      if(!user) return next(new AppError("User Not Exist" , 404)) ;
 
       //^ Delete Image from Server Disk Local :
       if(user.imgCover){
          const fileName = "Uploads/users/" + path.basename(user.imgCover)
-         fs.unlinkSync(path.resolve(fileName))
+         if (fs.existsSync(path.resolve(fileName))) {
+            fs.unlinkSync(path.resolve(fileName))
+         }
       }
 
-      !user && next(new AppError("Not Found User" , 404))
-      user && res.json({message:"success" , user})
+
+      //^ Delete all invoices, transform and  prescription for this user :
+      const orders = await orderModel.find({user:req.params.id}) ;
+      if(!orders.length > 0) return next(new AppError("Orders is Empty" , 404)) ;
+      
+      const prescriptionList = await prescriptionModel.find({createdBy:req.params.id}) ;
+      if(!prescriptionList.length > 0) return next(new AppError("Prescription is Empty" , 404)) ;
+
+
+      //^ Delete order files :
+      for (const order of orders) {
+         if (order.invoice_pdf) {
+            try {
+               const fileName = "Docs/" + path.basename(order.invoice_pdf)
+               if (fs.existsSync(path.resolve(fileName))) {
+                  fs.unlinkSync(path.resolve(fileName))
+               }
+            } catch (err) {
+               console.log("Invoice file not found or already deleted:", fileName);
+               return next(new AppError("Invoice file not found or already deleted" , 404)) ;
+            }
+         }
+
+         if (order.transform_pdf) {
+            try {
+               const fileName = "Docs/" + path.basename(order.transform_pdf)
+               if (fs.existsSync(path.resolve(fileName))) {
+                  fs.unlinkSync(path.resolve(fileName))
+               }
+            } catch (err) {
+               console.log("Transform file not found or already deleted:", fileName);
+               return next(new AppError("Transform file not found or already deleted" , 404)) ;
+            }
+         }
+      }
+
+
+
+
+      //^ Delete prescription files :
+      for (const prescription of prescriptionList) {
+         if (prescription.image) {
+            try {
+               const fileName =  "Uploads/Prescription/" + path.basename(prescription.image)
+               if (fs.existsSync(path.resolve(fileName))) {
+                  fs.unlinkSync(path.resolve(fileName))
+               }
+            } catch (err) {
+               console.log("Prescription image not found or already deleted:", fileName);
+               return next(new AppError("Prescription image not found or already deleted" , 404)) ;
+            }
+         }
+      }
+
+      const deletedOrders = await orderModel.deleteMany({user:req.params.id}) ;
+      const deletedPrescription = await prescriptionModel.deleteMany({createdBy:req.params.id}) ;
+
+      res.json({message:"success" , user})
    }
 )
 
@@ -234,7 +286,7 @@ export const changeImgCover = catchError(
    async(req , res , next)=>{
       if(!req.file) return next(new AppError("Please Choose image Cover" , 404))
 
-      if((req.file.size > +process.env.UPLOAD_IMAGE_SIZE)){
+      if((req.file.size > uploadImageSize)){
          return next(new AppError("Size Media Should be Less than 200 k-Byte" , 404))
       }
 
@@ -268,12 +320,3 @@ export const changeImgCover = catchError(
 )
 
 
-
-
-//& Deleted All Prices :
-export const deletedAllUsers = catchError(
-   async(req , res , next)=>{
-      // const users = await userModel.deleteMany();
-      res.json({message:"Successfully Deleted All Users"})
-   }
-)

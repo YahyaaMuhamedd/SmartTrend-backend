@@ -26,7 +26,7 @@ export const singleVal = {
 
 export const addPrescriptionVal = Joi.object({
 	phone:Joi.string().pattern(/^(002)?01[0125][0-9]{8}$/).required().trim() ,
-   description:Joi.string().min(10).max(400).trim().required() ,
+   message:Joi.string().min(10).max(400).trim().required() ,
    file:generalFields.file.required() ,
 })
 

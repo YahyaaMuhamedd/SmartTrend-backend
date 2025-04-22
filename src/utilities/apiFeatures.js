@@ -70,12 +70,14 @@ export class ApiFeature {
                {patient_Name:{$regex:this.searchQuery.keyword}} , //used name patient
                {patient_Phone:{$regex:this.searchQuery.keyword}} , //used phone patient
                {description:{$regex:this.searchQuery.keyword}} ,
+               {order_Number:{$regex:this.searchQuery.keyword}} ,
             ]
          })
       }
       return this ;
    }
 }
+
 
 
 
