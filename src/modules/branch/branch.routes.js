@@ -21,13 +21,19 @@ const router = Router() ;
 
 
 
+//^=========================== Get Branch Count =================
+   router.route("/getBranchCount")
+      // .get(BC.getBranchCount)
+      .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR)  , BC.getBranchCount)
+
+
 //^=========================== Get Single Company, Update, Delete, Change Image =================
    router.route("/:id")
       .get( validation(paramsIdVal)  , BC.getSingleBranch)
       // .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) , validation(paramsIdVal)  , BC.getSingleBranch)
 
-      .put( validation(updateBranchVal) ,  BC.updateBranch)
-      // .put(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) , validation(updateBranchVal) ,  BC.updateBranch)
+      // .put( validation(updateBranchVal) ,  BC.updateBranch)
+      .put(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) , validation(updateBranchVal) ,  BC.updateBranch)
       
 
       .delete( validation(paramsIdVal)  , BC.deleteBranch)

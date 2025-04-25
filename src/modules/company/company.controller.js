@@ -71,7 +71,7 @@ export const getCompanyCount = catchError(
       const blockedCompany = await companyModel.find({isActive:false});
       
       
-      //! Cancel Orders :
+      //! Cancel Company :
       const activeCompany = await companyModel.find({isActive:true});
 
 

@@ -97,7 +97,7 @@ export const getSinglePrice = catchError(
 
 
 
-//& Update Price :
+//& Add Price :
 export const addPrice = catchError(
    async(req , res , next)=>{
       const {final_amount , price , discount  , company , test} = req.body ;
@@ -142,15 +142,34 @@ export const addPrice = catchError(
 //& Update Price :
 export const updatePrice = catchError(
    async(req , res , next)=>{
+      const {test , company , final_amount , price , discount } = req.body ;
+
+
+      const priceExist = await priceModel.findOne({test , company}) ;
+      if(!priceExist) return next(new AppError("Price Not Exist", 404) ) ;
+
+
+      const priceAfterDiscount = price -  ((price * discount) / 100) ;
+      const updatePrice = await priceModel.findByIdAndUpdate(priceExist._id , {final_amount , price , priceAfterDiscount ,  discount} , {new:true}) ;
+      
+      updatePrice &&  res.json({message:"success" , updatePrice}) ;
+   }
+)
+
+
+//& Update Price :
+export const updatePriceById = catchError(
+   async(req , res , next)=>{
       const {final_amount , price , discount } = req.body ;
       const {id} = req.params ;
 
       const priceExist = await priceModel.findById(id) ;
+      if(!priceExist) return next(new AppError("Price Not Exist", 404) ) ;
+
 
       const priceAfterDiscount = price -  ((price * discount) / 100) ;
-      const updatePrice = await priceModel.findByIdAndUpdate(id , {testName:priceExist.test.name , final_amount , price , priceAfterDiscount ,  discount} , {new:true}) ;
+      const updatePrice = await priceModel.findByIdAndUpdate(id , {final_amount , price , priceAfterDiscount ,  discount} , {new:true}) ;
       
-      !updatePrice && next(new AppError("Price Not Found..", 404) ) ;
       updatePrice &&  res.json({message:"success" , updatePrice}) ;
    }
 )
@@ -166,15 +185,5 @@ export const deletePrice = catchError(
 
       !price && next(new AppError("Price Not Exist" , 404))
       price && res.json({message:"success" , price})
-   }
-)
-
-
-
-//& Deleted All Prices :
-export const deletedAllPrices = catchError(
-   async(req , res , next)=>{
-      const prices = await priceModel.deleteMany();
-      res.json({message:"Successfully Deleted All Prices"})
    }
 )

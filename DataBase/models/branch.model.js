@@ -34,6 +34,10 @@ const schema = new Schema({
       type:Types.ObjectId ,
       ref: "company" 
    } ,
+   isActive:{
+      type:Boolean ,
+      default:true
+   } ,
    creationTimeAt:{
       type:Number 
    } ,

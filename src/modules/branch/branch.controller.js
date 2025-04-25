@@ -10,8 +10,19 @@ import { catchError } from "../../utilities/catchError.js";
 //& Get All Branches :
 export const getAllBranches = catchError(
    async(req , res , next)=>{
+      const{filter} = req.query ;
       let result = await branchModel.find();
-      let apiFeature = new ApiFeature(branchModel.find(), req.query ).pagination().fields().search().filter().sort();
+
+
+      //^ Filter By Order Type :
+      let filterObj = {};
+      if(filter === "active"){
+         filterObj = { isActive:true }
+      }else if (filter === "block"){
+         filterObj = { isActive:false }
+      }
+      
+      let apiFeature = new ApiFeature(branchModel.find(filterObj), req.query ).pagination().fields().search().filter().sort();
       const branches = await apiFeature.mongooseQuery.select("-password");
 
       if(!branches.length) return next(new AppError("Branches is Empty" , 404))
@@ -35,6 +46,41 @@ export const getAllBranches = catchError(
             metadata.prevPage  = prevPage
          }
       res.json({message:"success" , results:result.length ,  metadata: metadata ,  branches}) ;
+   }
+)
+
+
+
+//& Get Branch Count :
+export const getBranchCount = catchError(
+   async(req , res , next)=>{
+
+      //! All Branch :
+      const branch = await branchModel.find();
+
+      //! Get All Branch Specific Company :
+      let arr = [];
+      const companies = await companyModel.find();
+      for (const company of companies) {
+         const branch = await branchModel.find({company:company._id}) ;
+         arr.push({company , branch_count:branch.length})
+      }
+
+
+      //! Blocked Branch :
+      const blockedBranch = await branchModel.find({isActive:false});
+      
+      
+      //! Cancel Branch :
+      const activeBranch = await branchModel.find({isActive:true});
+
+
+      res.json({message:"success" , branch_Data :{
+         count:branch.length ,
+         branchSpecificCompany:arr ,
+         active_Branch:activeBranch.length  ,
+         blocked_Branch:blockedBranch.length ,
+      }}) ;
    }
 )
 
@@ -140,6 +186,7 @@ export const updateBranch = catchError(
       branch &&  res.json({message:"success" , branch}) ;
    }
 )
+
 
 
 

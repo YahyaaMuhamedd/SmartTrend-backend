@@ -88,7 +88,7 @@ export const addPrescription = catchError(
             image , 
             createdBy ,
             download_URL:`${process.env.BASE_URL}/api/v1/prescription/download/${image}`
-         }) ;
+         } , {new:true}) ;
 
          //! Delete Image And Update Image in Folder :
          const index = (process.env.BASE_URL.length + 13)
@@ -110,6 +110,8 @@ export const addPrescription = catchError(
          }) ;
    
          !prescription && next(new AppError("Prescription Not Added", 404) ) ;
+         console.log(prescription);
+         
          prescription &&  res.json({message:"success" , prescription}) ;
       }
    }
