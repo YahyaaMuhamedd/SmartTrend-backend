@@ -37,7 +37,8 @@ export const addBranchVal = Joi.object({
    name:Joi.string().min(1).max(100).required().trim() ,
    email:Joi.string().email().required().trim() ,
    phone:Joi.string().pattern(/^(00201|\+201|01)[0-2,5]{1}[0-9]{8}$/).required() ,
-	password:Joi.string().pattern(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/).required() ,
+	password:Joi.string().pattern(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/) ,
+   rePassword:Joi.valid(Joi.ref("password")),
    street:Joi.string().min(1).max(100).trim() ,
    city:Joi.string().min(1).max(100).trim() ,
    area:Joi.string().min(1).max(100).trim() ,
@@ -55,6 +56,7 @@ export const updateBranchVal = Joi.object({
    rePassword:Joi.valid(Joi.ref("password")),
    street:Joi.string().min(1).max(100).trim() ,
    city:Joi.string().min(1).max(100).trim() ,
+   isActive:Joi.boolean(),
    area:Joi.string().min(1).max(100).trim() ,
 	company:Joi.string().hex().length(24) 
 })

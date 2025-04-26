@@ -137,7 +137,7 @@ export const updateBranch = catchError(
    async(req , res , next)=>{
 
       const{id} = req.params ;
-      const {name , email  , phone , password , street , city , area , company } = req.body ;
+      const {name , email  , phone , password , street , city , area , company , isActive} = req.body ;
 
       //& Check Exist Branch By BranchId :
       const branch = await branchModel.findById(id);
@@ -166,6 +166,9 @@ export const updateBranch = catchError(
       }
       if(phone){
          branch.phone = phone
+      }
+      if(isActive){
+         branch.isActive = isActive
       }
       if(street){
          branch.address.street = street

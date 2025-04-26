@@ -18,7 +18,7 @@ import { patientModel } from "../../../DataBase/models/patient.model.js";
 import { create_pdf } from "../../services/create_pdf.js";
 import {  pdf_invoice } from "../../templates/pdf.invoice.js";
 import { getNextOrderNumber } from "../../handlers/getNextOrderNumber.js";
-import { getTodayRange } from "../../utilities/getTodayRange.js";
+import { getDateRange } from "../../utilities/getDateRange.js";
 env.config() ;
 
 
@@ -138,8 +138,8 @@ export const getOrderCount = catchError(
 
 
       //& Get Today :
-      const start = getTodayRange().start
-      const end = getTodayRange().end
+      const start = getDateRange().start
+      const end = getDateRange().end
 
 
       //! Get All Payment Orders Today's :

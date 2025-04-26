@@ -1,5 +1,4 @@
 import { userModel } from "../../../DataBase/models/user.model.js"
-import cloudinary from "../../services/cloudinary.config.js";
 import { AppError } from "../../utilities/AppError.js";
 import { ApiFeature } from "../../utilities/apiFeatures.js";
 import { catchError } from "../../utilities/catchError.js";
@@ -9,6 +8,7 @@ import fs from "fs";
 import path from "path";
 import { orderModel } from "../../../DataBase/models/order.model.js";
 import { prescriptionModel } from "../../../DataBase/models/prescription.model.js";
+// import { getDateRange } from "../../utilities/getDateRange.js";
 
 const uploadImageSize = Number(process.env.UPLOAD_IMAGE_SIZE) || 2000000;
 
@@ -32,7 +32,7 @@ export const getAllUser = catchError(
 
 
       let apiFeature = new ApiFeature(userModel.find(filterObj), req.query ).pagination().fields().search().filter().sort();
-      const users = await apiFeature.mongooseQuery.select("name phone role email birthDay age imgCover addresses confirmedEmail isBlocked");
+      const users = await apiFeature.mongooseQuery.select("name phone role email birthDay age imgCover addresses confirmedEmail isBlocked createdAt updatedAt");
 
       if(!users.length) return next(new AppError("Users is Empty" , 404))
 
@@ -75,20 +75,16 @@ export const getUserCount = catchError(
       const activeUser = await userModel.find({isBlocked:false });
 
       //& Get date By Specific Formate 0000-00-00 :
-      const date = new Date();
-      const day = (date.getDate()).toString().length == 1 ? `0${(date.getDate() - 1)}` :  (date.getDate() -1 ) ;
-      const month = (date.getMonth()).toString().length == 1 ? `0${(date.getMonth() + 1)}` :  (date.getMonth() + 1) ;
-      const year = date.getFullYear() ;
 
-      const todayDate = `${year}-${month}-${day}T00:00:00Z` ;
-
+      const startDay = getDateRange().start ;
+      const endDay = getDateRange().end ;
 
 
       //! Get All Payment Orders Today's :
       const todayNewUsers = await userModel.find({
-         createdAt:
+         creationTimeAt:
             {
-               $gte:todayDate ,
+               $gte:startDay , $lte:endDay
             }
       });
 
