@@ -12,14 +12,17 @@ env.config()
 
 export const initApp = (app)=>{
 
+ //^ Login With Google :
+   app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+   app.get('/auth/google/callback' , passport.authenticate('google', { failureRedirect: '/' }), loginWithGoogle) ;
 
+
+
+
+   
    //^ User Routing :
    app.use("/api/v1" , appRouter) ;
 
-
-   //^ Login With Google :
-   app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-   app.get('/auth/google/callback' , passport.authenticate('google', { failureRedirect: '/' }), loginWithGoogle) ;
 
 
 
