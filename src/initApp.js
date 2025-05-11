@@ -17,10 +17,10 @@ export const initApp = (app)=>{
    app.use("/api/v1" , appRouter) ;
 
 
-
    //^ Login With Google :
    app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
    app.get('/auth/google/callback' , passport.authenticate('google', { failureRedirect: '/' }), loginWithGoogle) ;
+
 
 
    //^ Express Middle Ware

@@ -86,35 +86,3 @@ process.on("unhandledRejection" , (error)=>{
    console.log("Error" , error);
 });
 
-
-
-// profile {
-//    id: '102473374956688917299',
-//    displayName: 'Mahmoud Osman',
-//    name: { familyName: 'Osman', givenName: 'Mahmoud' },
-//    emails: [ { value: 'mahmoud.osman440@gmail.com', verified: true } ],
-//    photos: [
-//      {
-//        value: 'https://lh3.googleusercontent.com/a/ACg8ocI21c2yz-JK8OeblmnyoK13lAtGA8A5jDJIT6eH4VLalsJSgg=s96-c'
-//      }
-//    ],
-//    provider: 'google',
-//    _raw: '{\n' +
-//      '  "sub": "102473374956688917299",\n' +
-//      '  "name": "Mahmoud Osman",\n' +
-//      '  "given_name": "Mahmoud",\n' +
-//      '  "family_name": "Osman",\n' +
-//      '  "picture": "https://lh3.googleusercontent.com/a/ACg8ocI21c2yz-JK8OeblmnyoK13lAtGA8A5jDJIT6eH4VLalsJSgg\\u003ds96-c",\n' +
-//      '  "email": "mahmoud.osman440@gmail.com",\n' +
-//      '  "email_verified": true\n' +
-//      '}',
-//    _json: {
-//      sub: '102473374956688917299',
-//      name: 'Mahmoud Osman',
-//      given_name: 'Mahmoud',
-//      family_name: 'Osman',
-//      picture: 'https://lh3.googleusercontent.com/a/ACg8ocI21c2yz-JK8OeblmnyoK13lAtGA8A5jDJIT6eH4VLalsJSgg=s96-c',
-//      email: 'mahmoud.osman440@gmail.com',
-//      email_verified: true
-//    }
-//  }

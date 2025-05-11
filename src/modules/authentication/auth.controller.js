@@ -282,6 +282,6 @@ export const loginWithGoogle = catchError(
          role:user.role
       } ;
 
-   res.redirect(`http://localhost:3000/#/LoginSuccess?token=${token}&user=${JSON.stringify(loggedUser)}`);
+      res.redirect(`https://eng-mahmoudothman.github.io/Fekrah_Medical_Front-End/#/LoginSuccess?token=${token}&user=${JSON.stringify(loggedUser)}`);
    }
 )
