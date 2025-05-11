@@ -18,7 +18,7 @@ import { patientModel } from "../../../DataBase/models/patient.model.js";
 import { create_pdf } from "../../services/create_pdf.js";
 import {  pdf_invoice } from "../../templates/pdf.invoice.js";
 import { getNextOrderNumber } from "../../handlers/getNextOrderNumber.js";
-import { getDateRange } from "../../utilities/getDateRange.js";
+import { getDateRange } from "../../services/getDateRange.js";
 env.config() ;
 
 
@@ -39,16 +39,25 @@ export const getAllOrder = catchError(
       let result = await orderModel.find();
 
       //^ Merge Params
-      let filterObj = {};
+      let filterObj = {};  
+
+      //& Return all orders during the current month :
+      const start = getDateRange().currentMonth.start // get all order in month range first day to end day   1 - 31
+      const end = getDateRange().currentMonth.end
+
+
 
       //^ Filter By Order Type :
       if (filter == "sampling"){
-         filterObj = {is_Approved :true , is_Paid :true }
+         filterObj = {is_Approved :true , is_Paid :true , is_Cancel:false  }
       }else if (filter == "cancel"){
          filterObj = {is_Cancel:true}
       }else if (filter == "new"){
          filterObj = {   
-            is_Paid :true   , 
+            createdAtOrder: {
+               $gte: start,
+               $lte: end
+            }
          }
       }
 
@@ -126,6 +135,7 @@ export const getOrderCount = catchError(
       //! Cancel Orders :
       const cancelOrder = await orderModel.find({is_Cancel:true});
 
+
       //! Done Orders :
       const approvedOrder = await orderModel.find({is_Approved:true , is_Paid:true , is_Cancel:false});
 
@@ -156,12 +166,12 @@ export const getOrderCount = catchError(
       //! Total Price After Discount All Orders :
       const total_Price_After_Discount = paymentOrder.reduce((acc , order)=>{
          return acc + order.total_Price_After_Discount
-      } , 0)
+      } , 0) ;
       
       //! Total Price Net Amount All Orders :
       const Net_Amount = paymentOrder.reduce((acc , order)=>{
          return acc + order.Net_Amount
-      } , 0)
+      } , 0) ;
       
       //! Total Today's Profits  :
       const finishProfits = total_Price_After_Discount - Net_Amount ;
@@ -196,7 +206,7 @@ export const getSpecificOrder = catchError(
 
 
 
-//*     ============================================ Cash Order ============================================== 
+//*============================================ Cash Order ============================================== 
 
 //& Create Cash Order Logged User Or Old User :
 export const createCashOrder = catchError(
@@ -248,7 +258,7 @@ export const createCashOrder = catchError(
       }
 
       //! Delete Cart After Create Order:
-      const cartDeleted = await cartModel.findByIdAndDelete(cart._id , {new:true}) ;
+      // const cartDeleted = await cartModel.findByIdAndDelete(cart._id , {new:true}) ;
 
       //& Increase the number of times the test is done : 
       const options =  order.orderItems.map(({test:{_id }})=>({
@@ -263,11 +273,6 @@ export const createCashOrder = catchError(
       res.json({message:"success", add_Invoice_Order, patient:req.patient});
    }
 )
-
-
-
-
-
 
 
 
@@ -402,10 +407,6 @@ export const checkExistPatientMiddleWare = catchError(
 
 
 
-
-
-
-
 //& Change Wrong Invoice True Or False :
 export const addHouseCall = catchError(
    async(req , res , next)=>{
@@ -521,6 +522,250 @@ export const deleteOrder = catchError(
    }
 )
 
+
+
+
+
+
+
+
+//^================================== Providing statistics for the graph in the admin for sales orders  =============
+
+
+
+export const salesLastMonth = catchError(
+   async (req, res) => {
+
+      // const time = getDateRange() ;
+
+      // const salesPerMonth = await orderModel.aggregate([
+      //    {
+      //       $match: { is_Paid: true } // نفلتر الطلبات المدفوعة فقط
+      //    } ,
+      //    {
+      //       $group: {
+      //          _id: { $month: "$createdAt" } ,
+      //          // _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+      //          total_After_Sales: { $sum: "$total_Price_After_Discount" }
+      //       }
+      //    },
+      //    {
+      //       $sort: { _id: 1 }
+      //    }
+      // ]);
+
+
+      // const sevenDaysAgo = new Date() ;
+      //    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6) ; // 6 عشان اليوم الحالي كمان
+      // const sales = await orderModel.aggregate([
+      //    {
+      //    $match: {
+      //       createdAt: { $gte: sevenDaysAgo }
+      //    }
+      //    },
+      //    {
+      //    $group: {
+      //       _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+      //       totalSales: { $sum: "$total_Price_After_Discount" }
+      //    }
+      //    },
+      //    { $sort: { _id: 1 } }
+      // ]);
+
+      // res.json({message:"success" , salesPerMonth})
+
+
+      // const result = await orderModel.aggregate([
+      //    {
+      //       $lookup: {
+      //          from: 'companies',
+      //          localField: 'company',
+      //          foreignField: '_id',
+      //          as: 'company'
+      //       }
+      //    },
+      //    // { $unwind: '$company' },
+      //    { $match: { 'company.name': 'almokhtabar' } },
+      //    { $limit: 1 }
+      // ]);
+
+
+      // const result = await orderModel.aggregate([
+      //    {
+      //       $group: {
+      //          _id: "$company",        // تجميع حسب الشركة
+      //          totalSales: { $sum: "$total_Price_After_Discount" },  // جمع الإجمالي من جميع الطلبات لكل شركة
+      //          orderCount: { $count: {} }  // عد عدد الطلبات
+      //       }
+      //    }
+      // ]);
+
+      const time = getDateRange() ;
+      const from = time.currentMonth.start ;
+      const to = time.currentMonth.end ;
+
+
+      // const result = await orderModel.aggregate([
+      //    //! Filter Order By time And Total Price :
+      //    {
+      //       $match: {
+      //          createdAtOrder: { $gte: from, $lte: to } ,
+      //          total_Price_After_Discount:{$gte:200}
+      //       }
+      //    },
+
+      //    //! Create Group Order By Company id :
+      //    {
+      //       $group: {
+      //          _id: "$company", // تجميع حسب الشركة
+      //          // _id: "$user", // تجميع حسب المستخدم
+      //          total_Sales: { $sum: "$total_Price_After_Discount" }, // جمع الإجمالي من جميع الطلبات لكل شركة
+      //          orderCount: { $count: {} } , // عد عدد الطلبات
+      //       }
+      //    },
+
+      //    //! Sort  By Total and Return Company  :
+      //    // { $sort: { totalSales: -1 } }, // ترتيب تنازلي
+      //    // { $sort: { totalSales: 1 } }, // ترتيب تصاعدى
+      //    // { $limit: 1 },
+
+      //    //! Create Populate On Company id  And Create New Field companyDetails to Company :
+      //    {
+      //       $lookup: {
+      //          from: "companies", //  (collection)  اسم المجموعة الخاصة بالشركات 
+      //          // from: "users", //(collection)  اسم المجموعة الخاصة بالمستخدمين 
+      //          localField: "_id",  // الحقل الذي نستخدمه للربط (هو الـ _id للشركة هنا)
+      //          foreignField: "_id", // الحقل الذي سنربط به في مجموعة الشركات
+      //          as: "companyDetails" // الإسم الجديد للمصفوفة التي تحتوي على تفاصيل الشركة
+      //          // as: "userDetails" // الإسم الجديد للمصفوفة التي تحتوي على تفاصيل المستخدم
+      //       }
+      //    },
+
+      //    //! Get Separator Company Only :
+      //    {
+      //       $unwind: "$companyDetails" // لتفكيك المصفوفة وإرجاع كل شركة ككائن منفصل
+      //       // $unwind: "$userDetails" // لتفكيك المصفوفة وإرجاع كل مستخدم ككائن منفصل
+      //    },
+
+      //    //! Create Finish Response Shape and add new Field  :
+      //    {
+      //       $project: {
+      //          _id: 0, // 👈 هذا يخفي الـ _id من النتيجة
+      //          companyName: "$companyDetails.name", // إرجاع اسم الشركة فقط
+      //          // companyName: "$userDetails.name", // إرجاع اسم المستخدم فقط
+      //          total_Sales: 1, // الإجمالي
+      //          orderCount: 1 ,// عدد الطلبات
+      //          totalAfterTax: { $multiply: ["$total_Sales", 1.14] } // ضرب المجموع في 14% ضريبة مثلاً
+      //       }
+      //    }
+      // ]);
+
+      const result = await orderModel.aggregate([
+         //! Filter Order By time And Total Price :
+         {
+            $match: {
+               createdAtOrder: { $gte: from, $lte: to } ,
+               total_Price_After_Discount:{$gte:200}
+            }
+         },
+
+         //! Create Group Order By Company id :
+         {
+            $group: {
+               _id: "$company", // تجميع حسب الشركة
+               // _id: "$user", // تجميع حسب المستخدم
+               total_Sales: { $sum: "$total_Price_After_Discount" }, // جمع الإجمالي من جميع الطلبات لكل شركة
+               orderCount: { $count: {} } , // عد عدد الطلبات
+            }
+         },
+
+         //! Sort  By Total and Return Company  :
+         // { $sort: { totalSales: -1 } }, // ترتيب تنازلي
+         // { $sort: { totalSales: 1 } }, // ترتيب تصاعدى
+         // { $limit: 1 },
+
+         //! Create Populate On Company id  And Create New Field companyDetails to Company :
+         {
+            $lookup: {
+               from: "companies", //  (collection)  اسم المجموعة الخاصة بالشركات 
+               // from: "users", //(collection)  اسم المجموعة الخاصة بالمستخدمين 
+               localField: "_id",  // الحقل الذي نستخدمه للربط (هو الـ _id للشركة هنا)
+               foreignField: "_id", // الحقل الذي سنربط به في مجموعة الشركات
+               as: "companyDetails" // الإسم الجديد للمصفوفة التي تحتوي على تفاصيل الشركة
+               // as: "userDetails" // الإسم الجديد للمصفوفة التي تحتوي على تفاصيل المستخدم
+            }
+         },
+
+         //! Get Separator Company Only :
+         {
+            $unwind: "$companyDetails" // لتفكيك المصفوفة وإرجاع كل شركة ككائن منفصل
+            // $unwind: "$userDetails" // لتفكيك المصفوفة وإرجاع كل مستخدم ككائن منفصل
+         },
+
+         //! Create Finish Response Shape and add new Field  :
+         {
+            $project: {
+               _id: 0, // 👈 هذا يخفي الـ _id من النتيجة
+               companyName: "$companyDetails.name", // إرجاع اسم الشركة فقط
+               // companyName: "$userDetails.name", // إرجاع اسم المستخدم فقط
+               total_Sales: 1, // الإجمالي
+               orderCount: 1 ,// عدد الطلبات
+               totalAfterTax: { $multiply: ["$total_Sales", 1.14] } // ضرب المجموع في 14% ضريبة مثلاً
+            }
+         }
+      ]);
+
+
+
+         const monthlyIncome = await orderModel.aggregate([
+            {
+               $match: {
+                  createdAtOrder: { $gte: from, $lte: to },
+                  is_Paid: true
+               }
+            },
+            {
+               $project: {
+                  numberOfTests: { $size: "$orderItems" },
+                  total_After_Sales: { $ifNull: ["$total_Price_After_Discount", 0] },
+                  createdAt: { $toDate: "$createdAtOrder" }
+               }
+            },
+            {
+               $group: {
+                  _id: { $month: "$createdAt" },
+                  total_Sales: { $sum: "$total_After_Sales" },
+                  order_count: { $sum: 1 },
+                  totalTests: { $sum: "$numberOfTests" }
+               }
+            },
+            {
+               $addFields: {
+                  target: 20000,
+                  achievementPercent: {
+                     $cond: [
+                        { $gt: [20000, 0] },
+                        { $round: [{ $multiply: [{ $divide: ["$total_Sales", 20000] }, 100] }, 2] },
+                        0
+                     ]
+                  } ,
+                  testTarget: 500 ,
+                  achievementPercentTest: {
+                     $cond: [
+                        { $gt: [500, 0] },
+                        { $round: [{ $multiply: [{ $divide: ["$totalTests", 500] }, 100] }, 2] },
+                        0
+                     ]
+                  }
+               }
+            } 
+         ]);
+         
+      
+      
+      
+      res.json({message:"success" , monthlyIncome  , result})
+   });
 
 
 

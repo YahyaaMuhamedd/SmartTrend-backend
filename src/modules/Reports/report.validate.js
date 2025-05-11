@@ -28,27 +28,8 @@ export const singleVal = {
 
 
 export const getReportVal = Joi.object({
-   start :Joi.date().format('YYYY-MM-DD') , 
-   end :Joi.date().format('YYYY-MM-DD') , 
-   company_id :Joi.string().min(24).max(24) , 
-})
-
-
-export const getReportNewVal = Joi.object({
    start :Joi.date().format('YYYY-MM-DD').optional() , 
    end :Joi.date().format('YYYY-MM-DD').optional() , 
-   company_id :Joi.string().min(24).max(24).optional() , 
+   company :Joi.string().min(24).max(24).optional() , 
 	patient:Joi.string().min(2).max(30).optional() ,
-	specificDay:Joi.string().pattern(/^[0-9]{2}$/).optional() ,
-	specificMonth:Joi.string().pattern(/^[0-9]{2}$/).optional() ,
-	specificYear:Joi.number().min(2000).optional() ,
 })
-
-
-export const getOrderByPatientNameVal = Joi.object({
-   start :Joi.date().format('YYYY-MM-DD') , 
-   end :Joi.date().format('YYYY-MM-DD') , 
-   company_id :Joi.string().min(24).max(24) , 
-   patient :Joi.string() , 
-})
-

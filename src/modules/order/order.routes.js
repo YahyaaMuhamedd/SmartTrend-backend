@@ -21,7 +21,16 @@ const router = Router() ;
 
 
 
-   //^============================ Get Order Count Admin Dashboard ==================================================
+   
+   //^=============================== Sales Last Month ===============================================
+      router.route("/salesLastMonth")
+      .get( orderControl.salesLastMonth)
+      
+
+
+
+
+   //^============================ Get Order Count Admin Dashboard ===================================
    router.route("/orderCount")
    .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) ,  orderControl.getOrderCount)
 

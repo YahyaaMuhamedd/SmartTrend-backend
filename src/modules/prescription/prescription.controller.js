@@ -69,10 +69,7 @@ export const addPrescription = catchError(
 
       const createdBy = req.user._id
       let image = "" ;
-
-
-      const existPrescription = await prescriptionModel.findOne({createdBy})
-
+      const existPrescription = await prescriptionModel.find({createdBy})
       //& Check On Size File Media Before Convert From k-byte to Mega byte :
       if(req.file){
          if((req.file.size > uploadImageSize)){
@@ -81,22 +78,27 @@ export const addPrescription = catchError(
          image = req.file.filename ;
       }
 
-      if(existPrescription){
-         const prescription = await prescriptionModel.findByIdAndUpdate( existPrescription._id , {
+      if(existPrescription.length >= 5 ){
+
+         //! Delete Old Prescription  :
+         const id = existPrescription[0]._id;
+         const  prescriptionDeleted = await prescriptionModel.findByIdAndDelete(id) ;
+
+         //! Delete Image to Old Prescription And Update Image in Folder :
+         const index = (process.env.BASE_URL.length + 13)
+         const fileName = prescriptionDeleted.image.slice(index) 
+         const fullPathFile = path.resolve(`Uploads/Prescription/${fileName}`)
+         if(fs.existsSync(fullPathFile)){
+            fs.unlinkSync(fullPathFile)
+         }
+
+         const prescription = await prescriptionModel.create({
             phone, 
             message , 
             image , 
             createdBy ,
             download_URL:`${process.env.BASE_URL}/api/v1/prescription/download/${image}`
-         } , {new:true}) ;
-
-         //! Delete Image And Update Image in Folder :
-         const index = (process.env.BASE_URL.length + 13)
-         const fileName = existPrescription.image.slice(index) 
-         const fullPathFile = path.resolve(`Uploads/Prescription/${fileName}`)
-         if(fs.existsSync(fullPathFile)){
-            fs.unlinkSync(fullPathFile)
-         }
+         }) ;
 
          !prescription && next(new AppError("Prescription Not Added", 404) ) ;
          prescription &&  res.json({message:"success" , prescription}) ;
@@ -110,8 +112,6 @@ export const addPrescription = catchError(
          }) ;
    
          !prescription && next(new AppError("Prescription Not Added", 404) ) ;
-         console.log(prescription);
-         
          prescription &&  res.json({message:"success" , prescription}) ;
       }
    }
@@ -134,6 +134,7 @@ export const downloadPrescription = catchError(
       res.download(filePath, fileName);
    }
 );
+
 
 
 

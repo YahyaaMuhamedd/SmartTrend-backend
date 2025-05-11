@@ -7,13 +7,15 @@ const schema = new Schema({
       type:String , 
       trim : true ,
       lowercase:true ,
-      minLength:[1 , "Should be Character Count More Than 2 Character"] ,
-      maxLength:[100 , "Should be Character Count Less Than 50 Character"] ,
+      minLength: [3, "Should be more than 2 characters"] ,
+      maxLength: [400, "Should be less than 400 characters"]
    } ,
    email:{
       type:String ,
+      trim : true ,
       lowercase:true ,
-      unique:[true , "company Name is Unique"] ,
+      unique:[true , "Email must be unique"] ,
+      match: [/\S+@\S+\.\S+/, "Email format is invalid"]
    } ,
    passwordChangedAt:{
       type:Date 
@@ -23,7 +25,8 @@ const schema = new Schema({
    },
    phone :{
       type:String ,
-      required :[true , "Password is required"]
+      required :[true , "Phone is required"] ,
+      match: [/^01[0125][0-9]{8}$/, "Invalid Egyptian phone number"]
    } ,
    isActive:{
       type:Boolean ,
@@ -34,9 +37,10 @@ const schema = new Schema({
    } ,
    description:{
       type:String ,
+      trim : true ,
       lowercase:true ,
-      minLength:[10 , "Should be Character Count More Than 2 Character"] ,
-      maxLength:[400 , "Should be Character Count Less Than 50 Character"] ,
+      minLength: [3, "Should be more than 2 characters"] ,
+      maxLength: [400, "Should be less than 400 characters"]
    } ,
    start:{
       type:Date

@@ -77,6 +77,15 @@ const schema = new Schema({
    invoice_number:{
       type:Number ,
    } ,
+   total_Price:{
+      type:Number ,
+   } ,
+   total_Price_After_Discount:{
+      type:Number ,
+   } ,
+   Net_Amount:{
+      type:Number ,
+   } ,
    transform_number:{
       type:Number ,
    } ,
@@ -115,6 +124,15 @@ schema.pre("save"  , function(next){
       expiry.setDate(expiry.getDate() + 30);
       this.invoiceExpiryDate = expiry;
    }
+
+
+
+   //& Calculate Total Price , Total Price After Discount and Net_Amount :
+   this.total_Price = Math.round(this.orderItems.reduce((acc, entry) => acc + entry.price, 0)) ;
+   this.Net_Amount = Math.round(this.orderItems.reduce((acc, entry) => acc + entry.final_amount, 0)) ;
+   this.total_Price_After_Discount = Math.round(this.orderItems.reduce((acc, entry) => acc + entry.priceAfterDiscount, 0)) ;
+
+
    next()
 }) ;
 
@@ -142,35 +160,6 @@ schema.pre(/^find/ , function (next){
    this.populate("company" , "_id name email phone address logo description start")
    this.populate("branch" , "_id name email phone address")
    next()
-})
-
-
-//& Calculate Total Price Before Discount : 
-schema.virtual("total_Price").get(function (){
-   
-   const total = this.orderItems.reduce((acc , entry)=>{
-      return acc + entry.price
-   } , 0)
-   return total
-})
-
-
-//& Calculate Net Amount : 
-schema.virtual("Net_Amount").get(function (){
-   
-   const total = this.orderItems.reduce((acc , entry)=>{
-      return acc + entry.final_amount
-   } , 0)
-   return total
-})
-
-//& Calculate Total Price After Discount : 
-schema.virtual("total_Price_After_Discount").get(function (){
-   
-   const total = this.orderItems.reduce((acc , entry)=>{
-      return acc + entry.priceAfterDiscount
-   } , 0)
-   return total
 })
 
 export const orderModel = model("order" , schema)

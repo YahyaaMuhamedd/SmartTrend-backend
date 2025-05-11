@@ -55,6 +55,7 @@ export const getAllBranches = catchError(
 export const getBranchCount = catchError(
    async(req , res , next)=>{
 
+
       //! All Branch :
       const branch = await branchModel.find();
 

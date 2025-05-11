@@ -13,6 +13,7 @@ import patientRouter from "../modules/patient/patient.routes.js"
 import prescriptionRouter from "../modules/prescription/prescription.routes.js"
 import onlineSystemRouter from "../modules/onlineSystem/onlineSystem.routes.js"
 import branchRouter from "../modules/branch/branch.routes.js"
+import excelRouter from "../modules/excelSheet/excelSheet.routes.js"
 
 
 const router = Router()
@@ -32,6 +33,7 @@ const router = Router()
    router.use("/prescription" , prescriptionRouter) ;
    router.use("/patient" , patientRouter) ;
    router.use("/branch" , branchRouter) ;
+   router.use("/excel" , excelRouter) ;
 
    router.use("/onlineSystem" , onlineSystemRouter) ;
 

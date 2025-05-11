@@ -66,7 +66,7 @@ schema.virtual("total_Price").get(function (){
    const total = this.cartItems.reduce((acc , entry)=>{
       return acc + entry.price?.price
    } , 0)
-   return total
+   return Math.round(total)
 })
 
 //& Calculate Total Price Before Discount : 
@@ -74,7 +74,7 @@ schema.virtual("Net_Amount").get(function (){
    const total = this.cartItems.reduce((acc , entry)=>{
       return acc + entry.price?.final_amount
    } , 0)
-   return total
+   return Math.round(total)
 })
 
 
@@ -83,7 +83,7 @@ schema.virtual("total_After_Discount").get(function (){
    const total = this.cartItems.reduce((acc , current)=>{
       return acc + current.price?.priceAfterDiscount
    } , 0)
-   return total
+   return Math.round(total)
 })
 
 export const cartModel = model("cart" , schema)

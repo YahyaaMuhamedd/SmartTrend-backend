@@ -52,6 +52,7 @@ export const paramsIdVal = Joi.object({
 })
 
 
+
 export const blockedAndActiveUserVal = Joi.object({
    id:Joi.string().hex().length(24).required() ,
    block:Joi.boolean().optional(),

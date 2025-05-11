@@ -35,7 +35,7 @@ export const addCompanyVal = Joi.object({
    address:Joi.string().min(1).max(100).required().trim() ,
    phone:Joi.string().pattern(/^(00201|\+201|01)[0-2,5]{1}[0-9]{8}$/).required() ,
    description:Joi.string().min(10).max(400).required().trim() ,
-   email:Joi.string().email().required().trim() ,
+   email:Joi.string().email().pattern(/^\S+@\S+\.\S+$/).required().trim() ,
 
 
 

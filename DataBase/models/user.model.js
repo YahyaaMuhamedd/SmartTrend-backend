@@ -11,9 +11,18 @@ const schema = new Schema({
       minLength:[2 , "Should be Character Count More Than 2 Character"] ,
       maxLength:[50 , "Should be Character Count Less Than 50 Character"] ,
    } ,
+   googleId: { 
+      type: String , 
+      unique: true ,
+      sparse: true
+   } ,
+   facebookId: { 
+      type: String , 
+      unique: true ,
+      sparse: true
+   } ,
    phone:{
       type:String ,
-      required:[true , "Phone is Required"] 
    } ,
    email:{
       type:String ,
@@ -23,7 +32,9 @@ const schema = new Schema({
    } ,
    password :{
       type:String ,
-      required :[true , "Password is required"] 
+      required: function () {
+         return !this.googleId ;     // لو مفيش تسجيل بجوجل، يبقى الباسورد لازم
+      } ,
    } ,
    age: {
       type:Number , 
@@ -42,7 +53,6 @@ const schema = new Schema({
    },
    birthDay:{
       type:Date , 
-      required : true ,
    } ,
    imgCover:{
       type:String
@@ -71,11 +81,7 @@ const schema = new Schema({
    } ,
    creationTimeAt:{
       type:Number 
-   } ,
-   createdBy:{
-      type:Types.ObjectId ,
-      ref: "user" 
-   }
+   } 
 } , { timestamps:true } )
 
 

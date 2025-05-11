@@ -14,7 +14,7 @@ const router  = Router() ;
 
 
 //^=========================== Get Users, Add User, Change Image ==============================================
-router.route("/")
+	router.route("/")
 		.get(UC.getAllUser)
 		// .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) , UC.getAllUser)
 
@@ -28,8 +28,6 @@ router.route("/")
 	router.route("/userCount")
 		// .get(UC.getUserCount)
 		.get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) , UC.getUserCount)
-
-
 
 
 

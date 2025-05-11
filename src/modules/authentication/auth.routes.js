@@ -7,6 +7,7 @@ import { protectedRoutes } from "../../middleWare/authentication.js";
 import { authorize } from "../../middleWare/authorization.js";
 import { validation } from "../../middleWare/validation.js";
 import { ROLES } from "../../utilities/enums.js";
+import passport from "passport";
 
 
 
@@ -67,8 +68,33 @@ router.route("/reset-password")
 
 
 //^=========================== Generate QR Code =====================================
-	router.route("/qr_code")
-		.get (protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , AuthControl.generateQR_Code) 
+router.route("/qr_code")
+.get (protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , AuthControl.generateQR_Code) 
 
+
+
+
+
+//^=========================== Social Login By Google =====================================
+		router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+
+		router.get(
+		'/google/callback',
+		passport.authenticate('google', { failureRedirect: '/' }),
+		(req, res) => {
+			const token = jwt.sign(
+				{
+				name: req.user.displayName,
+				email: req.user.emails[0].value,
+				picture: req.user.photos[0].value,
+				},
+				process.env.JWT_SECRET,
+				{ expiresIn: '1h' }
+			);
+		
+			res.redirect(`http://localhost:3000/login/success?token=${token}`);
+		}
+		);
 
 export default router ;

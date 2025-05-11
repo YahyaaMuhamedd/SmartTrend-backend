@@ -253,3 +253,35 @@ export const generateQR_Code = catchError(
          })
    }
 )
+
+
+
+//&  Login With Google :
+export const loginWithGoogle = catchError(
+   async (req, res) => {
+      const email = req.user.emails[0].value
+      let user = await userModel.findOne({email} ) ;
+      console.log(user?"Successfully Ya Mahmoud":"Fail Login Ya MAhmoud");
+      if(!user){
+         user = await userModel.create({
+            name:req.user.displayName ,
+            googleId:req.user.id ,
+            email 
+         })
+      }
+
+      const token = jwt.sign(
+         {_id:user._id , name:user.name , phone: user.phone , email:user.email , role:user.role , birthDay:user.birthDay , age:user.age , imgCover:user.imgCover} , 
+         process.env.SECRET_KEY , 
+         {expiresIn:process.env.TOKEN_EXPIRATION} // expired Token After 2 hours or ==> expiresIn:"2h" 
+      ) 
+      const loggedUser = {
+         _id:user._id ,
+         name:user.name ,
+         email:user.email ,
+         role:user.role
+      } ;
+
+   res.redirect(`http://localhost:3000/#/LoginSuccess?token=${token}&user=${JSON.stringify(loggedUser)}`);
+   }
+)

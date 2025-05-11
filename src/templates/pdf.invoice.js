@@ -185,13 +185,13 @@ export let pdf_invoice = (data) => {
                ${data.orderItems.map((ele) => `
                   <tr class="item">
                      <td>${ele?.test.name}</td>
-                     <td>${Math.trunc(ele.priceAfterDiscount) == ele.priceAfterDiscount ? `${ele.priceAfterDiscount}.00 EGP ` : `${ele.priceAfterDiscount} EGP `}</td>
+                     <td>${Math.round(ele.priceAfterDiscount) == ele.priceAfterDiscount ? `${ele.priceAfterDiscount}.00 EGP ` : `${ele.priceAfterDiscount} EGP `}</td>
                   </tr>
                `).join(" ")}
 
                <tr class="total">
                   <td style="font-weight:bold;">Total Price</td>
-                  <td>Total: ${Math.trunc(data.total_Price_After_Discount) == data.total_Price_After_Discount ? `${data.total_Price_After_Discount}.00 EGP ` : `${data.total_Price_After_Discount} EGP `}</td>
+                  <td>Total: ${Math.round(data.total_Price_After_Discount) == data.total_Price_After_Discount ? `${data.total_Price_After_Discount}.00 EGP ` : `${data.total_Price_After_Discount} EGP `}</td>
                </tr>
 
             </table>

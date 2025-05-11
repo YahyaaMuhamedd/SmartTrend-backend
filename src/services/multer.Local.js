@@ -10,7 +10,8 @@ const uniqueNumber = customAlphabet("123456789" , 5)
 export let validExtension = {
    image:["image/jpeg" , "image/png" , "image/webp" , "image.jpg"] , 
    audio:["audio/x-ms-wma" , "audio/mp4"] ,
-   pdf:["application/pdf"]
+   pdf:["application/pdf"] ,
+   excel:[ 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
 }
 
 
