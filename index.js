@@ -17,9 +17,6 @@ import bcrypt from "bcrypt";
 //!========================================================================================
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import expressSession from 'express-session';
-import jwt from 'jsonwebtoken';
-import { userModel } from './DataBase/models/user.model.js';
 import configGoogle from './src/services/configGoogle.js';
 import { loginWithGoogle } from './src/modules/authentication/auth.controller.js';
 //!========================================================================================
@@ -52,6 +49,11 @@ app.use(express.json()) ;
       );
       passport.serializeUser((user, done) => done(null, user));
       passport.deserializeUser((obj, done) => done(null, obj));
+
+       //^ Login With Google :
+      app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+      app.get('/auth/google/callback' , passport.authenticate('google', { failureRedirect: '/' }), loginWithGoogle) ;
+
 //!========================================================================================
 
 
