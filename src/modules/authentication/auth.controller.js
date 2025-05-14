@@ -54,7 +54,7 @@ export const signIn = catchError(
       const user = await userModel.findOne({email})
       !user && next(new AppError("User Not Exist" , 401)) ;
 
-      const loggedUser = await userModel.findById(user._id).select("-_id name role  phone birthDay email  age imgCover") ;
+      // const loggedUser = await userModel.findById(user._id).select("-_id name role  phone birthDay email  age imgCover") ;
       if(user && bcrypt.compareSync(password , user?.password)) {
          const token = jwt.sign(
             {_id:user._id , name:user.name , phone: user.phone , email:user.email , role:user.role , birthDay:user.birthDay , age:user.age , imgCover:user.imgCover} , 
@@ -63,7 +63,7 @@ export const signIn = catchError(
             // {expiresIn:60*60*2} // expired Token After 2 hours or ==> expiresIn:"2h" 
          ) 
 
-         return res.json({message:"success"  , user:loggedUser ,   token }) ;
+         return res.json({message:"success" ,  token }) ;
       }
       return next(new AppError("Email Or Password InCorrect" , 401)) ;
    }
@@ -261,7 +261,7 @@ export const loginWithGoogle = catchError(
    async (req, res) => {
       const email = req.user.emails[0].value
       let user = await userModel.findOne({email} ) ;
-      console.log(user?"Successfully Ya Mahmoud":"Fail Login Ya MAhmoud");
+      console.log(user?"Successfully Ya Mahmoud Google":"Fail Login Ya MAhmoud Google");
       if(!user){
          user = await userModel.create({
             name:req.user.displayName ,
@@ -275,13 +275,7 @@ export const loginWithGoogle = catchError(
          process.env.SECRET_KEY , 
          {expiresIn:process.env.TOKEN_EXPIRATION} // expired Token After 2 hours or ==> expiresIn:"2h" 
       ) 
-      const loggedUser = {
-         _id:user._id ,
-         name:user.name ,
-         email:user.email ,
-         role:user.role
-      } ;
 
-      res.redirect(`https://eng-mahmoudothman.github.io/Fekrah_Medical_Front-End/#/LoginSuccess?token=${token}&user=${JSON.stringify(loggedUser)}`);
+      res.redirect(`${process.env.REDIRECT_URL_GOOGLE}/#/LoginSuccessGoogle?token=${token}`);
    }
 )

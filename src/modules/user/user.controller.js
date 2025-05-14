@@ -173,6 +173,42 @@ export const updateUser = catchError(
 )
 
 
+//& Update User :
+export const completeUserInfoWhenLoginGoogle = catchError(
+   async(req , res , next)=>{
+      const {phone , birthDay , password} = req.body ;
+
+      const user = await userModel.findById(req.user._id)
+      if(!user) return next(new AppError("User Not Found" , 404)) ;
+      
+      //& Calculation Age From BirthDay :
+      let age = 0 ;
+      let nowAge = (birthDay)=>{
+         let dateNow = new Date()
+         let birth = new Date(birthDay)
+         let diff = dateNow - birth
+         let age = Math.floor(diff/1000/60/60/24/365);
+         return age
+      }
+      age = nowAge(birthDay) ;
+      if(phone) user.phone = phone ;
+      if(birthDay) user.birthDay = birthDay ;
+      if(password) user.password = password ;
+      user.age = age ;
+      await user.save() ;
+
+
+      const token = jwt.sign(
+         {_id:user._id , name:user.name , phone: user.phone , email:user.email , role:user.role , birthDay:user.birthDay , age:user.age , imgCover:user.imgCover} , 
+         process.env.SECRET_KEY , 
+         {expiresIn:process.env.TOKEN_EXPIRATION} // expired Token After 2 hours or ==> expiresIn:"2h" 
+      ) 
+
+      res.json({message:"success" , token})
+   }
+)
+
+
 
 //& Update User Role :
 export const updateUserRole = catchError(

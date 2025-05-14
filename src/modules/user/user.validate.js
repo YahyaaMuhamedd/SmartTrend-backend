@@ -37,7 +37,7 @@ export const addUserVal = Joi.object({
 
 export const updateUserRoleVal = Joi.object({
    id:Joi.string().hex().length(24).required() ,
-
+   
    role:Joi.string().valid("user" , "admin" , "moderator").required() ,
 })
 
@@ -71,3 +71,11 @@ export const updateUserVal = Joi.object({
 
 
 
+
+
+export const completeUserInfoWhenLoginGoogleVal = Joi.object({
+   phone:Joi.string().pattern(/^(002)?01[0125][0-9]{8}$/).required().trim() ,
+   birthDay:Joi.date().format('YYYY-MM-DD') , 
+   password:Joi.string().pattern(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/).required() ,
+   rePassword:Joi.valid(Joi.ref("password")).required()
+})

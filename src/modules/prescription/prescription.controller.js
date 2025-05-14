@@ -144,12 +144,13 @@ export const downloadPrescription = catchError(
 //& Seen prescription :
 export const seenPrescription = catchError(
    async(req , res , next)=>{
-
       const {id} = req.params ;
+
       const prescription = await prescriptionModel.findByIdAndUpdate(id , {is_seen:true} ,{new:true}) ;
+      const prescriptions = await prescriptionModel.find() ;
 
       !prescription && next(new AppError("Not Found Prescription" , 404))
-      prescription && res.json({message:"success" , prescription , })
+      prescription && res.json({message:"success" , prescriptions})
    }
 )
 
@@ -158,12 +159,13 @@ export const seenPrescription = catchError(
 //& Delete prescription By id :
 export const deletePrescription = catchError(
    async(req , res , next)=>{
-
       const {id} = req.params ;
+      
       const prescription = await prescriptionModel.findByIdAndDelete(id , {new:true}) ;
+      const prescriptions = await prescriptionModel.find() ;
 
-      !prescription && next(new AppError("Not Found Prescription" , 404))
-      prescription && res.json({message:"success" , prescription , })
+      !prescription && next(new AppError("Prescription Not Exist " , 404))
+      prescription && res.json({message:"success" , prescriptions })
    }
 )
 

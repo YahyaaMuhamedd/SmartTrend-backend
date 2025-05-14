@@ -99,10 +99,10 @@ schema.pre("save"  , function(next){
 }) ;
 
 
-// & Hash Password Before Save When Update User :
-schema.pre("findOneAndUpdate" , function(){
-   if(this._update.password) this._update.password = bcrypt.hashSync(this._update.password , 8) ; 
-}) ;
+// // & Hash Password Before Save When Update User :
+// schema.pre("findOneAndUpdate" , function(){
+//    if(this._update.password) this._update.password = bcrypt.hashSync(this._update.password , 8) ; 
+// }) ;
 
 
 

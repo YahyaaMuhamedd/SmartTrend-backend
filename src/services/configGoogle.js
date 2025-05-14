@@ -9,7 +9,7 @@ export default function configGoogle(){
          secret: process.env.SECRET_KEY , 
          resave: false,
          saveUninitialized: false,
-         cookie: { maxAge: 24 * 60 * 60 * 1000 } // 1 يوم
+         cookie: { maxAge: 60 * 60 * 1000 } // 2 Hours
       })
    )
 }
