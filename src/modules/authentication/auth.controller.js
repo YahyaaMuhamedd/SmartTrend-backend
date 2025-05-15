@@ -276,6 +276,7 @@ export const loginWithGoogle = catchError(
          {expiresIn:process.env.TOKEN_EXPIRATION} // expired Token After 2 hours or ==> expiresIn:"2h" 
       ) 
 
-      res.redirect(`https://eng-mahmoudothman.github.io/Fekrah_Medical_Front-End/#/LoginSuccessGoogle?token=${token}`);
+      // res.redirect(`https://eng-mahmoudothman.github.io/Fekrah_Medical_Front-End/#/LoginSuccessGoogle?token=${token}`);
+      res.redirect(`${process.env.REDIRECT_URL_GOOGLE}/#/LoginSuccessGoogle?token=${token}`);
    }
 )
