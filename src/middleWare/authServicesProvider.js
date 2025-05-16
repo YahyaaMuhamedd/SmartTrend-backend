@@ -24,7 +24,9 @@ export const authServicesProvider = catchError(
       // 3- Check Exist company Or Not
       const branch = await branchModel.findById(decoded._id) ;
       if(!branch) return next(new AppError("Branch Not Exist ProtectedRoute" , 401)) ;
+      if(!branch.isActive) return next(new AppError("Branch is blocked" , 401)) ;
 
+      
       req.branch = branch
       next();
    }

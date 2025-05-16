@@ -130,7 +130,7 @@ export let pdf_invoice = (data) => {
          <div class="invoice-box">
 
             <!-- شعار الشركة -->
-            <img src="https://fekrahmedicalback-end-production-c89a.up.railway.app/images/logo.jpg" alt="Logo" style="max-width: 150px; margin-bottom: 20px;" />
+            <img src="https://fekrahmedicalback-end-production-c89a.up.railway.app/images/newLogo.png" alt="Logo" style="max-width: 150px; margin-bottom: 20px;" />
 
             <table cellpadding="0" cellspacing="0">
                <tr class="top">
@@ -140,7 +140,6 @@ export let pdf_invoice = (data) => {
                      <li>Invoice Num: ${data.invoice_number}</li>
                      <li>Created_At: ${new Date(data.createdAt).toISOString().split('T')[0] }</li>
                      <li>Company Name: ${data.company.name}</li>
-                     <li>Branch Name: .................</li>
                   </ul>
                </tr>
                <hr/>
@@ -156,12 +155,6 @@ export let pdf_invoice = (data) => {
                               Patient Phone : ${data.patient_Phone} <br />
                            </td>
    
-                           <td>
-                              User Name: ${data.user?.name} <br />
-                              User email : ${data.user?.email} <br />
-                              User Phone : ${data.user?.phone} <br />
-                              ######### : ###################  <br />
-                           </td>
                         </tr>
                      </table>
                   </td>

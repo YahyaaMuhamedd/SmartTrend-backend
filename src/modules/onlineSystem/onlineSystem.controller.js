@@ -20,7 +20,10 @@ const transform_nanoid = customAlphabet(alphabet , 10) ;
 export const signInBranch = catchError(
    async (req , res , next)=>{
       const{email , password} = req.body ;
-      const branch = await branchModel.findOne({email})
+      const branch = await branchModel.findOne({email}) ;
+      if(!branch) return next(new AppError("Branch Not Exist" , 401)) ;
+      if(!branch.isActive) return next(new AppError("Branch is blocked" , 401)) ;
+
 
       const loggedBranch = await branchModel.findById(branch?._id).select("-_id name  phone  email address company") ;
       if(branch && bcrypt.compareSync(password , branch?.password)) {

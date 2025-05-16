@@ -115,7 +115,7 @@ export let pdf_transform = (data)=>{
       
                               <ul style="font-weight:bold;  list-style:none;">
                                  <li>Invoice Num: ${data.invoice_number}</li>
-                                 <li>Created_At: ${date}</li>
+                                 <li>Created_At: ${data.approved_At}</li>
                                  <li>Insurance_Number: ${data.transform_number}</li>
                               </ul>
 
