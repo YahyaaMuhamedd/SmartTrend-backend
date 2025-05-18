@@ -925,9 +925,13 @@ export const createOnlineOrder = async (data)=>{
       })) ,
    })
 
+   console.log("Done 1");
+   
+
    //! Added invoice to this Order :
    const patient_Name_Slug = slugify(`${order.patient_Name}`) ;
    const add_Invoice_Order = await orderModel.findByIdAndUpdate(order._id , {invoice_pdf  : `invoice_${patient_Name_Slug}_${order._id}.pdf` } , {new:true})
+   console.log("Done 2");
    
    //! Create Invoice Pdf  orders :
    try {
@@ -935,9 +939,11 @@ export const createOnlineOrder = async (data)=>{
    } catch (error) {
       console.error('Invoice PDF creation failed', error.response?.data || error.message);
    }
+   console.log("Done 3");
 
    //!Delete Cart After Create Order:
    const cartDeleted = await cartModel.findByIdAndDelete(cart._id , {new:true})  ; 
+   console.log("Done 4");
 
    //& Increase the number of times the test is done : 
    const options =  order.orderItems.map(({test:{_id }})=>({
