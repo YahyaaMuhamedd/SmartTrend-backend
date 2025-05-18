@@ -7,14 +7,8 @@ const schema = new Schema({
       required:true ,
       lowercase:true
    } , 
-   patient_History :{
-      type:String ,
-   } , 
    patient_Age :{
       type:Number
-   } , 
-   doctor_Name :{
-      type:String
    } , 
    patient_Phone :{
       type:String
@@ -27,10 +21,6 @@ const schema = new Schema({
    birthDay:{
       type:Date , 
       required : true ,
-   } ,
-   address:{
-      street:String , 
-      city :String
    } ,
    creationTimeAt:{
       type:Number 

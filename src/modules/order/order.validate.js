@@ -23,15 +23,19 @@ export const singleVal = {
 
 
 
+export const createOnlineOrderVal = Joi.object({
+	patient_Name:Joi.string().min(2).max(50).trim().required() ,
+   birthDay:Joi.date().format('YYYY-MM-DD').required() , 
+   gender:Joi.string().required() ,
+   payment :Joi.string().required() ,
+   patient_Phone:Joi.string().pattern(/^(002)?01[0125][0-9]{8}$/).trim().required() 
+})
+
 export const createOrderVal = Joi.object({
 	patient_Name:Joi.string().min(2).max(50).trim().required() ,
    birthDay:Joi.date().format('YYYY-MM-DD').required() , 
    gender:Joi.string().required() ,
-   patient_Phone:Joi.string().pattern(/^(002)?01[0125][0-9]{8}$/).trim().required() ,
-   doctor_Name:Joi.string().min(2).max(50).trim().required() ,
-   patient_History:Joi.string().min(2).max(500).trim().required() ,
-	street:Joi.string() ,
-	city:Joi.string() ,
+   patient_Phone:Joi.string().pattern(/^(002)?01[0125][0-9]{8}$/).trim().required() 
 })
 
 

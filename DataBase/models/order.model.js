@@ -21,15 +21,13 @@ const schema = new Schema({
    patient_Phone :{
       type:String
    } , 
-   patient_History :{
-      type:String ,
-   } , 
    patient_Age :{
       type:Number
    } , 
-   doctor_Name :{
-      type:String
-   } , 
+   birthDay:{
+      type:Date , 
+      required : true ,
+   } ,
    gender:{
       type:String ,
       enum :["male" , "female"] ,
@@ -54,10 +52,6 @@ const schema = new Schema({
          }  ,
       }
    ] ,
-   shipping_Address:{
-      street:String ,
-      city:String ,
-   } ,
    createdAtOrder:{
       type:Number
    }  ,
@@ -72,7 +66,7 @@ const schema = new Schema({
    payment_Type:{
       type:String ,
       enum:["cash" , "card"] ,
-      default:"cash" ,
+      default:"card" ,
    } ,
    invoice_number:{
       type:Number ,

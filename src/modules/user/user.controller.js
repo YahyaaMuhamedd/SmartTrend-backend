@@ -32,7 +32,7 @@ export const getAllUser = catchError(
 
 
       let apiFeature = new ApiFeature(userModel.find(filterObj), req.query ).pagination().fields().search().filter().sort();
-      const users = await apiFeature.mongooseQuery.select("name phone role email birthDay age imgCover addresses confirmedEmail isBlocked createdAt updatedAt");
+      const users = await apiFeature.mongooseQuery.select("name gender phone role email birthDay age imgCover addresses confirmedEmail isBlocked createdAt updatedAt");
 
       if(!users.length) return next(new AppError("Users is Empty" , 404))
 
@@ -103,7 +103,7 @@ export const getUserCount = catchError(
 //& Add User :
 export const addUser = catchError(
    async (req , res , next)=>{
-      const {name , role , phone , email , birthDay , password} = req.body ;
+      const {name , role , phone , email , birthDay , gender , password} = req.body ;
 
      //& Calculation Age From BirthDay :
       let age = 0 ;
@@ -116,7 +116,7 @@ export const addUser = catchError(
       }
       age = nowAge(req.body.birthDay)
 
-      const user = await userModel.create({name , role , phone , age , birthDay , email  , password}) ;
+      const user = await userModel.create({name , gender ,  role , phone , age , birthDay , email  , password}) ;
 
       !user && next(new AppError("User Not Added" , 404))
       user && res.json({message:"success", user})
@@ -139,7 +139,7 @@ export const getSingleUser = catchError(
 //& Update User :
 export const updateUser = catchError(
    async(req , res , next)=>{
-      const {name , phone , email , birthDay} = req.body ;
+      const {name , phone , email , birthDay , gender} = req.body ;
 
       const user = await userModel.findById(req.user._id)
       if(!user) return next(new AppError("User Not Found" , 404)) ;
@@ -158,6 +158,7 @@ export const updateUser = catchError(
       }
       age = nowAge(birthDay) ;
       if(name) user.name = name ;
+      if(gender) user.gender = gender ;
       if(phone) user.phone = phone ;
       if(email) user.email = email ;
       if(birthDay) user.birthDay = birthDay ;
@@ -165,7 +166,7 @@ export const updateUser = catchError(
       
       await user.save()
 
-      const userUpdated = await userModel.findById(req.user._id).select("-_id name role  phone birthDay email  age imgCover") ;
+      const userUpdated = await userModel.findById(req.user._id).select("-_id name gender role  phone birthDay email  age imgCover") ;
 
       !userUpdated &&  next(new AppError("User Not Found After Updated" , 404)) ;
       userUpdated &&  res.json({message:"success" , updateUser:userUpdated})
@@ -176,7 +177,7 @@ export const updateUser = catchError(
 //& Update User :
 export const completeUserInfoWhenLoginGoogle = catchError(
    async(req , res , next)=>{
-      const {phone , birthDay , password} = req.body ;
+      const {phone , birthDay , gender , password} = req.body ;
 
       const user = await userModel.findById(req.user._id)
       if(!user) return next(new AppError("User Not Found" , 404)) ;
@@ -192,6 +193,7 @@ export const completeUserInfoWhenLoginGoogle = catchError(
       }
       age = nowAge(birthDay) ;
       if(phone) user.phone = phone ;
+      if(gender) user.gender = gender ;
       if(birthDay) user.birthDay = birthDay ;
       if(password) user.password = password ;
       user.age = age ;
@@ -199,7 +201,7 @@ export const completeUserInfoWhenLoginGoogle = catchError(
 
 
       const token = jwt.sign(
-         {_id:user._id , name:user.name , phone: user.phone , email:user.email , role:user.role , birthDay:user.birthDay , age:user.age , imgCover:user.imgCover} , 
+         {_id:user._id , name:user.name , gender:user.gender ,  phone: user.phone , email:user.email , role:user.role , birthDay:user.birthDay , age:user.age , imgCover:user.imgCover} , 
          process.env.SECRET_KEY , 
          {expiresIn:process.env.TOKEN_EXPIRATION} // expired Token After 2 hours or ==> expiresIn:"2h" 
       ) 

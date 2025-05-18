@@ -11,10 +11,7 @@ export const getAllPrice = catchError(
    async(req , res , next)=>{
       let result = await priceModel.find();
 
-      //^ Merge Params
-      let filterObj = {};
-
-      let apiFeature = new ApiFeature(priceModel.find(filterObj), req.query ).pagination().fields().search().filter().sort();
+      let apiFeature = new ApiFeature(priceModel.find(), req.query ).pagination().fields().search().filter().sort();
       const prices = await apiFeature.mongooseQuery.select("");
 
       if(!prices.length) return next(new AppError("Prices is Empty" , 404))
@@ -100,9 +97,8 @@ export const getSinglePrice = catchError(
 //& Add Price :
 export const addPrice = catchError(
    async(req , res , next)=>{
-      const {final_amount , price , discount  , company , test} = req.body ;
+      const {final_amount , price , priceAfterDiscount ,  company , test} = req.body ;
 
-      
       
       const testExist = await testModel.findById(test) ;
       if(!testExist) return next(new AppError("Test Not Exist", 404) ) ;
@@ -111,13 +107,13 @@ export const addPrice = catchError(
       const companyExist = await companyModel.findById(company) ;
       if(!companyExist) return next(new AppError("Company Not Exist", 404) ) ;
       
-
+      
       const priceExist = await priceModel.findOne({company , test}) ;
       if( priceExist ) return next(new AppError("Test Already Added To Price In This Company", 404) ) ;
-
+      
       const testName = testExist.name ;
       const companyName = companyExist.name ;
-      const priceAfterDiscount = price -  ((price * discount) / 100) ;
+      const discount = (( price - priceAfterDiscount ) / price ) * 100 ;
       
       const newPrice = await priceModel.create({
          price ,
@@ -142,17 +138,20 @@ export const addPrice = catchError(
 //& Update Price :
 export const updatePrice = catchError(
    async(req , res , next)=>{
-      const {test , company , final_amount , price , discount } = req.body ;
+      const {test , company , final_amount , price , priceAfterDiscount } = req.body ;
 
 
       const priceExist = await priceModel.findOne({test , company}) ;
       if(!priceExist) return next(new AppError("Price Not Exist", 404) ) ;
 
 
-      const priceAfterDiscount = price -  ((price * discount) / 100) ;
-      const updatePrice = await priceModel.findByIdAndUpdate(priceExist._id , {final_amount , price , priceAfterDiscount ,  discount} , {new:true}) ;
-      
-      updatePrice &&  res.json({message:"success" , updatePrice}) ;
+      const discount = (( price - priceAfterDiscount ) / price ) * 100 ;
+         priceExist.final_amount = final_amount ,  
+         priceExist.price = price , 
+         priceExist.priceAfterDiscount = priceAfterDiscount ,  
+         priceExist.discount = discount
+      await priceExist.save() ;
+      res.json({message:"success" , updatePrice:priceExist}) ;
    }
 )
 
@@ -160,17 +159,20 @@ export const updatePrice = catchError(
 //& Update Price :
 export const updatePriceById = catchError(
    async(req , res , next)=>{
-      const {final_amount , price , discount } = req.body ;
+      const {final_amount , price , priceAfterDiscount } = req.body ;
       const {id} = req.params ;
 
       const priceExist = await priceModel.findById(id) ;
       if(!priceExist) return next(new AppError("Price Not Exist", 404) ) ;
 
 
-      const priceAfterDiscount = price -  ((price * discount) / 100) ;
-      const updatePrice = await priceModel.findByIdAndUpdate(id , {final_amount , price , priceAfterDiscount ,  discount} , {new:true}) ;
-      
-      updatePrice &&  res.json({message:"success" , updatePrice}) ;
+      const discount = (( price - priceAfterDiscount ) / price ) * 100 ;
+         priceExist.final_amount = final_amount ,  
+         priceExist.price = price , 
+         priceExist.priceAfterDiscount = priceAfterDiscount ,  
+         priceExist.discount = discount
+      await priceExist.save() ;
+      res.json({message:"success" , updatePrice:priceExist}) ;
    }
 )
 

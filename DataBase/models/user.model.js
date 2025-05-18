@@ -16,10 +16,10 @@ const schema = new Schema({
       unique: true ,
       sparse: true
    } ,
-   facebookId: { 
-      type: String , 
-      unique: true ,
-      sparse: true
+   gender:{
+      type:String ,
+      enum:["male" , "female"] ,
+      default:"male"
    } ,
    phone:{
       type:String ,

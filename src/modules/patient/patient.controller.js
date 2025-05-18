@@ -51,7 +51,7 @@ export const getAllPatient = catchError(
 //& Added New Patient :
 export const add_Patient = catchError(
    async(req , res , next)=>{
-      const {birthDay , street , city  , patient_Phone , patient_Name  , doctor_Name , patient_History , gender } = req.body ;
+      const {birthDay , patient_Phone , patient_Name  , gender } = req.body ;
 
       const patientExist = await patientModel.findOne({patient_Name:patient_Name}) ;
       patientExist && next(new AppError("Patient Name Already Exist" , 404))
@@ -74,13 +74,7 @@ export const add_Patient = catchError(
             patient_Age:age , 
             birthDay , 
             gender ,
-            address:{
-               street ,
-               city  
-            } , 
             patient_Phone , 
-            doctor_Name , 
-            patient_History , 
          })
          
          !patient && next(new AppError("Patient Not Added" , 404))
@@ -107,7 +101,7 @@ export const getSinglePatient = catchError(
 //& Update User :
 export const updatePatient = catchError(
    async(req , res , next)=>{
-      const {birthDay , street , city  , patient_Phone , patient_Name  , doctor_Name , patient_History , gender } = req.body ;
+      const {birthDay , patient_Phone , patient_Name  , gender } = req.body ;
       const {id} = req.params ;
 
       let patient = await patientModel.findById(id) ;
@@ -141,11 +135,7 @@ export const updatePatient = catchError(
       patient.patient_Age = age ; 
       patient.birthDay = birthDay ;
       patient.gender = gender ; 
-      patient.address.street = street ; 
-      patient.address.city = city ;
       patient.patient_Phone = patient_Phone ; 
-      patient.doctor_Name = doctor_Name ;
-      patient.patient_History = patient_History ;
       await patient.save() ;
 
       res.json({message:"Successfully Updated Patient" , patient})

@@ -212,7 +212,7 @@ export const getSpecificOrder = catchError(
 export const createCashOrder = catchError(
    async(req , res , next)=>{
 
-      const {patient_Name, patient_Age, gender, address:{street, city}, patient_Phone, doctor_Name, patient_History } = req.patient ;
+      const {patient_Name, patient_Age, gender, patient_Phone} = req.patient ;
       const cart = await cartModel.findOne({user:req.user._id}) ;
       if(!cart) return next(new AppError("Cart Not Found", 404)) ;
 
@@ -225,10 +225,8 @@ export const createCashOrder = catchError(
          user:req.user._id ,
          patient_Name , 
          patient_Age , 
-         doctor_Name , 
          cart:cart._id ,
          patient_Phone ,
-         patient_History , 
          gender ,
          is_Paid:true ,
          invoice_number ,
@@ -238,11 +236,7 @@ export const createCashOrder = catchError(
             price:price ,
             priceAfterDiscount:priceAfterDiscount ,
             final_amount
-         })) ,
-         shipping_Address:{
-            street: street ,
-            city: city ,
-         } ,
+         }))
       })
       
       //! Added invoice to this Order :
@@ -350,7 +344,7 @@ export const createCashOrder = catchError(
 //& Check Patient Exist MiddleWare :
 export const checkExistPatientMiddleWare = catchError(
    async(req , res , next)=>{
-      const {patient_Name , birthDay , gender , street , city , patient_Phone , doctor_Name , patient_History } = req.body ;
+      const {patient_Name , birthDay , gender  , patient_Phone} = req.body ;
 
       //& Calculation Age From BirthDay :
       let age = 0 ;
@@ -371,13 +365,7 @@ export const checkExistPatientMiddleWare = catchError(
             patient_Age:age , 
             birthDay , 
             gender ,
-            address:{
-               street ,
-               city  
-            } , 
             patient_Phone , 
-            doctor_Name , 
-            patient_History , 
          } , {new:true})
          if(!patient) return next(new AppError("Patient Not Updated" , 404)) ;
          req.patient = patient
@@ -388,13 +376,7 @@ export const checkExistPatientMiddleWare = catchError(
             patient_Age:age , 
             birthDay , 
             gender ,
-            address:{
-               street ,
-               city  
-            } , 
             patient_Phone , 
-            doctor_Name , 
-            patient_History , 
          })
          if(!patient) return next(new AppError("Patient Not Added" , 404)) ;
          req.patient = patient
@@ -796,28 +778,45 @@ const getAuthToken = async () => {
 //& 2- Create Payment Method :
 export const createSession = async (req , res , next) => {
    try {
-      await getAuthToken();
+      await getAuthToken() ;
 
-      const {patient_Name  , gender , street , city ,  patient_Phone , doctor_Name , patient_History} = req.body ;
+
+      const {patient_Name  , gender , birthDay,  patient_Phone , patient_Age} = req.patient ;
+      const {payment} = req.query;
+
+      let integration_id ;
+      if(payment === "credit"){
+         integration_id = "4822951" ;
+      }else if(payment === "vodafone"){
+         integration_id = "4822951" ;
+      }else if(payment === "orange"){
+         integration_id = "4822951" ;
+      }else if(payment === "etisalat"){
+         integration_id = "4822951" ;
+      }else if(payment === "we"){
+         integration_id = "4822951" ;
+      }else if(payment === "fawry"){
+         integration_id = "4822951" ;
+      }else if(payment === "instapay"){
+         integration_id = "4822951" ;
+      } ;
+
+
 
       const cart = await cartModel.findOne({user:req.user._id}) ;
       if(!cart) return next(new AppError("Cart Not Found" , 404)) ;
 
-      // const phone = req.user.phone ;
       const amount_num = cart.total_After_Discount ; 
       const amount = Math.round(amount_num) * 100 ; 
 
 
       const orderData = {
          user: req.user._id , 
-         patient_Name , 
-         patient_Age: req.patient.patient_Age , 
-         gender , 
-         street , 
-         city , 
+         patient_Name :patient_Name , 
+         patient_Age ,
+         gender ,  
          patient_Phone , 
-         doctor_Name , 
-         patient_History ,
+         birthDay , 
       } ;
 
 
@@ -880,8 +879,8 @@ export const webhookMiddleWre = catchError(
          console.log("Extra ==>" , payment_key_claims.extra);
          
       if (success) {
-         createOnlineOrder(payment_key_claims.extra)
-         console.log(`💰 Successfully Payment Message : ${data.message} ${amount_cents / 100} EGP`);
+         await createOnlineOrder(payment_key_claims.extra)
+         // console.log(`💰 Successfully Payment Message : ${data.message} ${amount_cents / 100} EGP`);
       } else {
          console.log(`❌ Failed Payment Message : ${data.message}`);
       }
@@ -894,12 +893,8 @@ export const createOnlineOrder = async (data)=>{
       user , 
       patient_Name , 
       patient_Age , 
-      doctor_Name , 
       patient_Phone , 
-      patient_History , 
       gender , 
-      street , 
-      city 
    } = data ;
 
    const cart = await cartModel.findOne({user:user}) ;
@@ -913,10 +908,8 @@ export const createOnlineOrder = async (data)=>{
       user:user ,
       patient_Name ,
       patient_Age , 
-      doctor_Name , 
       cart:cart._id ,
-      patient_Phone ,
-      patient_History , 
+      patient_Phone , 
       gender ,
       invoice_number ,
       is_Paid : true ,
@@ -927,10 +920,6 @@ export const createOnlineOrder = async (data)=>{
          priceAfterDiscount:priceAfterDiscount ,
          final_amount
       })) ,
-      shipping_Address:{
-         street: street ,
-         city: city ,
-      } ,
    })
 
    //! Added invoice to this Order :

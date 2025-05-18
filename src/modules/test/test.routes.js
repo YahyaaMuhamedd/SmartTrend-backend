@@ -1,7 +1,7 @@
 import { Router } from "express";
 import * as testControl from "./test.controller.js";
 import {validation} from "../../middleWare/validation.js";
-import { addTestVal, paramsIdVal, updateTestVal } from "./test.validate.js";
+import { addTestOnlyVal, addTestVal, paramsIdVal, updateTestVal } from "./test.validate.js";
 import { protectedRoutes } from "../../middleWare/authentication.js";
 import { authorize } from "../../middleWare/authorization.js";
 import { ROLES } from "../../utilities/enums.js";
@@ -17,7 +17,13 @@ router.route("/")
    .get( testControl.getAllTest)
    // .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , testControl.getAllTest)
    //& Add Test And Price in Same EndPoint :
-   .post(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) ,  validation(addTestVal) ,  testControl.addNewTest)
+   .post(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) ,  validation(addTestVal) ,  testControl.addTest)
+   
+
+//^===========================Add Test With Price============================================
+router.route("/addTestWithPrice")
+   //& Add Test And Price in Same EndPoint :
+   .post(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) ,  validation(addTestVal) ,  testControl.addTest)
    
 
 
@@ -35,7 +41,7 @@ router.route("/getTestCount")
 
 //^=========================== Add Test And Price in Same EndPoint  ==============================
 router.route("/addTestOnly")
-      .post(protectedRoutes , authorize("admin" , "moderator") ,  validation(addTestVal)  , testControl.addTestOnly)
+      .post(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) ,  validation(addTestOnlyVal)  , testControl.addTestOnly)
 
 
 

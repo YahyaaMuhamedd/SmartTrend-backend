@@ -73,7 +73,7 @@ export const transformOnlineSystem = catchError(
       await order.save() ;
 
       //! Create Transformation invoice Pdf  Orders :
-      create_pdf(pdf_transform , order , `transform_${patient_Name_Slug}_${order._id}`);
+      await create_pdf(pdf_transform , order , `transform_${patient_Name_Slug}_${order._id}`);
 
       res.json({message:"success" , url:`${process.env.BASE_URL}/pdf/transform_${patient_Name_Slug}_${order._id}.pdf`}) ;
    }

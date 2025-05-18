@@ -3,23 +3,15 @@ import JoiDate from '@joi/date';
 const Joi = coreJoi.extend(JoiDate);
 
 
-// const schema = Joi.date().format('YYYY-MM-DD').utc(); validation to Date
-
-
-// export const signUpVal = Joi.object({
-//    name:Joi.string().min(2).max(50).required().trim() ,
-// 	phone:Joi.string().pattern(/^(002)?01[0125][0-9]{8}$/).trim() ,
-//    birthDay:Joi.date().format('YYYY-MM-DD') , 
-//    email:Joi.string().email().required().trim() ,
-//    password:Joi.string().pattern(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/).required() ,
-//    rePassword:Joi.valid(Joi.ref("password")).required() ,
-// })
-
-
 export const signUpVal = Joi.object({
    name: Joi.string().min(2).max(50).required().trim(),
    email: Joi.string().email().required().trim(),
    googleId: Joi.string() , 
+   gender: Joi.alternatives().conditional("googleId", {
+      is: Joi.exist(),
+      then: Joi.string().optional(),
+      otherwise: Joi.string().valid('male', 'female').required(),
+   }),
    phone: Joi.alternatives().conditional("googleId", {
       is: Joi.exist(),
       then: Joi.string().optional(),

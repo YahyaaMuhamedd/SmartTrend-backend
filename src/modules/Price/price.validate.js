@@ -27,13 +27,15 @@ export const singleVal = {
 
 export const paramsIdVal = Joi.object({
    id:Joi.string().hex().length(24).required() ,
-   limit:Joi.string() 
+   limit:Joi.string() ,
+   keyword:Joi.string() ,
+
 })
 
 
 export const addPriceVal = Joi.object({
    price:Joi.number().min(0).required() ,
-   discount:Joi.number().min(0).required() ,
+   priceAfterDiscount:Joi.number().min(0).required() ,
    final_amount:Joi.number().min(0).required() ,
    company:Joi.string().hex().length(24).required() ,
    test:Joi.string().hex().length(24).required() 
@@ -46,7 +48,7 @@ export const updatePriceVal = Joi.object({
 
 
    price:Joi.number().min(0).required() ,
-   discount:Joi.number().min(0).required() ,
+   priceAfterDiscount:Joi.number().min(0).required() ,
    final_amount:Joi.number().min(0) ,
 })
 
@@ -55,6 +57,6 @@ export const updatePriceByIdVal = Joi.object({
    id:Joi.string().hex().length(24).required() ,
 
    price:Joi.number().min(0).required() ,
-   discount:Joi.number().min(0).required() ,
+   priceAfterDiscount:Joi.number().min(0).required() ,
    final_amount:Joi.number().min(0) ,
 })

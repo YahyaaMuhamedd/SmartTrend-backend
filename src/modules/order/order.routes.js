@@ -3,7 +3,7 @@ import * as orderControl from "./order.controller.js";
 import {validation} from "../../middleWare/validation.js";
 import { protectedRoutes } from "../../middleWare/authentication.js";
 import { authorize } from "../../middleWare/authorization.js";
-import { addHouseCallVal , cancelOrderVal , createOrderVal , generateInvoiceOrderVal , paramsIdVal } from "./order.validate.js";
+import { addHouseCallVal , cancelOrderVal , createOnlineOrderVal, createOrderVal , generateInvoiceOrderVal , paramsIdVal } from "./order.validate.js";
 import { ROLES } from "../../utilities/enums.js";
 
 
@@ -52,7 +52,7 @@ const router = Router() ;
    router.route("/create-session")
       .post(protectedRoutes , 
          authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , 
-         validation(createOrderVal) , 
+         validation(createOnlineOrderVal) , 
          orderControl.checkExistPatientMiddleWare , 
          orderControl.createSession )
 

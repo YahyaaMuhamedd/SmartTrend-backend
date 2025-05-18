@@ -84,11 +84,11 @@ export const getTestCount = catchError(
 
 
 
-export const addNewTest = catchError(
+export const addTest = catchError(
    async(req , res , next)=>{
-      const {name , condition , description  , company , discount , price , final_amount} = req.body ;
+      const {name , condition , description  , company , priceAfterDiscount , price , final_amount} = req.body ;
 
-
+      
       const companyExist = await companyModel.findById(company) ;
       if(!companyExist) return next(new AppError("Company Not Exist" , 404))
 
@@ -113,13 +113,15 @@ export const addNewTest = catchError(
          return next(new AppError("Test Already Added To Price In This Company" , 404)) ;
       }
 
-      const priceAfterDiscount = price -  ((price * discount) / 100) ;
+      const discount = (( price - priceAfterDiscount ) / price ) * 100 ;
       const newTestAndPrice = await priceModel.create({testName , price , final_amount , priceAfterDiscount , companyName  , test , company , discount , createdBy }) ;
 
       !newTestAndPrice && next(new AppError("Test Not Added", 404) ) ;
       newTestAndPrice &&  res.json({message:"success" ,newTest ,  newTestAndPrice}) ;
    }
 )
+
+
 
 
 //& Get Single Test :
@@ -141,11 +143,20 @@ export const updateTest = catchError(
       const {name , condition , description , isActive} = req.body ;
       const {id} = req.params ;
 
-
       const testExist = await testModel.findById(id) ;
-      !testExist && next(new AppError("Test Not Found", 404) ) ;
+      !testExist && next(new AppError("Test Not Exist", 404) ) ;
 
-      
+     // 1- Check new test name not exist in database and not same name to this id :
+      const duplicateTest = await testModel.findOne({ name , _id: { $ne: id } });
+      if (duplicateTest) return next(new AppError("Test name already exists", 400));
+
+      // 2- if test name is changed , update test name in all prices :
+      if (name !== testExist.name) {
+         await priceModel.updateMany(
+            { testName: testExist.name } ,
+            { $set: { testName: name } }
+         );
+      }
       
       //&Create slug By Test Name : 
       const slug = slugify(name) ;
@@ -183,16 +194,16 @@ export const deleteTest = catchError(
 //& Add Test Only  :
 export const addTestOnly = catchError(
    async(req , res , next)=>{
-      const testExist = await testModel.findOne({ name:req.body.name}) ;
+      const {name , condition , description} = req.body ;
+
+      const testExist = await testModel.findOne({ name }) ;
       if(testExist) return next(new AppError("Test Already Exist", 404) ) ;
 
-      
-      
-      const {name , condition , description , isActive} = req.body ;
+
       //&Create slug By Test Name : 
       const slug = slugify(name) ;
 
-      const test = await testModel.create({name , condition , description , isActive , slug , createdBy:req.user._id}) ;
+      const test = await testModel.create({name , condition , description  , slug , createdBy:req.user._id}) ;
 
       !test && next(new AppError("Test Not Added", 404) ) ;
       test && res.json({message:"success" , test})

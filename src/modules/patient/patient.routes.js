@@ -13,8 +13,8 @@ const router  = Router() ;
 
 //^=========================== Get Patients, Add Patient =====================================
 router.route("/")
-      // .get(PC.getAllPatient)
-      .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , PC.getAllPatient)
+      .get(PC.getAllPatient)
+      // .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , PC.getAllPatient)
       .post (protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(addPatientVal) ,  PC.add_Patient) 
 
 

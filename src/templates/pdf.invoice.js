@@ -130,16 +130,17 @@ export let pdf_invoice = (data) => {
          <div class="invoice-box">
 
             <!-- شعار الشركة -->
-            <img src="https://fekrahmedicalback-end-production-c89a.up.railway.app/images/newLogo.png" alt="Logo" style="max-width: 150px; margin-bottom: 20px;" />
+            <img src="${process.env.BASE_URL}/images/newLogo.png" alt="Logo" style="max-width: 150px; margin-bottom: 20px ;" />
 
             <table cellpadding="0" cellspacing="0">
                <tr class="top">
-                  <h1 style=" text-align: center ; "> Fekrah Medical </h1>
+                  <h1 style=" text-align: center ; "> SMART TREND </h1>
 
                   <ul style="font-weight:bold; list-style:none;">
-                     <li>Invoice Num: ${data.invoice_number}</li>
-                     <li>Created_At: ${new Date(data.createdAt).toISOString().split('T')[0] }</li>
+                     <li>Invoice Number: ${data.invoice_number}</li>
+                     <li>Order Number: ${data.order_Number}</li>
                      <li>Company Name: ${data.company.name}</li>
+                     <li>Created At: ${new Date(data.createdAt).toISOString().split('T')[0] }</li>
                   </ul>
                </tr>
                <hr/>
@@ -149,10 +150,11 @@ export let pdf_invoice = (data) => {
                      <table>
                         <tr>
                            <td>
+                              Patient Information :- <br />
                               Patient Name : ${data.patient_Name} <br />
-                              Patient Street : ${data.shipping_Address.street} <br />
-                              Patient City : ${data.shipping_Address.city} <br />
-                              Patient Phone : ${data.patient_Phone} <br />
+                              Patient Street : ${data.shipping_Address.street?data.shipping_Address.street:"لا يوجد"} <br />
+                              Patient City : ${data.shipping_Address.city?data.shipping_Address.city:"لا يوجد"} <br />
+                              Patient Phone : ${data.patient_Phone? data.patient_Phone :"لا يوجد"} <br />
                            </td>
    
                         </tr>
@@ -166,8 +168,8 @@ export let pdf_invoice = (data) => {
                </tr>
       
                <tr class="details">
-                  <td style="font-weight:bold;">Check Total Price After Discount</td>
-                  <td style="font-weight:bold;"> ${data.total_Price_After_Discount} EGP</td>
+                  <td style="font-weight:bold;">Check Total Price</td>
+                  <td style="font-weight:bold;"> 00.00 EGP</td>
                </tr>
       
                <tr class="heading">
@@ -178,22 +180,22 @@ export let pdf_invoice = (data) => {
                ${data.orderItems.map((ele) => `
                   <tr class="item">
                      <td>${ele?.test.name}</td>
-                     <td>${Math.round(ele.priceAfterDiscount) == ele.priceAfterDiscount ? `${ele.priceAfterDiscount}.00 EGP ` : `${ele.priceAfterDiscount} EGP `}</td>
+                     <td>00.00 EGP</td>
                   </tr>
                `).join(" ")}
 
                <tr class="total">
                   <td style="font-weight:bold;">Total Price</td>
-                  <td>Total: ${Math.round(data.total_Price_After_Discount) == data.total_Price_After_Discount ? `${data.total_Price_After_Discount}.00 EGP ` : `${data.total_Price_After_Discount} EGP `}</td>
+                  <td>Total: 00.00 EGP </td>
                </tr>
 
             </table>
             
             <div class="signature">
-               <p>Fekrah Medical - www.fekrahmedical.com</p>
-               <p>Address: [Your Company Address]</p>
+               <p>TREND - www.trend-sm.com</p>
+               <p>Address: Cairo</p>
                <p>Authorized Signature</p>
-               <p>____________________</p>
+               <p>________SMART_TREND________</p>
                </div>
                
             <div class="attention">

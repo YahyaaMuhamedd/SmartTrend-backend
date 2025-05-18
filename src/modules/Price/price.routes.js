@@ -34,7 +34,7 @@ const router = Router() ;
       
       //^=========================== Get Specific Price And Update, Delete Price =================
       router.route("/:id")
-      .get(protectedRoutes  , authorize(ROLES.ADMIN , ROLES.MODERATOR) , validation(paramsIdVal) ,  priceControl.getSinglePrice)
+      .get(protectedRoutes  , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(paramsIdVal) ,  priceControl.getSinglePrice)
       .put(protectedRoutes  , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(updatePriceByIdVal) , priceControl.updatePriceById)
 
 

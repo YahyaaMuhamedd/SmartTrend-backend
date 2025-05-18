@@ -110,14 +110,13 @@ export let pdf_transform = (data)=>{
                <table cellpadding="0" cellspacing="0">
                   <tr class="top">
 
-                              <h1 style=" text-align: center ; "> Fekrah Medical </h1>
-
-      
-                              <ul style="font-weight:bold;  list-style:none;">
-                                 <li>Invoice Num: ${data.invoice_number}</li>
-                                 <li>Created_At: ${data.approved_At}</li>
-                                 <li>Insurance_Number: ${data.transform_number}</li>
-                              </ul>
+                     <h1 style=" text-align: center ; "> SMART TREND </h1>
+                     <ul style="font-weight:bold;  list-style:none;">
+                        <li>Order Number: ${data.order_Number}</li>
+                        <li>Invoice Number: ${data.invoice_number}</li>
+                        <li>Insurance Number: ${data.transform_number}</li>
+                        <li>Created At:  ${new Date(data.approved_At).toISOString().split('T')[0] }</li>
+                     </ul>
 
                   </tr>
                   <hr/>
@@ -130,7 +129,7 @@ export let pdf_transform = (data)=>{
                               <td>
                                  Patient Name : ${data.patient_Name}<br />
                                  Patient Age : ${data.patient_Age} <br />
-                                 Patient City : ${data.shipping_Address.city}
+                                 Patient City : ${data.shipping_Address.city?data.shipping_Address.city:"لا يوجد"}
                               </td>
    
                               <td>

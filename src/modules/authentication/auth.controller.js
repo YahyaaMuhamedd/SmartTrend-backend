@@ -17,7 +17,7 @@ const nanoid = customAlphabet('0123456789', 6) ;
 //& Sign Up  :
 export const signUp = catchError(
    async (req , res , next)=>{
-      const {name  , phone , birthDay , email ,  password } = req.body ;
+      const {name  , phone , birthDay , email ,  password , gender } = req.body ;
 
      //& Calculation Age From BirthDay :
       let age = 0 ;
@@ -31,11 +31,11 @@ export const signUp = catchError(
       age = nowAge(birthDay)
 
 
-      const user = await userModel.create({name , age  , phone , birthDay , email  , password}) ;
+      const user = await userModel.create({name , age , gender , phone , birthDay , email  , password}) ;
 
 
       const token = jwt.sign(
-         {_id:user._id , name:user.name , phone: user.phone , email:user.email , role:user.role , birthDay:user.birthDay , age:user.age , imgCover:user.imgCover} , 
+         {_id:user._id , name:user.name , gender:user.gender , phone: user.phone , email:user.email , role:user.role , birthDay:user.birthDay , age:user.age , imgCover:user.imgCover} , 
          process.env.SECRET_KEY , 
          {expiresIn:process.env.TOKEN_EXPIRATION} // expired Token After 2 hours or ==> expiresIn:"2h" 
       ) 
@@ -57,7 +57,7 @@ export const signIn = catchError(
       // const loggedUser = await userModel.findById(user._id).select("-_id name role  phone birthDay email  age imgCover") ;
       if(user && bcrypt.compareSync(password , user?.password)) {
          const token = jwt.sign(
-            {_id:user._id , name:user.name , phone: user.phone , email:user.email , role:user.role , birthDay:user.birthDay , age:user.age , imgCover:user.imgCover} , 
+            {_id:user._id , name:user.name , gender:user.gender ,  phone: user.phone , email:user.email , role:user.role , birthDay:user.birthDay , age:user.age , imgCover:user.imgCover} , 
             process.env.SECRET_KEY , 
             {expiresIn:process.env.TOKEN_EXPIRATION} // expired Token After 2 hours or ==> expiresIn:"2h" 
             // {expiresIn:60*60*2} // expired Token After 2 hours or ==> expiresIn:"2h" 
@@ -89,7 +89,7 @@ export const changePassword = catchError(
 
          //& Generate Token :
          const token = jwt.sign(
-            {_id:user._id , name:user.name , phone: user.phone , email:user.email , role:user.role , birthDay:user.birthDay , age:user.age , imgCover:user.imgCover} , 
+            {_id:user._id , name:user.name , gender:user.gender ,  phone: user.phone , email:user.email , role:user.role , birthDay:user.birthDay , age:user.age , imgCover:user.imgCover} , 
             process.env.SECRET_KEY , 
             {expiresIn:process.env.TOKEN_EXPIRATION} // expired Token After 2 hours or ==> expiresIn:"2h" 
             // {expiresIn:60*60*2} // expired Token After 2 hours or ==> expiresIn:"2h" 
@@ -259,19 +259,23 @@ export const generateQR_Code = catchError(
 //&  Login With Google :
 export const loginWithGoogle = catchError(
    async (req, res) => {
-      const email = req.user.emails[0].value
+      const email = req.user.emails[0].value ;
+      const emailVerified = req.user.emails[0].verified ;
+      console.log(req.user);
+      
       let user = await userModel.findOne({email} ) ;
       console.log(user?"Successfully Ya Mahmoud Google":"Fail Login Ya MAhmoud Google");
       if(!user){
          user = await userModel.create({
             name:req.user.displayName ,
             googleId:req.user.id ,
-            email 
+            email ,
+            confirmedEmail:emailVerified
          })
       }
 
       const token = jwt.sign(
-         {_id:user._id , name:user.name , phone: user.phone , email:user.email , role:user.role , birthDay:user.birthDay , age:user.age , imgCover:user.imgCover} , 
+         {_id:user._id , name:user.name , gender:user.gender ,  phone: user.phone , email:user.email , role:user.role , birthDay:user.birthDay , age:user.age , imgCover:user.imgCover} , 
          process.env.SECRET_KEY , 
          {expiresIn:process.env.TOKEN_EXPIRATION} // expired Token After 2 hours or ==> expiresIn:"2h" 
       ) 

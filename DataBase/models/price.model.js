@@ -27,7 +27,8 @@ const schema = new Schema({
    } ,
    discount:{
       type:Number ,
-      min: 0 
+      min: 0 ,
+      set: value => Math.floor(value)  // <-- هنا بنقرب تلقائيًا عند الكتابة 
    } ,
    final_amount:{
       type:Number ,
@@ -56,6 +57,7 @@ schema.pre("save"  , function(next){
    if (!this.creationTimeAt) {
       this.creationTimeAt = Date.now() ;
    }
+   if (this.discount) this.discount = Math.floor(this.discount);
    next()
 }) ;
 
