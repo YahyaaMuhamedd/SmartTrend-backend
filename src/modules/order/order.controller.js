@@ -212,7 +212,7 @@ export const getSpecificOrder = catchError(
 export const createCashOrder = catchError(
    async(req , res , next)=>{
 
-      const {patient_Name, patient_Age, gender, patient_Phone} = req.patient ;
+      const {patient_Name, patient_Age, gender, patient_Phone , birthDay} = req.patient ;
       const cart = await cartModel.findOne({user:req.user._id}) ;
       if(!cart) return next(new AppError("Cart Not Found", 404)) ;
 
@@ -220,10 +220,14 @@ export const createCashOrder = catchError(
       const invoice_number = invoice_nanoid() ;
       const order_Number = await getNextOrderNumber() ;
 
+      console.log("Done3");
+
+
       const order = await orderModel.create({
          order_Number ,
          user:req.user._id ,
          patient_Name , 
+         birthDay ,
          patient_Age , 
          cart:cart._id ,
          patient_Phone ,
@@ -238,6 +242,7 @@ export const createCashOrder = catchError(
             final_amount
          }))
       })
+      console.log("Done4");
       
       //! Added invoice to this Order :
       const patient_Name_Slug = slugify(order.patient_Name) ;
@@ -246,6 +251,8 @@ export const createCashOrder = catchError(
       //! Create Invoice Pdf  orders :
       try {
          await create_pdf(pdf_invoice , add_Invoice_Order , `invoice_${patient_Name_Slug}_${order._id}`);
+               console.log("Done5");
+
       } catch (error) {
          return next(new AppError(error.message, 500));
          // return next(new AppError("Invoice PDF creation failed", 500));
@@ -262,6 +269,7 @@ export const createCashOrder = catchError(
          }
       }));
       await testModel.bulkWrite(options);
+      console.log("Done6");
 
       if(!order) return next(new AppError("Order Failed", 400)) ;
       res.json({message:"success", add_Invoice_Order, patient:req.patient});
@@ -356,6 +364,7 @@ export const checkExistPatientMiddleWare = catchError(
          return age
       }
       age = nowAge(birthDay)
+      console.log("Done1");
 
       //! Added New Patient :
       let existPatient = await patientModel.findOne({patient_Name}) ;
@@ -370,6 +379,8 @@ export const checkExistPatientMiddleWare = catchError(
          if(!patient) return next(new AppError("Patient Not Updated" , 404)) ;
          req.patient = patient
          next()
+      console.log("Done2");
+
       }else{
          const patient = await patientModel.create({
             patient_Name , 
@@ -381,6 +392,8 @@ export const checkExistPatientMiddleWare = catchError(
          if(!patient) return next(new AppError("Patient Not Added" , 404)) ;
          req.patient = patient
          next()
+      console.log("Done3");
+
       }
    }
 )
@@ -899,6 +912,7 @@ export const createOnlineOrder = async (data)=>{
       patient_Age , 
       patient_Phone , 
       gender , 
+      birthDay
    } = data ;
 
    const cart = await cartModel.findOne({user:user}) ;
@@ -908,13 +922,16 @@ export const createOnlineOrder = async (data)=>{
    console.log("Done 22");
    const order_Number = await getNextOrderNumber() ;
    console.log("Done 33");
+
+
    const order = await orderModel.create({
       order_Number ,
       user:user ,
       patient_Name ,
       patient_Age , 
       cart:cart._id ,
-      patient_Phone , 
+      patient_Phone ,
+      birthDay , 
       gender ,
       invoice_number ,
       is_Paid : true ,

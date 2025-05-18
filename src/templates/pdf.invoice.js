@@ -152,8 +152,8 @@ export let pdf_invoice = (data) => {
                            <td>
                               Patient Information :- <br />
                               Patient Name : ${data.patient_Name} <br />
-                              Patient Street : ${data.shipping_Address.street?data.shipping_Address.street:"لا يوجد"} <br />
-                              Patient City : ${data.shipping_Address.city?data.shipping_Address.city:"لا يوجد"} <br />
+                              Patient Street : "لا يوجد" <br />
+                              Patient City : "لا يوجد"} <br />
                               Patient Phone : ${data.patient_Phone? data.patient_Phone :"لا يوجد"} <br />
                            </td>
    
