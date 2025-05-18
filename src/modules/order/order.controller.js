@@ -816,7 +816,7 @@ export const createSession = async (req , res , next) => {
          patient_Age ,
          gender ,  
          patient_Phone , 
-         birthDay , 
+         birthDay:birthDay.slice(0,10) , 
       } ;
 
 
@@ -880,7 +880,7 @@ export const webhookMiddleWre = catchError(
          
       if (success) {
          await createOnlineOrder(payment_key_claims.extra)
-         // console.log(`💰 Successfully Payment Message : ${data.message} ${amount_cents / 100} EGP`);
+         console.log(`💰 Successfully Payment Message : ${data.message} ${amount_cents / 100} EGP`);
       } else {
          console.log(`❌ Failed Payment Message : ${data.message}`);
       }
@@ -889,6 +889,8 @@ export const webhookMiddleWre = catchError(
 
 //& 4- Create Online Order :
 export const createOnlineOrder = async (data)=>{
+   console.log("Done create Order");
+   
    const{
       user , 
       patient_Name , 
