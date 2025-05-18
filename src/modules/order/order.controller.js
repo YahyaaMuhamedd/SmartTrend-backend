@@ -816,7 +816,7 @@ export const createSession = async (req , res , next) => {
          patient_Age ,
          gender ,  
          patient_Phone , 
-         birthDay:birthDay.slice(0,10) , 
+         birthDay , 
       } ;
 
 
@@ -890,6 +890,7 @@ export const webhookMiddleWre = catchError(
 //& 4- Create Online Order :
 export const createOnlineOrder = async (data)=>{
    console.log("Done create Order");
+   console.log(data);
    
    const{
       user , 
