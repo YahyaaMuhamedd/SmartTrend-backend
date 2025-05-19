@@ -944,13 +944,9 @@ export const createOnlineOrder = async (data)=>{
       })) ,
    })
 
-   console.log("Done 1");
-   
-
    //! Added invoice to this Order :
    const patient_Name_Slug = slugify(`${order.patient_Name}`) ;
    const add_Invoice_Order = await orderModel.findByIdAndUpdate(order._id , {invoice_pdf  : `invoice_${patient_Name_Slug}_${order._id}.pdf` } , {new:true})
-   console.log("Done 2");
    
    //! Create Invoice Pdf  orders :
    try {
