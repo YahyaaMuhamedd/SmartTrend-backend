@@ -20,6 +20,10 @@ const schema = new Schema({
    passwordChangedAt:{
       type:Date 
    } ,
+   service:{
+      type:String ,
+      default:"analysis" 
+   },
    address:{
       type:String 
    },

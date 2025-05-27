@@ -129,7 +129,7 @@ export let pdf_transform = (data)=>{
                               <td>
                                  Patient Name : ${data.patient_Name}<br />
                                  Patient Age : ${data.patient_Age} <br />
-                                 Patient City : ${data.shipping_Address.city?data.shipping_Address.city:"لا يوجد"}
+                                 Patient BirthDay : ${data.birthDay} 
                               </td>
    
                               <td>

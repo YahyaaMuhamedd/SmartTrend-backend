@@ -167,6 +167,7 @@ const date = generate_Date() ;
 
 export const pdf_Report_data = (data)=>{
 
+
    const total_Net_Amount = data?.orders.reduce((acc , entry)=>{
       return acc + entry.Net_Amount
    } , 0)
@@ -177,9 +178,6 @@ export const pdf_Report_data = (data)=>{
    } , 0)
 
 
-   const total_Price = data?.orders.reduce((acc , entry)=>{
-      return acc + entry.total_Price
-   } , 0)
 
    return (
       `
@@ -234,6 +232,7 @@ export const pdf_Report_data = (data)=>{
                   border-bottom: 1px solid #ddd;
                   font-weight: bold;
                   text-align:center ;
+                  font-size:10px ;
                }
       
                .invoice-box table tr.details td {
@@ -243,7 +242,7 @@ export const pdf_Report_data = (data)=>{
                .invoice-box table tr.item td {
                   border-bottom: 1px solid #eee;
                   text-align:center ;
-
+                  font-size:10px ;
                }
       
                .invoice-box table tr.item.last td {
@@ -254,6 +253,7 @@ export const pdf_Report_data = (data)=>{
                   border-top: 2px solid #eee;
                   font-weight: bold;
                   text-align:center ;
+                  font-size:10px ;
                }
       
                @media only screen and (max-width: 600px) {
@@ -291,7 +291,7 @@ export const pdf_Report_data = (data)=>{
                <table cellpadding="0" cellspacing="0">
                   <tr class="top">
 
-                              <h1 style=" text-align: center ; "> Fekrah Medical </h1>
+                              <h1 style=" text-align: center ; ">SMART TREND</h1>
 
       
                               <ul style="font-weight:bold;  list-style:none; margin-top:20px ;">
@@ -308,9 +308,9 @@ export const pdf_Report_data = (data)=>{
 
                            <tr>
                               <td>
-                                 ${data.patientExist?.patient_Name ?  `Patient Name :${data.patientExist?.patient_Name}<br />
-                                    Patient Age : ${data.patientExist?.patient_Age}<br />
-                                    Patient City : ${data.patientExist?.address.city}`
+                                 ${data.patient_Name ?  `Patient Name :${data.patient_Name}<br />
+                                    Patient Age : ${data.patient_Age}<br />
+                                    Patient Birthday : ${data.birthDay}`
                                  :""}
                               </td>
                            </tr>
@@ -321,19 +321,25 @@ export const pdf_Report_data = (data)=>{
 
                   <tr class="heading">
                      <td>Number</td>
+                     <td>Order</td>
+                     <td>Name</td>
+                     <td>Phone</td>
+                     <td>Invoice</td>
                      <td>Company</td>
                      <td>Date</td>
-                     <td>Total_Price</td>
-                     <td>Price_Discount</td>
-                     <td>Net_Amount</td>
+                     <td>Payment</td>
+                     <td>Net Amount</td>
                   </tr>
       
                   ${data.orders?.map((ele , index)=>`
                            <tr class="item">
                               <td>${index + 1}</td>
+                              <td>${ele.order_Number}</td>
+                              <td>${ele.patient_Name}</td>
+                              <td>${ele.patient_Phone}</td>
+                              <td>${ele.invoice_number}</td>
                               <td>${ele.company?.name}</td>
                               <td>${new Date(ele.createdAtOrder).toString().slice(0 , 24)}</td>
-                              <td>${Math.round(ele.total_Price) }</td>
                               <td>${Math.round(ele.total_Price_After_Discount)}</td>
                               <td>${Math.round(ele.Net_Amount)}</td>
                            </tr>
@@ -345,8 +351,10 @@ export const pdf_Report_data = (data)=>{
                      <td>Total</td>
                      <td></td>
                      <td></td>
-      
-                     <td> ${ Math.round(total_Price)}.00</td>      
+                     <td></td>      
+                     <td></td>      
+                     <td></td>      
+                     <td></td>      
                      <td> ${Math.round(total_Price_Discount ) }.00</td>
                      <td> ${ Math.round(total_Net_Amount )}.00</td>
                </tr>

@@ -23,6 +23,7 @@ const schema = new Schema({
    } ,
    phone:{
       type:String ,
+      unique:[true , "Phone is Unique"]
    } ,
    email:{
       type:String ,

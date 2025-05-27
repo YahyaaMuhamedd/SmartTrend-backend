@@ -14,7 +14,7 @@ export const addTestVal = Joi.object({
    company:Joi.string().hex().length(24).required() ,
    price:Joi.number().min(0).required() ,
    priceAfterDiscount:Joi.number().min(0).required() ,
-   final_amount:Joi.number().min(0).required() ,
+   contract_Price:Joi.number().min(0).required() ,
 })
 
 

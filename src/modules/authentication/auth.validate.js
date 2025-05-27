@@ -38,7 +38,7 @@ export const signUpVal = Joi.object({
 
 
 export const signInVal = Joi.object({
-   email:Joi.string().email().required().trim() ,
+   userAccount:Joi.string().trim() ,
    password:Joi.string().pattern(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/).required() ,
 })
 

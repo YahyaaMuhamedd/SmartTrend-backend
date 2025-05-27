@@ -1,6 +1,6 @@
 import { Router } from "express";
 import * as AuthControl from "./auth.controller.js";
-import { emailExist } from "../../middleWare/emailExist.js";
+import { accountExist } from "../../middleWare/accountExist.js";
 import {signUpVal ,  signInVal , changePasswordVal , sendCodeToEmailVal , resetPasswordVal, verifyOTPVal, verifyOTPConfirmedEmailVal} from "../authentication/auth.validate.js";
 
 import { protectedRoutes } from "../../middleWare/authentication.js";
@@ -14,7 +14,7 @@ import passport from "passport";
 const router  = Router() ; 
 //^=========================== Sign Up =============================================
 	router.route("/signUp")
-		.post (validation(signUpVal) ,  emailExist  , AuthControl.signUp) 
+		.post (validation(signUpVal) ,  accountExist  , AuthControl.signUp) 
 
 
 

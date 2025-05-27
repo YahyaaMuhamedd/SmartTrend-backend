@@ -33,3 +33,9 @@ export const getReportVal = Joi.object({
    company :Joi.string().min(24).max(24).optional() , 
 	patient:Joi.string().min(2).max(30).optional() ,
 })
+
+export const getReportContractPriceVal = Joi.object({
+   start :Joi.date().format('YYYY-MM-DD').optional() , 
+   end :Joi.date().format('YYYY-MM-DD').optional() , 
+   company :Joi.string().min(24).max(24).required() , 
+})

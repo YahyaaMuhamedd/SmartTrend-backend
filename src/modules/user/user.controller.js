@@ -144,8 +144,9 @@ export const updateUser = catchError(
       const user = await userModel.findById(req.user._id)
       if(!user) return next(new AppError("User Not Found" , 404)) ;
       
-      const userExist = await userModel.findOne({email}) ;      
-      if(userExist && user.email !== email) return next(new AppError("Email Already Exist" , 401))
+      // 1- Check new user name or email not exist in database and not same name or email to this id :
+      const duplicateUser = await userModel.findOne({ name , email , _id: { $ne: req.user._id } });
+      if (duplicateUser) return next(new AppError("Name or email already exists", 400));
 
       //& Calculation Age From BirthDay :
       let age = 0 ;
@@ -167,11 +168,60 @@ export const updateUser = catchError(
       await user.save()
 
       const userUpdated = await userModel.findById(req.user._id).select("-_id name gender role  phone birthDay email  age imgCover") ;
+      const token = jwt.sign(
+         {_id:user._id , name:user.name , gender:user.gender ,  phone: user.phone , email:user.email , role:user.role , birthDay:user.birthDay , age:user.age , imgCover:user.imgCover} , 
+         process.env.SECRET_KEY , 
+         {expiresIn:process.env.TOKEN_EXPIRATION} // expired Token After 2 hours or ==> expiresIn:"2h" 
+         // {expiresIn:60*60*2} // expired Token After 2 hours or ==> expiresIn:"2h" 
+      ) 
 
       !userUpdated &&  next(new AppError("User Not Found After Updated" , 404)) ;
-      userUpdated &&  res.json({message:"success" , updateUser:userUpdated})
+      userUpdated &&  res.json({message:"success" , updateUser:userUpdated , token})
    }
 )
+
+// //& Update User :
+// export const updateUser = catchError(
+//    async(req , res , next)=>{
+//       const {name , phone , email , birthDay , gender} = req.body ;
+
+//       const user = await userModel.findById(req.user._id)
+//       if(!user) return next(new AppError("User Not Found" , 404)) ;
+      
+//       const userExist = await userModel.findOne({email}) ;      
+//       if(userExist && user.email !== email) return next(new AppError("Email Already Exist" , 401))
+
+//       //& Calculation Age From BirthDay :
+//       let age = 0 ;
+//       let nowAge = (birthDay)=>{
+//          let dateNow = new Date()
+//          let birth = new Date(birthDay)
+//          let diff = dateNow - birth
+//          let age = Math.floor(diff/1000/60/60/24/365);
+//          return age
+//       }
+//       age = nowAge(birthDay) ;
+//       if(name) user.name = name ;
+//       if(gender) user.gender = gender ;
+//       if(phone) user.phone = phone ;
+//       if(email) user.email = email ;
+//       if(birthDay) user.birthDay = birthDay ;
+//       user.age = age ;
+      
+//       await user.save()
+
+//       const userUpdated = await userModel.findById(req.user._id).select("-_id name gender role  phone birthDay email  age imgCover") ;
+//       const token = jwt.sign(
+//          {_id:user._id , name:user.name , gender:user.gender ,  phone: user.phone , email:user.email , role:user.role , birthDay:user.birthDay , age:user.age , imgCover:user.imgCover} , 
+//          process.env.SECRET_KEY , 
+//          {expiresIn:process.env.TOKEN_EXPIRATION} // expired Token After 2 hours or ==> expiresIn:"2h" 
+//          // {expiresIn:60*60*2} // expired Token After 2 hours or ==> expiresIn:"2h" 
+//       ) 
+
+//       !userUpdated &&  next(new AppError("User Not Found After Updated" , 404)) ;
+//       userUpdated &&  res.json({message:"success" , updateUser:userUpdated , token})
+//    }
+// )
 
 
 //& Update User :

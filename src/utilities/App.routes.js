@@ -15,6 +15,7 @@ import onlineSystemRouter from "../modules/onlineSystem/onlineSystem.routes.js"
 import branchRouter from "../modules/branch/branch.routes.js"
 import advertRouter from "../modules/advert/advert.routes.js"
 import excelRouter from "../modules/excelSheet/excelSheet.routes.js"
+import profileRouter from "../modules/profile/profile.routes.js"
 
 
 const router = Router()
@@ -36,6 +37,7 @@ const router = Router()
    router.use("/branch" , branchRouter) ;
    router.use("/advert" , advertRouter) ;
    router.use("/excel" , excelRouter) ;
+   router.use("/profile" , profileRouter) ;
 
    router.use("/onlineSystem" , onlineSystemRouter) ;
 

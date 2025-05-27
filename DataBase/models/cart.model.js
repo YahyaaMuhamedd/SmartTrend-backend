@@ -13,6 +13,9 @@ const schema = new Schema({
       type:Types.ObjectId , 
       ref:"company"
    } ,
+   profilePrice:{
+      type:Number 
+   } ,
    cartItems:[
       {
          test:{
@@ -69,10 +72,11 @@ schema.virtual("total_Price").get(function (){
    return Math.round(total)
 })
 
+
 //& Calculate Total Price Before Discount : 
 schema.virtual("Net_Amount").get(function (){
    const total = this.cartItems.reduce((acc , entry)=>{
-      return acc + entry.price?.final_amount
+      return acc + entry.price?.contract_Price
    } , 0)
    return Math.round(total)
 })

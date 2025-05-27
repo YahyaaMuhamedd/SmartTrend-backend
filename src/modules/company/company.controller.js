@@ -29,7 +29,7 @@ export const getAllCompanies = catchError(
 
       let apiFeature = new ApiFeature(companyModel.find(filterObj), req.query ).pagination().fields().search().filter().sort();
       const companies = await apiFeature.mongooseQuery;
-      // const companies = await apiFeature.mongooseQuery.select("name phone address isActive logo description discount start addresses");
+      // const companies = await apiFeature.mongooseQuery.select("name service phone address isActive logo description discount start addresses");
 
       if(!companies.length) return next(new AppError("companies is Empty" , 404))
 
@@ -89,7 +89,7 @@ export const getCompanyCount = catchError(
 //& Add New Company :
 export const addCompany = catchError(
    async(req , res , next)=>{
-      const {name , email , phone, description , address} = req.body ;
+      const {name , email , phone, description , address , service} = req.body ;
       const companyExist = await companyModel.findOne({email}) ;
       if(companyExist) return next(new AppError("Company is Already Exist" , 402)) ;
 
@@ -113,6 +113,7 @@ export const addCompany = catchError(
          description , 
          address ,
          logo , 
+         service ,
          start ,
          createdBy
       }) ;
@@ -140,14 +141,18 @@ export const getSingleCompany = catchError(
 //& Update Company :
 export const updateCompany = catchError(
    async(req , res , next)=>{
-      const {name , email ,  address , phone , description  , isActive} = req.body ;
-      if(email){
-         const existCompany = await companyModel.findOne({email}) ;
-         if(existCompany) return next(new AppError("Company Email Already Exist")) ;
-      }
+      const {name , email ,  address , phone , description  , isActive , service} = req.body ;
+      const {id} = req.params ;
+
+      const existCompany = await companyModel.findById(id) ;
+      if(!existCompany) return next(new AppError("Company Not Exist")) ;
+
+      // 1- Check new company email not exist in database and not same email to this id :
+      const duplicateCompany = await companyModel.findOne({ email , _id: { $ne: id } });
+      if (duplicateCompany) return next(new AppError("Company Email Already Exists", 400));
 
 
-      const company = await companyModel.findByIdAndUpdate(req.params.id , {name , address , phone  , email , description  , isActive} , {new:true}) ;
+      const company = await companyModel.findByIdAndUpdate(req.params.id , {name  , service , address , phone  , email , description  , isActive} , {new:true}) ;
 
       !company && next(new AppError("Company Not Found", 404) ) ;
       company &&  res.json({message:"success" , company}) ;

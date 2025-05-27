@@ -50,9 +50,10 @@ export const signUp = catchError(
 //& Sign In :
 export const signIn = catchError(
    async (req , res , next)=>{
-      const{email , password} = req.body ;
-      const user = await userModel.findOne({email})
-      !user && next(new AppError("User Not Exist" , 401)) ;
+      const{userAccount ,  password} = req.body ;
+
+      const user = await userModel.findOne({$or:[{email : userAccount } , {phone : userAccount }]}) ;
+      !user && next(new AppError("User Not Exist" , 401)) ; 
 
       // const loggedUser = await userModel.findById(user._id).select("-_id name role  phone birthDay email  age imgCover") ;
       if(user && bcrypt.compareSync(password , user?.password)) {

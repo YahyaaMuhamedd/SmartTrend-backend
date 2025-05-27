@@ -97,7 +97,7 @@ export const getSinglePrice = catchError(
 //& Add Price :
 export const addPrice = catchError(
    async(req , res , next)=>{
-      const {final_amount , price , priceAfterDiscount ,  company , test} = req.body ;
+      const {contract_Price , price , priceAfterDiscount ,  company , test} = req.body ;
 
       
       const testExist = await testModel.findById(test) ;
@@ -118,7 +118,7 @@ export const addPrice = catchError(
       const newPrice = await priceModel.create({
          price ,
          discount ,
-         final_amount ,
+         contract_Price ,
          test ,
          company ,
          testName ,
@@ -138,7 +138,7 @@ export const addPrice = catchError(
 //& Update Price :
 export const updatePrice = catchError(
    async(req , res , next)=>{
-      const {test , company , final_amount , price , priceAfterDiscount } = req.body ;
+      const {test , company , contract_Price , price , priceAfterDiscount } = req.body ;
 
 
       const priceExist = await priceModel.findOne({test , company}) ;
@@ -146,7 +146,7 @@ export const updatePrice = catchError(
 
 
       const discount = (( price - priceAfterDiscount ) / price ) * 100 ;
-         priceExist.final_amount = final_amount ,  
+         priceExist.contract_Price = contract_Price ,  
          priceExist.price = price , 
          priceExist.priceAfterDiscount = priceAfterDiscount ,  
          priceExist.discount = discount
@@ -159,7 +159,7 @@ export const updatePrice = catchError(
 //& Update Price :
 export const updatePriceById = catchError(
    async(req , res , next)=>{
-      const {final_amount , price , priceAfterDiscount } = req.body ;
+      const {contract_Price , price , priceAfterDiscount } = req.body ;
       const {id} = req.params ;
 
       const priceExist = await priceModel.findById(id) ;
@@ -167,7 +167,7 @@ export const updatePriceById = catchError(
 
 
       const discount = (( price - priceAfterDiscount ) / price ) * 100 ;
-         priceExist.final_amount = final_amount ,  
+         priceExist.contract_Price = contract_Price ,  
          priceExist.price = price , 
          priceExist.priceAfterDiscount = priceAfterDiscount ,  
          priceExist.discount = discount

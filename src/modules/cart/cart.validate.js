@@ -20,3 +20,12 @@ export const addAllTestsToCartVal = Joi.object({
       Joi.string().hex().length(24).required() 
    ).required()
 })
+
+
+export const addAllTestsToCartByAdminVal = Joi.object({
+   userId:Joi.string().hex().length(24).required() , 
+   companyId:Joi.string().hex().length(24).required() , 
+   listIdTest:Joi.array().items(
+      Joi.string().hex().length(24).required() 
+   ).required()
+})

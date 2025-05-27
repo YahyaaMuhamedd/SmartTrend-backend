@@ -3,7 +3,7 @@ import * as orderControl from "./order.controller.js";
 import {validation} from "../../middleWare/validation.js";
 import { protectedRoutes } from "../../middleWare/authentication.js";
 import { authorize } from "../../middleWare/authorization.js";
-import { addHouseCallVal , cancelOrderVal , createOnlineOrderVal, createOrderVal , generateInvoiceOrderVal , paramsIdVal } from "./order.validate.js";
+import { addHouseCallVal , cancelOrderVal , createCashOrderAdminVal , createOnlineOrderVal, createOrderVal , generateInvoiceOrderVal , paramsIdVal } from "./order.validate.js";
 import { ROLES } from "../../utilities/enums.js";
 
 
@@ -32,7 +32,8 @@ const router = Router() ;
 
    //^============================ Get Order Count Admin Dashboard ===================================
    router.route("/orderCount")
-   .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) ,  orderControl.getOrderCount)
+   .get(orderControl.getOrderCount)
+   // .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) ,  orderControl.getOrderCount)
 
 
 
@@ -68,6 +69,18 @@ const router = Router() ;
          validation(createOrderVal) , 
          orderControl.checkExistPatientMiddleWare , 
          orderControl.createCashOrder
+      )
+
+
+
+         
+   //^================================== Create Cash Order By Admin ========================================
+   router.route("/createCashOrderByAdmin")
+      .post(protectedRoutes , 
+         authorize(ROLES.ADMIN) , 
+         validation(createCashOrderAdminVal) , 
+         orderControl.checkExistPatientMiddleWare , 
+         orderControl.createCashOrderByAdmin
       )
 
 

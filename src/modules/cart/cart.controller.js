@@ -119,7 +119,7 @@ export const addTestToCart = catchError(
 
 
 
-//& Add All Tests To Cart  :
+//& Add All Tests To Cart By Logged User :
 export const addAllTestsToCart = catchError(
    async(req , res , next)=>{
       const {listIdTest ,  company_id} = req.body ;
@@ -155,6 +155,42 @@ export const addAllTestsToCart = catchError(
       res.json({message:"success" , cartExist})
    }
 )
+
+
+
+
+//& Add All Tests To Cart By Admin to Specific User :
+export const addAllTestsToCartByAdmin = catchError(
+   async(req , res , next)=>{
+      const {listIdTest ,  companyId , userId} = req.body ;
+      
+      let priceList = [] ;
+      for (const element of listIdTest) {
+         const priceTestExist = await priceModel.findOne({test:element , company:companyId}) ;
+         if(!priceTestExist)  return next(new AppError(`Price Test Not Found in This Company ` , 404)) ;
+         priceList.push(priceTestExist)
+      }
+      let cartItems = priceList.map((price)=>{
+         return {
+               test:price.test ,
+               price:price
+            }
+      })
+
+      //^ Delete User Cart  :
+      await cartModel.findOneAndDelete({user:userId}) ;
+
+      const cart = new cartModel({
+         user:userId ,
+         company :companyId ,
+         cartItems
+      })
+      await cart.save() ;
+
+      res.json({message:"success" , cart})
+   }
+)
+
 
 
 

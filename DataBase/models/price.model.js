@@ -30,7 +30,7 @@ const schema = new Schema({
       min: 0 ,
       set: value => Math.floor(value)  // <-- هنا بنقرب تلقائيًا عند الكتابة 
    } ,
-   final_amount:{
+   contract_Price:{
       type:Number ,
       min: 0 
    } ,

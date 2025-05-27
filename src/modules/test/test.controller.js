@@ -86,7 +86,7 @@ export const getTestCount = catchError(
 
 export const addTest = catchError(
    async(req , res , next)=>{
-      const {name , condition , description  , company , priceAfterDiscount , price , final_amount} = req.body ;
+      const {name , condition , description  , company , priceAfterDiscount , price , contract_Price} = req.body ;
 
       
       const companyExist = await companyModel.findById(company) ;
@@ -114,7 +114,7 @@ export const addTest = catchError(
       }
 
       const discount = (( price - priceAfterDiscount ) / price ) * 100 ;
-      const newTestAndPrice = await priceModel.create({testName , price , final_amount , priceAfterDiscount , companyName  , test , company , discount , createdBy }) ;
+      const newTestAndPrice = await priceModel.create({testName , price , contract_Price , priceAfterDiscount , companyName  , test , company , discount , createdBy }) ;
 
       !newTestAndPrice && next(new AppError("Test Not Added", 404) ) ;
       newTestAndPrice &&  res.json({message:"success" ,newTest ,  newTestAndPrice}) ;

@@ -28,6 +28,7 @@ export const createOnlineOrderVal = Joi.object({
    birthDay:Joi.date().format('YYYY-MM-DD').required() , 
    gender:Joi.string().required() ,
    payment :Joi.string().required() ,
+   profile :Joi.string().required() ,
    patient_Phone:Joi.string().pattern(/^(002)?01[0125][0-9]{8}$/).trim().required() 
 })
 
@@ -36,6 +37,18 @@ export const createOrderVal = Joi.object({
    birthDay:Joi.date().format('YYYY-MM-DD').required() , 
    gender:Joi.string().required() ,
    patient_Phone:Joi.string().pattern(/^(002)?01[0125][0-9]{8}$/).trim().required() 
+})
+
+
+export const createCashOrderAdminVal = Joi.object({
+	patient_Name:Joi.string().min(2).max(50).trim().required() ,
+   birthDay:Joi.date().format('YYYY-MM-DD').required() , 
+   gender:Joi.string().required() ,
+   patient_Phone:Joi.string().pattern(/^(002)?01[0125][0-9]{8}$/).trim().required() ,
+	listIdTest:Joi.array().items(
+		Joi.string().hex().length(24).required() 
+	).required() ,
+	companyId:Joi.string().hex().length(24).required() 
 })
 
 

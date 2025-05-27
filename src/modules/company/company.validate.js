@@ -36,11 +36,11 @@ export const addCompanyVal = Joi.object({
    phone:Joi.string().pattern(/^(00201|\+201|01)[0-2,5]{1}[0-9]{8}$/).required() ,
    description:Joi.string().min(10).max(400).required().trim() ,
    email:Joi.string().email().pattern(/^\S+@\S+\.\S+$/).required().trim() ,
+   service:Joi.string().required().trim() ,
 
 
 
 	file:generalFields.file.required() ,
-
 })
 
 
@@ -61,9 +61,10 @@ export const updateCompanyVal = Joi.object({
    name:Joi.string().min(1).max(100).trim() ,
    email:Joi.string().email().required().trim() ,
    phone:Joi.string().pattern(/^(00201|\+201|01)[0-2,5]{1}[0-9]{8}$/) ,
-   address:Joi.string().min(10).max(400).trim() ,
+   address:Joi.string().min(5).max(400).trim() ,
    description:Joi.string().min(10).max(400).trim() ,
-   isActive:Joi.string().valid(true , false),
+   isActive:Joi.string().valid("true" , "false"),
+   service:Joi.string().valid("analysis" , "radiology" , "pharmacy" , "hospital") ,
 })
 
 

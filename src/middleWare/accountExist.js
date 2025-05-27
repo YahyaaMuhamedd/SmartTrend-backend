@@ -3,10 +3,11 @@ import { AppError } from "../utilities/AppError.js";
 import { catchError } from "../utilities/catchError.js";
 
 
-export const emailExist = catchError(
+export const accountExist = catchError(
    async(req , res , next)=>{
-      let user = await userModel.findOne({$or:[
-         {email:req.body.email}
+      const user = await userModel.findOne({$or:[
+         {email:req.body.email} ,
+         {phone:req.body.phone} ,
       ]}) ;
       if(user) return next(new AppError("User Already Exist" , 409)) ;
       next() ;

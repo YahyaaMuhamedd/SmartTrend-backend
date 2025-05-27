@@ -3,7 +3,7 @@ import * as cartControl from "./cart.controller.js";
 import {validation} from "../../middleWare/validation.js";
 import { protectedRoutes } from "../../middleWare/authentication.js";
 import { authorize } from "../../middleWare/authorization.js";
-import { addAllTestsToCartVal, addCartVal, paramsIdVal } from "./cart.validate.js";
+import { addAllTestsToCartByAdminVal, addAllTestsToCartVal, addCartVal, paramsIdVal } from "./cart.validate.js";
 import { ROLES } from "../../utilities/enums.js";
 
 
@@ -21,9 +21,18 @@ const router = Router() ;
 
 
 
-//^=========================== Add All Tests To Cart =====================================
+//^=========================== Add All Tests To Cart By Logged User =====================================
 	router.route("/addAllTest")
 		.post(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(addAllTestsToCartVal) , cartControl.addAllTestsToCart)
+
+
+
+
+
+
+//^=========================== Add All Tests To Cart By Admin =====================================
+	router.route("/addAllTestByAdmin")
+		.post(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) , validation(addAllTestsToCartByAdminVal) , cartControl.addAllTestsToCartByAdmin)
 
 
 
