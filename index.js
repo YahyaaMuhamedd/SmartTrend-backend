@@ -21,10 +21,10 @@ import configGoogle from './src/services/configGoogle.js';
 import { loginWithGoogle } from './src/modules/authentication/auth.controller.js';
 import { webhookMiddleWre } from './src/modules/order/order.controller.js';
 
-// Load .env variables
 env.config();
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
 //!================= MIDDLEWARE SECURITY SETUP ==================
 app.use(cors());
@@ -35,8 +35,8 @@ app.use(mongoSanitize());
 app.use(xss());
 
 const limiter = rateLimit({
-   windowMs: 15 * 60 * 1000, // 15 minutes
-   max: 100, // limit each IP to 100 requests per windowMs
+   windowMs: 15 * 60 * 1000,
+   max: 100,
    message: "Too many requests from this IP, please try again after 15 minutes"
 });
 app.use('/api', limiter);
@@ -84,17 +84,28 @@ app.use("/order", orderRoutes);
 app.use("/price", priceRoutes);
 app.use("/cart", cartRoutes);
 
-//!================= DB INIT & SERVER ==================
-console.log("🚀 New version deployed!");
+//!================= DB INIT & SERVER START ==================
+const startServer = async () => {
+   try {
+      console.log("🚀 New version deployed!");
+      await dbConnection(process.env.URL_CONNECTION_DB_ONLINE_ATLAS);
+      initApp(app);
+      const server = app.listen(PORT, () =>
+         console.log(`🚀 Server is running on port ${PORT}`)
+      );
 
-initApp(app);
-await dbConnection(process.env.URL_CONNECTION_DB_ONLINE_ATLAS);
+      //! Handle unhandled promise rejections
+      process.on("unhandledRejection", (error) => {
+         console.error("❌ Unhandled Rejection:", error);
+         server.close(() => process.exit(1));
+      });
+   } catch (error) {
+      console.error("❌ Failed to start server:", error);
+      process.exit(1);
+   }
+};
 
-//!================= EXPORT FOR SERVERLESS ==================
-// Remove `app.listen(...)` for Vercel or Serverless
+startServer();
+
+//!================= EXPORT FOR SERVERLESS (Optional) ==================
 export default app;
-
-//!================= HANDLE REJECTION ==================
-process.on("unhandledRejection", (error) => {
-   console.error("❌ Unhandled Rejection:", error);
-});
