@@ -1,7 +1,7 @@
 
 //! Handle Error External Express => Start the Code :
-process.on("uncaughtException" , (error)=>{
-   console.log("Error" , error);
+process.on("uncaughtException", (error) => {
+   console.log("Error", error);
 })
 
 
@@ -31,38 +31,38 @@ const PORT = process.env.PORT || 5000;
 
 //& Express Middle Ware :
 app.use(cors());
-app.use(express.json()) ;
+app.use(express.json());
 
 //!========================================================================================
-   //* Login With Google :
-      app.use(configGoogle());
-      app.use(passport.initialize());
-      app.use(passport.session());
-      passport.use(
-         new GoogleStrategy(
-         {
-            clientID: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            callbackURL: '/auth/google/callback',
-         },(accessToken, refreshToken, profile, done) => {done(null, profile);})
-      );
-      passport.serializeUser((user, done) => done(null, user));
-      passport.deserializeUser((obj, done) => done(null, obj));
+//* Login With Google :
+app.use(configGoogle());
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(
+   new GoogleStrategy(
+      {
+         clientID: process.env.GOOGLE_CLIENT_ID,
+         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+         callbackURL: '/auth/google/callback',
+      }, (accessToken, refreshToken, profile, done) => { done(null, profile); })
+);
+passport.serializeUser((user, done) => done(null, user));
+passport.deserializeUser((obj, done) => done(null, obj));
 
-       //^ Login With Google :
-      app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-      app.get('/auth/google/callback' , passport.authenticate('google', { failureRedirect: '/' }), loginWithGoogle) ;
+//^ Login With Google :
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/' }), loginWithGoogle);
 
 //!========================================================================================
 
 
 //! Serve static files :
-app.use("/" , express.static("Uploads")) ;
-app.use("/pdf" , express.static("Docs")) ;
+app.use("/", express.static("Uploads"));
+app.use("/pdf", express.static("Docs"));
 
 
 //& Receive Webhook From Paymob :
-app.post("/webhook" , webhookMiddleWre)
+app.post("/webhook", webhookMiddleWre)
 
 console.log("🚀 New version deployed !!!");
 
@@ -80,8 +80,26 @@ export const server = app.listen(PORT, () => console.log(`Server is running ....
 
 
 //! Handle Error dbConnection And External Express => End the Code :
-process.on("unhandledRejection" , (error)=>{
-   console.log("Error" , error);
+process.on("unhandledRejection", (error) => {
+   console.log("Error", error);
 });
 
 
+// Routes 
+import userRoutes from './src/modules/user/user.routes.js';
+import authRoutes from './src/modules/authentication/auth.routes.js';
+import orderRoutes from './src/modules/order/order.routes.js';
+import productRoutes from './src/modules/product/product.routes.js';
+import categoryRoutes from './src/modules/category/category.routes.js';
+import brandRoutes from './src/modules/brand/brand.routes.js';
+import priceRoutes from './src/modules/Price/price.routes.js';
+import cartRoutes from './src/modules/cart/cart.routes.js';
+
+app.use("/user", userRoutes)
+app.use("/auth", authRoutes)
+app.use("/order", orderRoutes)
+app.use("/product", productRoutes)
+app.use("/category", categoryRoutes)
+app.use("/brand", brandRoutes)
+app.use("/price", priceRoutes)
+app.use("/cart", cartRoutes)
