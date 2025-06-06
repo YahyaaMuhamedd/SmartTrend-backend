@@ -11,8 +11,8 @@ import { authServicesProvider } from "../../middleWare/authServicesProvider.js";
 const router = Router() ;
 //^=========================== Get Approved Order Information =====================================
    router.route("/")
-      .post(validation(signInVal) , onlineSystemControl.signInBranch) 
       .get(authServicesProvider  , validation(invoiceInfoVal) , onlineSystemControl.getApprovedOrderInfo) 
+      .post(validation(signInVal) , onlineSystemControl.signInBranch) 
 
 
 

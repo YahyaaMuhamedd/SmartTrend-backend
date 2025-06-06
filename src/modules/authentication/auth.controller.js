@@ -243,7 +243,7 @@ export const confirmedEmail = catchError(
 
 
 
-
+//^ Generate QR Code :
    //&  Generate QR_Code :
 export const generateQR_Code = catchError(
    async (req , res , next)=>{
@@ -257,15 +257,15 @@ export const generateQR_Code = catchError(
 
 
 
+
+//^ Login With Google Account :
 //&  Login With Google :
 export const loginWithGoogle = catchError(
    async (req, res) => {
       const email = req.user.emails[0].value ;
       const emailVerified = req.user.emails[0].verified ;
-      console.log(req.user);
       
       let user = await userModel.findOne({email} ) ;
-      console.log(user?"Successfully Ya Mahmoud Google":"Fail Login Ya MAhmoud Google");
       if(!user){
          user = await userModel.create({
             name:req.user.displayName ,

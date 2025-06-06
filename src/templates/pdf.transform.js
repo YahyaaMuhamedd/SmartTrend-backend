@@ -50,6 +50,7 @@ export let pdf_transform = (data)=>{
       
                .invoice-box table tr.information table td {
                   padding-bottom: 40px;
+                  font-size: 12px;
                }
       
                .invoice-box table tr.heading td {
@@ -86,6 +87,7 @@ export let pdf_transform = (data)=>{
                      width: 100%;
                      display: block;
                      text-align: center;
+                     font-size: 10px;
                   }
                }
       
@@ -110,7 +112,7 @@ export let pdf_transform = (data)=>{
                <table cellpadding="0" cellspacing="0">
                   <tr class="top">
 
-                     <h1 style=" text-align: center ; "> SMART TREND </h1>
+                     <h1 style=" text-align: center ; "> TREND </h1>
                      <ul style="font-weight:bold;  list-style:none;">
                         <li>Order Number: ${data.order_Number}</li>
                         <li>Invoice Number: ${data.invoice_number}</li>
@@ -134,8 +136,8 @@ export let pdf_transform = (data)=>{
    
                               <td>
                                  Company Name : ${data.company.name}<br />
-                                 Company Phone: ${data.company.phone}<br />
-                                 Company Email : ${data.company.email}
+                                 Branch Name: .........<br />
+                                 Branch Email : ........
                               </td>
                            </tr>
 
@@ -157,21 +159,21 @@ export let pdf_transform = (data)=>{
                   <tr class="heading">
                      <td>Item</td>
       
-                     <td>final_amount</td>
+                     <td></td>
                   </tr>
       
                   ${data.orderItems.map((ele)=>`
                            <tr class="item">
                               <td>${ele.test?.name}</td>
-                              <td>EGP 00.00</td>
+                              <td></td>
                            </tr>
                         `
                   ).join(" ")}
 
                   <tr class="total">
-                  <td style="font-weight:bold;">Total Net Amount</td>
+                  <td style="font-weight:bold;"></td>
    
-                  <td> EGP 00.00</td>
+                  <td></td>
                </tr>
       
                </table>

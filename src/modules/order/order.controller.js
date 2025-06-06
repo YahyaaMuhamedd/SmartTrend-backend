@@ -332,7 +332,6 @@ export const createCashOrder = catchError(
       //! Create Invoice Pdf  orders :
       try {
          await create_pdf(pdf_invoice , add_Invoice_Order , `invoice_${patient_Name_Slug}_${order._id}`);
-
       } catch (error) {
          return next(new AppError(error.message, 500));
          // return next(new AppError("Invoice PDF creation failed", 500));
@@ -364,6 +363,7 @@ export const checkExistPatientMiddleWare = catchError(
    async(req , res , next)=>{
       const {patient_Name , birthDay , gender  , patient_Phone} = req.body ;
 
+      const createdBy = req.user._id ;
       //& Calculation Age From BirthDay :
       let age = 0 ;
       let nowAge = (birthDay)=>{
@@ -384,6 +384,7 @@ export const checkExistPatientMiddleWare = catchError(
             birthDay , 
             gender ,
             patient_Phone , 
+            createdBy
          } , {new:true})
          if(!patient) return next(new AppError("Patient Not Updated" , 404)) ;
          req.patient = patient
@@ -395,7 +396,8 @@ export const checkExistPatientMiddleWare = catchError(
             patient_Age:age , 
             birthDay , 
             gender ,
-            patient_Phone , 
+            patient_Phone ,
+            createdBy 
          })
          if(!patient) return next(new AppError("Patient Not Added" , 404)) ;
          req.patient = patient
@@ -1011,6 +1013,7 @@ export const webhookMiddleWre = catchError(
          console.log(`💰 Successfully Payment Message : ${data.message} ${amount_cents / 100} EGP`);
       } else {
          console.log(`❌ Failed Payment Message : ${data.message}`);
+         return next(new AppError(`❌ Failed Payment Message : ${data.message}` , 401)) ;
       }
    }
 )
@@ -1027,12 +1030,9 @@ export const createOnlineOrder = async (data)=>{
    } = data ;
 
    const cart = await cartModel.findOne({user:user}) ;
-   
    const company = cart.cartItems[0].price.company ;
    const invoice_number = invoice_nanoid() ;
-   
    const order_Number = await getNextOrderNumber() ;
- 
 
 
    const order = await orderModel.create({
@@ -1064,6 +1064,7 @@ export const createOnlineOrder = async (data)=>{
       await create_pdf(pdf_invoice , add_Invoice_Order , `invoice_${patient_Name_Slug}_${order._id}`);
    } catch (error) {
       console.error('Invoice PDF creation failed', error.response?.data || error.message);
+      return next(new AppError("Invoice PDF creation failed" , 404)) ;
    }
 
 
@@ -1079,9 +1080,8 @@ export const createOnlineOrder = async (data)=>{
       }
    }));
    await testModel.bulkWrite(options);
-
-   console.log("Successfully Created New Orders By Paymob Online!");
-   console.log("Done" , add_Invoice_Order);
+   
+   res.json({message:"Successfully Created New Orders By Paymob Online!" , order:add_Invoice_Order})
 }
 
 

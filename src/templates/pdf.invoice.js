@@ -134,7 +134,7 @@ export let pdf_invoice = (data) => {
 
             <table cellpadding="0" cellspacing="0">
                <tr class="top">
-                  <h1 style=" text-align: center ; "> SMART TREND </h1>
+                  <h1 style=" text-align: center ; ">TREND</h1>
 
                   <ul style="font-weight:bold; list-style:none;">
                      <li>Invoice Number: ${data.invoice_number}</li>
@@ -153,7 +153,7 @@ export let pdf_invoice = (data) => {
                               Patient Information :- <br />
                               Patient Name : ${data.patient_Name} <br />
                               Patient Street : "لا يوجد" <br />
-                              Patient City : "لا يوجد"} <br />
+                              Patient City : "لا يوجد" <br />
                               Patient Phone : ${data.patient_Phone? data.patient_Phone :"لا يوجد"} <br />
                            </td>
    
@@ -168,25 +168,25 @@ export let pdf_invoice = (data) => {
                </tr>
       
                <tr class="details">
-                  <td style="font-weight:bold;">Check Total Price</td>
-                  <td style="font-weight:bold;"> 00.00 EGP</td>
+                  <td style="font-weight:bold;"> </td>
+                  <td style="font-weight:bold;"> </td>
                </tr>
       
                <tr class="heading">
                   <td>Item</td>
-                  <td>Price</td>
+                  <td></td>
                </tr>
 
                ${data.orderItems.map((ele) => `
                   <tr class="item">
                      <td>${ele?.test.name}</td>
-                     <td>00.00 EGP</td>
+                     <td></td>
                   </tr>
                `).join(" ")}
 
                <tr class="total">
-                  <td style="font-weight:bold;">Total Price</td>
-                  <td>Total: 00.00 EGP </td>
+                  <td style="font-weight:bold;"> </td>
+                  <td></td>
                </tr>
 
             </table>

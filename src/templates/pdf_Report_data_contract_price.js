@@ -121,7 +121,7 @@ export const pdf_Report_data_contract_price = (data)=>{
                <table cellpadding="0" cellspacing="0">
                   <tr class="top">
 
-                              <h1 style=" text-align: center ; "> Fekrah Medical </h1>
+                              <h1 style=" text-align: center ; "> TREND </h1>
 
       
                               <ul style="font-weight:bold;  list-style:none; margin-top:20px ;">

@@ -57,6 +57,7 @@ export const add_Patient = catchError(
       patientExist && next(new AppError("Patient Name Already Exist" , 404))
 
 
+      const createdBy = req.user._id ;
          //& Calculation Age From BirthDay :
          let age = 0 ;
          let nowAge = (birthDay)=>{
@@ -75,6 +76,7 @@ export const add_Patient = catchError(
             birthDay , 
             gender ,
             patient_Phone , 
+            createdBy
          })
          
          !patient && next(new AppError("Patient Not Added" , 404))

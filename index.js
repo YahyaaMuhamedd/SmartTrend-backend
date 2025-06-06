@@ -12,7 +12,6 @@ import { dbConnection } from './DataBase/dbConnection.js';
 import env from "dotenv"
 import { socketConnect } from './src/services/socketConnection.js';
 import { webhookMiddleWre } from './src/modules/order/order.controller.js';
-import bcrypt from "bcrypt";
 
 //!========================================================================================
 import passport from 'passport';
@@ -57,13 +56,10 @@ app.use(express.json()) ;
 //!========================================================================================
 
 
-
+//! Serve static files :
 app.use("/" , express.static("Uploads")) ;
 app.use("/pdf" , express.static("Docs")) ;
 
-// Serve static files from specific directories
-// app.use("/", express.static(path.join(process.cwd(), 'Uploads')));
-// app.use("/pdf", express.static(path.join(process.cwd(), 'Docs')));
 
 //& Receive Webhook From Paymob :
 app.post("/webhook" , webhookMiddleWre)
@@ -78,8 +74,7 @@ dbConnection()
 export const server = app.listen(PORT, () => console.log(`Server is running ....`))
 
 //& Socket io Connection :
-socketConnect(server)
-
+// socketConnect(server)
 
 
 

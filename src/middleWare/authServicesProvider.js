@@ -26,7 +26,7 @@ export const authServicesProvider = catchError(
       if(!branch) return next(new AppError("Branch Not Exist ProtectedRoute" , 401)) ;
       if(!branch.isActive) return next(new AppError("Branch is blocked" , 401)) ;
 
-      
+
       req.branch = branch
       next();
    }

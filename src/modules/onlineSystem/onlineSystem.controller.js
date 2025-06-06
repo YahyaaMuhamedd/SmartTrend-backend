@@ -47,6 +47,7 @@ export const signInBranch = catchError(
 //& Confirmed Approved Online System in Branch Laboratory :
 export const transformOnlineSystem = catchError(
    async(req , res , next)=>{
+      
       const {invoice_number} = req.body ;
       const {company} = req.branch ;
       const transform_number =  transform_nanoid();
@@ -87,17 +88,19 @@ export const transformOnlineSystem = catchError(
 export const getApprovedOrderInfo = catchError(
    async(req , res , next)=>{
       const {invoice_number} = req.query ;
-      const {email} = req.branch ;
-      
-      
-      const order = await orderModel.findOne({invoice_number}) ;
-      if(!order) return next(new AppError("Order Not Found Please Connect On Hot line :3245 !" , 404)) ;
+      const {company:{_id}} = req.branch ;
 
-      if(email !== order.branch.email) return next(new AppError("Order Not Found This branch Please Connect On Hot line :3245 !" , 404)) ;
+      
+      const order = await orderModel.findOne({invoice_number , company:_id}) ;
+      if(!order) return next(new AppError("Order Not Found in this Company, Please Connect On Hot line :3245 !" , 404)) ;
+
 
       res.json({message:"success" , order:{
+         company: order?.company?.name ,
+         invoiceExpiryDate: order?.invoiceExpiryDate ,
+         createdAt: order?.createdAt ,
          patient_Name:order.patient_Name ,
-         branch_Name:order?.branch.name ,
+         branch_Name:order?.branch?.name ,
          patient_Phone:order.patient_Phone ,
          patient_Age:order.patient_Age ,
          patient_History:order.patient_History ,
