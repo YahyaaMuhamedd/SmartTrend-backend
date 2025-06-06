@@ -31,7 +31,9 @@ export const paramsIdVal = Joi.object({
 
 
 export const addHistoryVal = Joi.object({
-   history_message:Joi.string().min(10).max(1000).optional(),
+   history_surgeries:Joi.string().min(2).max(1000).optional(),
+   history_medicines:Joi.string().min(2).max(1000).optional(),
+   history_disease:Joi.string().min(2).max(1000).optional(),
 
 	files:Joi.array().items(generalFields.file.optional()).optional()
 })

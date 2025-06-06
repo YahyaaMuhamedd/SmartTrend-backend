@@ -44,11 +44,10 @@ export const getAllHistory= catchError(
 //& Add New Company :
 export const addHistory = catchError(
    async(req , res , next)=>{
-      const {history_message} = req.body ;
-      let history = await historyModel.findOne({user:req.user._id}) ;
-
+      const {history_disease , history_medicines , history_surgeries} = req.body ;
       const user = req.user._id ;
-      
+      let history = await historyModel.findOne({user}) ;
+
       //& Check On Size File Media Before Convert From k-byte to Mega byte :
       let images = [] ;
       if(req.files.length > 0){
@@ -60,20 +59,22 @@ export const addHistory = catchError(
          })
       } ;
 
-
       if(history){
-         if(history_message) history.history_message = history_message ;
+         if(history_disease) history.history_disease = history_disease ;
+         if(history_medicines) history.history_medicines = history_medicines ;
+         if(history_surgeries) history.history_surgeries = history_surgeries ;
+
          if(images.length > 0) history.images = images ;
          await history.save() ;
       } else{
          history = await historyModel.create({ 
-            history_message , 
+            history_disease , 
+            history_medicines , 
+            history_surgeries , 
             images , 
             user
          }) ;
       }
-
-
 
       !history && next(new AppError("The History has not been added.", 404) ) ;
       history &&  res.json({message:"success" , history}) ;
@@ -83,11 +84,9 @@ export const addHistory = catchError(
 
 
 //& Get Single History :
-export const getHistorySpecificPatient = catchError(
+export const getHistorySpecificUser = catchError(
    async(req , res , next)=>{
-      const {id} = req.params ;
-
-      const history = await historyModel.findOne({user:id}) ;
+      const history = await historyModel.findOne({user:req.user._id}) ;
       !history && next(new AppError("History Not Exist" , 404))
       history && res.json({message:"success" , history})
    }
