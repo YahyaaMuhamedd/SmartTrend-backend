@@ -23,7 +23,8 @@ const schema = new Schema({
    } ,
    phone:{
       type:String ,
-      unique:[true , "Phone is Unique"]
+      unique:[true , "Phone is Unique"] ,
+      match: [/^01[0125][0-9]{8}$/, "Invalid Egyptian phone number"]
    } ,
    email:{
       type:String ,

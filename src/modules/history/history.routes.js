@@ -27,9 +27,9 @@ const router = Router() ;
 
 
 //^=========================== Get Single Advert and  Delete =================
-   router.route("/:id")
-      .get(validation(paramsIdVal),  PH.getHistorySpecificPatient)
-      // .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) ,  validation(paramsIdVal)  , PH.getHistorySpecificPatient)
+   router.route("/historyLoggedUser")
+      // .get(PH.getHistorySpecificUser)
+      .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , PH.getHistorySpecificUser)
 
 
       .delete( validation(paramsIdVal)  , PH.deleteHistory)

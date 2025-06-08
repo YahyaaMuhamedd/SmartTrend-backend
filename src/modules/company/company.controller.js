@@ -1,9 +1,9 @@
-import { branchModel } from "../../../DataBase/models/branch.model.js";
-import { companyModel } from "../../../DataBase/models/company.model.js";
-import { priceModel } from "../../../DataBase/models/price.model.js";
-import { AppError } from "../../utilities/AppError.js";
-import { ApiFeature } from "../../utilities/apiFeatures.js";
-import { catchError } from "../../utilities/catchError.js";
+import { branchModel } from "../../../DataBase/models/branch.model.js" ;
+import { companyModel } from "../../../DataBase/models/company.model.js" ;
+import { priceModel } from "../../../DataBase/models/price.model.js" ;
+import { AppError } from "../../utilities/AppError.js" ;
+import { ApiFeature } from "../../utilities/apiFeatures.js" ;
+import { catchError } from "../../utilities/catchError.js" ;
 import fs from "fs" ;
 import path from "path" ;
 
@@ -15,31 +15,42 @@ export const getAllCompanies = catchError(
    async(req , res , next)=>{
       const{filter} = req.query ;
 
-      let result = await companyModel.find();
+      const result = await companyModel.find();
 
       //^ Merge Params
       let filterObj = {};
 
       //^ Filter By Order Type :
-      if(filter == "active"){
-         filterObj = { isActive:true }
-      }else if (filter == "blocked"){
-         filterObj = { isActive:false }
+      switch (filter) {
+      case "active":
+         filterObj = { isActive: true };
+         break;
+      case "blocked":
+         filterObj = { isActive: false };
+         break;
+      case "analysis":
+      case "radiology":
+      case "pharmacy":
+      case "hospital":
+         filterObj = { service: filter };
+         break;
+      default:
+         filterObj = {} ; 
       }
 
-      let apiFeature = new ApiFeature(companyModel.find(filterObj), req.query ).pagination().fields().search().filter().sort();
+
+      const apiFeature = new ApiFeature(companyModel.find(filterObj), req.query ).pagination().fields().search().filter().sort();
       const companies = await apiFeature.mongooseQuery;
-      // const companies = await apiFeature.mongooseQuery.select("name service phone address isActive logo description discount start addresses");
 
       if(!companies.length) return next(new AppError("companies is Empty" , 404))
 
-      let currentPag = apiFeature.pageNumber ;
-      let numberOfPages = Math.ceil(result.length  / apiFeature.limit)  ;
-      let limit = apiFeature.limit  ;
-      let nextPage = numberOfPages - apiFeature.pageNumber ;
-      let prevPage = (numberOfPages - nextPage) - 1 ;
+      const currentPag = apiFeature.pageNumber ;
+      const numberOfPages = Math.ceil(result.length  / apiFeature.limit)  ;
+      const limit = apiFeature.limit  ;
+      const nextPage = numberOfPages - apiFeature.pageNumber ;
+      const prevPage = (numberOfPages - nextPage) - 1 ;
 
-      let metadata = {
+      const metadata = {
          currentPag: currentPag ,
          numberOfPages: numberOfPages || 1 ,
          limit: limit ,
@@ -55,8 +66,6 @@ export const getAllCompanies = catchError(
       res.json({message:"success" , results:result.length ,  metadata: metadata ,  companies}) ;
    }
 )
-
-
 
 
 //& Get Order Count :
@@ -83,7 +92,6 @@ export const getCompanyCount = catchError(
       }}) ;
    }
 )
-
 
 
 //& Add New Company :
