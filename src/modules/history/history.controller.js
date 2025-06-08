@@ -1,4 +1,4 @@
-import { historyModel } from "../../../DataBase/models/patientHistory .model.js";
+import { historyModel } from "../../../DataBase/models/patientHistory.model.js";
 import { AppError } from "../../utilities/AppError.js";
 import { ApiFeature } from "../../utilities/apiFeatures.js";
 import { catchError } from "../../utilities/catchError.js";

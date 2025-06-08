@@ -9,20 +9,20 @@ import { testModel } from "../../../DataBase/models/test.model.js";
 //& Get All Price :
 export const getAllPrice = catchError(
    async(req , res , next)=>{
-      let result = await priceModel.find();
+      const result = await priceModel.find();
 
-      let apiFeature = new ApiFeature(priceModel.find(), req.query ).pagination().fields().search().filter().sort();
+      const apiFeature = new ApiFeature(priceModel.find(), req.query ).pagination().fields().search().filter().sort();
       const prices = await apiFeature.mongooseQuery.select("");
 
       if(!prices.length) return next(new AppError("Prices is Empty" , 404))
 
-      let currentPag = apiFeature.pageNumber ;
-      let numberOfPages = Math.ceil(result.length  / apiFeature.limit)  ;
-      let limit = apiFeature.limit  ;
-      let nextPage = numberOfPages - apiFeature.pageNumber ;
-      let prevPage = (numberOfPages - nextPage) - 1 ;
+      const currentPag = apiFeature.pageNumber ;
+      const numberOfPages = Math.ceil(result.length  / apiFeature.limit)  ;
+      const limit = apiFeature.limit  ;
+      const nextPage = numberOfPages - apiFeature.pageNumber ;
+      const prevPage = (numberOfPages - nextPage) - 1 ;
 
-      let metadata = {
+      const metadata = {
          currentPag: currentPag ,
          numberOfPages: numberOfPages || 1 ,
          limit: limit ,
@@ -49,18 +49,18 @@ export const getPriceCompany = catchError(
       
       //^ Merge Params
       let filterObj = {company:id};
-      let apiFeature = new ApiFeature(priceModel.find(filterObj), req.query ).pagination().fields().search().filter().sort();
+      const apiFeature = new ApiFeature(priceModel.find(filterObj), req.query ).pagination().fields().search().filter().sort();
       const prices = await apiFeature.mongooseQuery.select("");
 
       if(!prices.length) return next(new AppError("Prices is Empty" , 404))
 
-      let currentPag = apiFeature.pageNumber ;
-      let numberOfPages = Math.ceil(prices.length  / apiFeature.limit)  ;
-      let limit = 2  ;
-      let nextPage = numberOfPages - apiFeature.pageNumber ;
-      let prevPage = (numberOfPages - nextPage) - 1 ;
+      const currentPag = apiFeature.pageNumber ;
+      const numberOfPages = Math.ceil(prices.length  / apiFeature.limit)  ;
+      const limit = 2  ;
+      const nextPage = numberOfPages - apiFeature.pageNumber ;
+      const prevPage = (numberOfPages - nextPage) - 1 ;
 
-      let metadata = {
+      const metadata = {
          currentPag: currentPag ,
          numberOfPages: numberOfPages || 1 ,
          limit: limit ,
