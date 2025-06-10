@@ -12,7 +12,6 @@ export const getOffers = catchError(
    async(req , res , next)=>{
       const{listIdTest} = req.body ;
       const testCount = listIdTest.length ;
-      console.log("testCount" ,  testCount);
       
       let priceList = [] ;
       

@@ -25,7 +25,7 @@ export const sendEmail = async (sendTo , subject , content)=>{
    
    //! send mail with defined transport object
    const info = await transporter.sendMail({
-      from: '"Fekrah Medical Website Configuration Email 👻" <mahmoud.osman440@gmail.com>', // sender address
+      from: `"Fekrah Medical Website Configuration Email 👻" <${process.env.EMAIL_SENDING_MESSAGE}>`, // sender address
       to: sendTo, // list of receivers
       subject: subject , // Subject line
       text: "Hello world?", // plain text body
