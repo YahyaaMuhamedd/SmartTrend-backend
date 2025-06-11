@@ -115,6 +115,18 @@ const router = Router() ;
 
 
 
+   //^================================== Delete Order Media =====================================
+   router.route("/media/:id")
+   .delete(protectedRoutes , 
+      authorize(ROLES.ADMIN , ROLES.MODERATOR) , 
+      validation(paramsIdVal) , 
+      orderControl.deleteOrderMedia)
+   
+   
+
+
+
+
    //^================================== Generate Invoice Order =====================================
    router.route("/generateInvoiceOrder")
    .post(protectedRoutes , 

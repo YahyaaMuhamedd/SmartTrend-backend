@@ -532,6 +532,39 @@ export const deleteOrder = catchError(
 
 
 
+//& Delete Order Media :
+export const deleteOrderMedia = catchError(
+   async(req , res , next)=>{
+      const {id} = req.params ;
+
+      const order = await orderModel.findById(id) ;
+
+      if(order){
+         //! Delete Invoice Order from Server Disk :
+         if(!(path.basename(order.invoice_pdf) === "undefined")){
+            const fileNameInvoice = "Docs/" + path.basename(order.invoice_pdf)
+            fs.unlinkSync(path.resolve(fileNameInvoice))
+         }
+
+         //! Delete Transformation from Server Disk :
+         if(!(path.basename(order.transform_pdf) === "undefined")){
+            const fileNameTransformation = "Docs/" + path.basename(order.transform_pdf)
+            fs.unlinkSync(path.resolve(fileNameTransformation))
+         }
+
+      }else{
+         return next(new AppError("Order Not Exist" , 404)) ;
+      }
+      res.json({message:"success" })
+   }
+)
+
+
+
+
+
+
+
 
 //^================================== Providing statistics for the graph in the admin for sales orders  =============
 export const salesLastMonth = catchError(
