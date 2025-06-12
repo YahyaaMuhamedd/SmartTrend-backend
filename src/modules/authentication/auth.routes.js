@@ -93,7 +93,8 @@ router.route("/qr_code")
 				{ expiresIn: '1h' }
 			);
 		
-			res.redirect(`http://localhost:3000/login/success?token=${token}`);
+			// res.redirect(`http://localhost:3000/login/success?token=${token}`);
+			res.redirect(`${process.env.REDIRECT_URL_GOOGLE}/login/success?token=${token}`);
 		}
 		);
 
