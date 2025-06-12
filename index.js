@@ -21,13 +21,11 @@ import { loginWithGoogle } from './src/modules/authentication/auth.controller.js
 //!========================================================================================
 
 
-import helmet from 'helmet';
+// import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import mongoSanitize from 'express-mongo-sanitize';
 import xss from 'xss-clean';
 import hpp from 'hpp';
-
-
 
 
 env.config();
@@ -37,10 +35,18 @@ const PORT = process.env.PORT || 5000;
 
 
 
+
+
+
+
+
+
+
+
 //!================= MIDDLEWARE SECURITY SETUP ============================================
 app.use(cors());
 app.use(express.json({ limit: '3000kb' }));
-app.use(helmet());
+// app.use(helmet()) ;
 app.use(hpp());
 app.use(mongoSanitize());
 app.use(xss());
@@ -50,6 +56,12 @@ const limiter = rateLimit({
    message: "Too many requests from this IP, please try again after 15 minutes"
 });
 app.use('/api', limiter);
+
+
+
+
+
+
 
 
 
@@ -77,6 +89,10 @@ app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'em
 app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/' }), loginWithGoogle);
 
 //!========================================================================================
+
+
+
+
 
 
 //! Serve static files :
