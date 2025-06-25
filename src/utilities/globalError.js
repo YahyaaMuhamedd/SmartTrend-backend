@@ -1,8 +1,8 @@
 import env from "dotenv"
 
-env.config()
+   env.config() ;
 
-let MODE = process.env.MODE
+const MODE = process.env.MODE
 
 
 
@@ -16,3 +16,5 @@ export const globalError = (error , req , res , next)=>{
       return res.status(error.statusCode).json({message:error.message,Error:error })
    }
 }
+
+

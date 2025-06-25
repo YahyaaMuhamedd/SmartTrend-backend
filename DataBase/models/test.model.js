@@ -6,10 +6,10 @@ const schema = new Schema({
       type:String , 
       trim : true ,
       required : true ,
-      unique:[true , "Test Name is Required"] ,
+      unique:[true , "Test Name is Unique"] ,
       lowercase:true ,
       minLength:[1 , "Should be Character Count More Than 2 Character"] ,
-      maxLength:[100 , "Should be Character Count Less Than 50 Character"] ,
+      maxLength:[300 , "Should be Character Count Less Than 300 Character"] ,
    } ,
    slug:{
       type:String ,
@@ -17,13 +17,11 @@ const schema = new Schema({
    } ,
    condition :{
       type:String ,
-      required :[true , "Password is required"] ,
-      minLength:[10 , "Should be Character Count More Than 2 Character"] ,
+      minLength:[2 , "Should be Character Count More Than 2 Character"] ,
       maxLength:[400 , "Should be Character Count Less Than 50 Character"] ,
    } ,
    description:{
       type:String ,
-      required:true ,
       minLength:[10 , "Should be Character Count More Than 2 Character"] ,
       maxLength:[400 , "Should be Character Count Less Than 50 Character"] ,
    } ,

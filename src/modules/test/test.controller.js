@@ -5,6 +5,11 @@ import { ApiFeature } from "../../utilities/apiFeatures.js";
 import { catchError } from "../../utilities/catchError.js";
 import { priceModel } from "../../../DataBase/models/price.model.js";
 import { companyModel } from "../../../DataBase/models/company.model.js";
+import { importExcelData } from "../../services/importExcel.js";
+import { exportDataToExcelWithinId } from "../../services/exportExcel.js";
+
+
+const uploadImageSize = Number(process.env.UPLOAD_IMAGE_SIZE) || 2000000;
 
 
 //& Get All Test :
@@ -221,3 +226,46 @@ export const deletedAllTests = catchError(
       res.json({message:"Successfully Deleted All Tests"})
    }
 )
+
+
+//& Add All Tests By Excel Sheet :
+export const addTestSheetExcelToDatabase = catchError(
+   async(req , res , next)=>{
+      if(!req.file) return next(new AppError("Please Choose Excel Sheet" , 404))
+
+      if((req.file.size > uploadImageSize)){
+         return next(new AppError("Size Media Should be Less than 200 k-Byte" , 404))
+      }
+
+      const excelPath = req.file.path ;
+      const data = await importExcelData(excelPath) ;
+      for (const ele of data) {
+         ele.createdBy = req.user._id
+      }
+      const tests = await testModel.insertMany(data) ;
+      res.json({message:"Insert Tests Successfully 🥰"})
+   }
+) ;
+
+
+
+//& Create Excel :
+export const generateExcelListTest = catchError(async (req, res, next) => {
+   const data = await testModel.find();
+   const plainData = data.map(doc => doc.toObject()) ;
+   console.log(plainData);
+   
+   const filePath = await exportDataToExcelWithinId(plainData) ;
+   if (filePath) {
+      res.download(filePath, 'data.xlsx', (err) => {
+         if (err) {
+            console.error('❌ Error downloading file:', err);
+            return next(AppError('Error downloading file', 500));
+         }
+      });
+   } else {
+      return next(AppError('No data to export', 404)) ;
+   }
+});
+
+

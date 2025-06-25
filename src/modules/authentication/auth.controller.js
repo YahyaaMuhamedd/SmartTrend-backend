@@ -273,6 +273,10 @@ export const loginWithGoogle = catchError(
             email ,
             confirmedEmail:emailVerified
          })
+      }else {
+         user.googleId = req.user.id ;
+         user.confirmedEmail = emailVerified ;
+         await user.save() ;
       }
 
       const token = jwt.sign(

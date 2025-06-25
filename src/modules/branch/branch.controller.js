@@ -1,9 +1,12 @@
 import { branchModel } from "../../../DataBase/models/branch.model.js";
 import { companyModel } from "../../../DataBase/models/company.model.js";
+import { importExcelData } from "../../services/importExcel.js";
 import { AppError } from "../../utilities/AppError.js";
 import { ApiFeature } from "../../utilities/apiFeatures.js";
 import { catchError } from "../../utilities/catchError.js";
+import bcrypt from "bcrypt";
 
+const uploadImageSize = Number(process.env.UPLOAD_IMAGE_SIZE) || 2000000;
 
 
 
@@ -202,4 +205,32 @@ export const deleteBranch = catchError(
       if(!branch) return next(new AppError("Branch Not Exist" , 404))
       branch && res.json({message:"success" , branch })
    }
-)
+) ;
+
+
+
+//& Add All Branches By Excel Sheet :
+export const addBranchSheetExcelToDatabase = catchError(
+   async(req , res , next)=>{
+      if(!req.file) return next(new AppError("Please Choose Excel Sheet" , 404))
+
+      if((req.file.size > uploadImageSize)){
+         return next(new AppError("Size Media Should be Less than 200 k-Byte" , 404))
+      }
+
+      const excelPath = req.file.path ;
+      const data = await importExcelData(excelPath) ;
+
+
+      //! Hashing Password Manually :
+      for (let branch of data) {
+         if (branch.password) {
+            branch.password = bcrypt.hashSync(branch.password , 8);
+         }
+         branch.createdBy = req.user._id
+      }
+
+      const branches = await branchModel.insertMany(data) ;
+      res.json({message:"Insert Branches Successfully 🥰"})
+   }
+) ;

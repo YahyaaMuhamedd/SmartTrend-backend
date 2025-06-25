@@ -8,7 +8,8 @@ import { authorize } from "../../middleWare/authorization.js";
 import { validation } from "../../middleWare/validation.js";
 import { ROLES } from "../../utilities/enums.js";
 import passport from "passport";
-
+import env from "dotenv";
+env.config();
 
 
 const router = Router();
@@ -93,7 +94,7 @@ router.get(
 			{ expiresIn: '1h' }
 		);
 
-		// res.redirect(`http://localhost:3000/login/success?token=${token}`);
+		// res.redirect(`https://sm-trend.com/login/success?token=${token}`);
 		res.redirect(`${process.env.REDIRECT_URL_GOOGLE}/login/success?token=${token}`);
 	}
 );

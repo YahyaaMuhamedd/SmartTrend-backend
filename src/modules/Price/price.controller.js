@@ -4,6 +4,9 @@ import { ApiFeature } from "../../utilities/apiFeatures.js";
 import { catchError } from "../../utilities/catchError.js";
 import { companyModel } from "../../../DataBase/models/company.model.js";
 import { testModel } from "../../../DataBase/models/test.model.js";
+import { importExcelData } from "../../services/importExcel.js";
+
+const uploadImageSize = Number(process.env.UPLOAD_IMAGE_SIZE) || 2000000;
 
 
 //& Get All Price :
@@ -116,13 +119,14 @@ export const addPrice = catchError(
       const discount = (( price - priceAfterDiscount ) / price ) * 100 ;
       
       const newPrice = await priceModel.create({
-         price ,
          discount ,
+         testName ,
+         companyName ,
+
+         price ,
          contract_Price ,
          test ,
          company ,
-         testName ,
-         companyName ,
          priceAfterDiscount ,
          createdBy:req.user._id
       }) ;
@@ -189,3 +193,54 @@ export const deletePrice = catchError(
       price && res.json({message:"success" , price})
    }
 )
+
+
+
+
+//& Add All Prices By Excel Sheet :
+export const addPriceSheetExcelToDatabase = catchError(
+   async(req , res , next)=>{
+      if(!req.file) return next(new AppError("Please Choose Excel Sheet" , 404))
+
+      if((req.file.size > uploadImageSize)){
+         return next(new AppError("Size Media Should be Less than 200 k-Byte" , 404))
+      }
+
+      const excelPath = req.file.path ;
+      const data = await importExcelData(excelPath) ;
+      
+      //! Hashing Password Manually :
+      for (let ele of data) {
+         const test = ele.test ;
+         const company = ele.company ;
+         const price = ele.price ;
+         const priceAfterDiscount = ele.priceAfterDiscount ;
+
+         const testExist = await testModel.findById(test) ;
+         if(!testExist) return next(new AppError("Test Not Exist", 404) ) ;
+         
+         
+         const companyExist = await companyModel.findById(company) ;
+         if(!companyExist) return next(new AppError("Company Not Exist", 404) ) ;
+         
+         
+         const priceExist = await priceModel.findOne({company , test}) ;
+         if( priceExist ) return next(new AppError("Test Already Added To Price In This Company", 404) ) ;
+         
+
+
+         ele.test = test ;
+         ele.company = company ;
+         ele.price = price ;
+         ele.priceAfterDiscount = Math.round(priceAfterDiscount) ;
+         ele.testName = testExist.name ;
+         ele.companyName = companyExist.name ;
+         ele.createdBy = req.user._id ;
+         ele.discount = Math.round((( price - priceAfterDiscount ) / price ) * 100 ) ;
+      }
+      
+      const tests = await priceModel.insertMany(data) ;
+      res.json({message:"Insert Tests Successfully 🥰"})
+   }
+) ; 
+

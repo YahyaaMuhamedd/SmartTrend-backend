@@ -152,8 +152,6 @@ export let pdf_invoice = (data) => {
                            <td>
                               Patient Information :- <br />
                               Patient Name : ${data.patient_Name} <br />
-                              Patient Street : "لا يوجد" <br />
-                              Patient City : "لا يوجد" <br />
                               Patient Phone : ${data.patient_Phone? data.patient_Phone :"لا يوجد"} <br />
                            </td>
    
@@ -192,7 +190,7 @@ export let pdf_invoice = (data) => {
             </table>
             
             <div class="signature">
-               <p>TREND - www.trend-sm.com</p>
+               <p>TREND - www.sm-trend.com</p>
                <p>Address: Cairo</p>
                <p>Authorized Signature</p>
                <p>________SMART_TREND________</p>

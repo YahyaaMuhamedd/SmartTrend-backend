@@ -5,6 +5,7 @@ import { addTestOnlyVal, addTestVal, paramsIdVal, updateTestVal } from "./test.v
 import { protectedRoutes } from "../../middleWare/authentication.js";
 import { authorize } from "../../middleWare/authorization.js";
 import { ROLES } from "../../utilities/enums.js";
+import { multerLocal, validExtension } from "../../services/multer.Local.js";
 
 
 
@@ -45,18 +46,30 @@ router.route("/addTestOnly")
 
 
 
+//^=========================== Add Tests By Excel Sheet  ==============================
+router.route("/addAllTestByExcelSheet")
+      .post(protectedRoutes , authorize(ROLES.ADMIN) ,  multerLocal(validExtension.excel , "excel").single("file") , testControl.addTestSheetExcelToDatabase)
+
+
+//^=========================== Add Tests By Excel Sheet  ==============================
+router.route("/getListTestByExcelSheet")
+      .get(testControl.generateExcelListTest)
+
+
+
 //^=========================== Deleted All Tests In Database =====================================
 router.route("/deleted_all_tests_in_database")
       .delete( testControl.deletedAllTests)
 
 
+      
 
 
 
 //^=========================== Get Single Test ===================================================
 router.route("/:id")
-   // .get(validation(paramsIdVal) , testControl.getSingleTest)
-   .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(paramsIdVal) , testControl.getSingleTest)
+   .get(testControl.getSingleTest)
+   // .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(paramsIdVal) , testControl.getSingleTest)
 
 
 
