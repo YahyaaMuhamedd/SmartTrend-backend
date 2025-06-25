@@ -152,6 +152,8 @@ export let pdf_invoice = (data) => {
                            <td>
                               Patient Information :- <br />
                               Patient Name : ${data.patient_Name} <br />
+                              Patient Age : ${data.patient_Age} <br />
+                              Patient Birth Date : ${data.birthDay.toString().split(" ").slice(1 , 4)}  <br />
                               Patient Phone : ${data.patient_Phone? data.patient_Phone :"لا يوجد"} <br />
                            </td>
    

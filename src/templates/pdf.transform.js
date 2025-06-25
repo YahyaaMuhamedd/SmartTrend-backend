@@ -8,7 +8,7 @@ export let pdf_transform = (data)=>{
    const total = data.orderItems.reduce((acc , ele)=>{
       return acc + ele.contract_Price ;
    } , 0) ;
-   
+
    return (
       `
       <!DOCTYPE html>
@@ -121,8 +121,7 @@ export let pdf_transform = (data)=>{
                      <ul style="font-weight:bold;  list-style:none;">
                         <li>Order Number: ${data.order_Number}</li>
                         <li>Invoice Number: ${data.invoice_number}</li>
-                        <li>Insurance Number: ${data.transform_number}</li>
-                        <li>Created At:  ${new Date(data.approved_At).toISOString().split('T')[0] }</li>
+                        <li>Created At:  ${new Date(data.approved_At).toISOString().split('T')[0] } </li>
                      </ul>
 
                   </tr>
@@ -136,13 +135,13 @@ export let pdf_transform = (data)=>{
                               <td>
                                  Patient Name : ${data.patient_Name}<br />
                                  Patient Age : ${data.patient_Age} <br />
-                                 Patient BirthDay : ${data.birthDay} 
+                                 Patient Birth Date : ${data.birthDay.toString().split(" ").slice(1 , 4)}  <br />
+                                 Patient Phone : ${data.patient_Phone}
                               </td>
    
                               <td>
-                                 Company Name : ${data.company.name}<br />
-                                 Branch Name: .........<br />
-                                 Branch Email : ........
+                                 Company Name : ${data.company?.name}<br />
+                                 Branch Name: ${data.branch?.name || "Any Branch"}<br />
                               </td>
                            </tr>
 

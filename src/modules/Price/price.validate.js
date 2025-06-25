@@ -33,7 +33,15 @@ export const paramsIdVal = Joi.object({
 })
 
 
-export const addPriceVal = Joi.object({
+export const addTestPriceVal = Joi.object({
+   price:Joi.number().min(0).required() ,
+   priceAfterDiscount:Joi.number().min(0).required() ,
+   contract_Price:Joi.number().min(0).required() ,
+   company:Joi.string().hex().length(24).required() ,
+   test:Joi.string().hex().length(24).required() 
+})
+
+export const addRadiologyPriceVal = Joi.object({
    price:Joi.number().min(0).required() ,
    priceAfterDiscount:Joi.number().min(0).required() ,
    contract_Price:Joi.number().min(0).required() ,
@@ -42,7 +50,7 @@ export const addPriceVal = Joi.object({
 })
 
 
-export const updatePriceVal = Joi.object({
+export const updateTestPriceVal = Joi.object({
    test:Joi.string().hex().length(24).required() ,
    company:Joi.string().hex().length(24).required() ,
 
@@ -53,7 +61,7 @@ export const updatePriceVal = Joi.object({
 })
 
 
-export const updatePriceByIdVal = Joi.object({
+export const updateTestPriceByIdVal = Joi.object({
    id:Joi.string().hex().length(24).required() ,
 
    price:Joi.number().min(0).required() ,
