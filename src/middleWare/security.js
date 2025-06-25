@@ -7,7 +7,7 @@ import rateLimit from "express-rate-limit";
 import cors from "cors";
 
 export const applySecurityMiddlewares = (app) => {
-   
+
    //^1️⃣ Secure HTTP headers
       // app.use(helmet()) ;
       app.use(
@@ -96,16 +96,3 @@ export const applySecurityMiddlewares = (app) => {
    //^7️⃣ Disable X-Powered-By header (عشان ميبقاش واضح إنك شغال Express)
       app.disable("x-powered-by");
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
