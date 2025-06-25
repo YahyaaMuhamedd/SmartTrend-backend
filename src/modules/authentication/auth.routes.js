@@ -8,7 +8,8 @@ import { authorize } from "../../middleWare/authorization.js";
 import { validation } from "../../middleWare/validation.js";
 import { ROLES } from "../../utilities/enums.js";
 import passport from "passport";
-
+import env from "dotenv" ;
+env.config();
 
 
 const router  = Router() ; 
@@ -81,19 +82,19 @@ router.route("/qr_code")
 
 		router.get(
 		'/google/callback',
-		passport.authenticate('google', { failureRedirect: '/' }),
+			passport.authenticate('google', { failureRedirect: '/' }),
 		(req, res) => {
 			const token = jwt.sign(
 				{
-				name: req.user.displayName,
-				email: req.user.emails[0].value,
-				picture: req.user.photos[0].value,
+					name: req.user.displayName,
+					email: req.user.emails[0].value,
+					picture: req.user.photos[0].value,
 				},
-				process.env.JWT_SECRET,
+					process.env.JWT_SECRET,
 				{ expiresIn: '1h' }
 			);
 		
-			// res.redirect(`http://localhost:3000/login/success?token=${token}`);
+			// res.redirect(`https://sm-trend.com/login/success?token=${token}`);
 			res.redirect(`${process.env.REDIRECT_URL_GOOGLE}/login/success?token=${token}`);
 		}
 		);

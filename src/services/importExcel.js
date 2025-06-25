@@ -17,5 +17,3 @@ export const importExcelData = async (filePath) => {
    }
 };
 
-
-

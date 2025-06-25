@@ -14,7 +14,7 @@ const schema = new Schema({
    googleId: { 
       type: String , 
       unique: true ,
-      sparse: true
+      sparse: true     // Create Index put I use it when not all documents have the same field that I want to index.
    } ,
    gender:{
       type:String ,

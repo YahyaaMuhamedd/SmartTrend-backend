@@ -110,7 +110,7 @@ export const addTestToCart = catchError(
          })
          await cartExist.save() ;
 
-         res.json({message:"success" , cartExist})
+         res.json({message:"success" , cart:cartExist})
       }
    }
 )
@@ -131,7 +131,9 @@ export const addAllTestsToCart = catchError(
          priceList.push(priceTestExist)
       }
 
-      let cartExist = await cartModel.findOne({user:req.user._id}) ;
+      //^ Delete Old Cart :
+      await cartModel.findOneAndDelete({user:req.user._id}) ;
+
       let cartItems = priceList.map((price)=>{
          return {
                test:price.test ,
@@ -139,22 +141,52 @@ export const addAllTestsToCart = catchError(
             }
       })
 
-      if(!cartExist){
-         cartExist = new cartModel({
-            user:req.user._id ,
-            company :company_id ,
-            cartItems
-         })
-         await cartExist.save() ;
-      }
-      else{
-         cartExist.cartItems = cartItems
-         cartExist.company = company_id
-         await cartExist.save() ;
-      }
-      res.json({message:"success" , cartExist})
+      const cartExist = await cartModel.create({
+         user:req.user._id ,
+         company :company_id ,
+         cartItems
+      })
+
+      res.json({message:"success" , cart:cartExist})
    }
 )
+
+// //& Add All Tests To Cart By Logged User :
+// export const addAllTestsToCart = catchError(
+//    async(req , res , next)=>{
+//       const {listIdTest ,  company_id} = req.body ;
+      
+//       let priceList = [] ;
+//       for (const element of listIdTest) {
+//          const priceTestExist = await priceModel.findOne({test:element , company:company_id}) ;
+//          if(!priceTestExist)  return next(new AppError(`Price Test Not Found in This Company id = ${element}` , 404)) ;
+//          priceList.push(priceTestExist)
+//       }
+
+//       let cartExist = await cartModel.findOne({user:req.user._id}) ;
+//       let cartItems = priceList.map((price)=>{
+//          return {
+//                test:price.test ,
+//                price:price
+//             }
+//       })
+
+//       if(!cartExist){
+//          cartExist = new cartModel({
+//             user:req.user._id ,
+//             company :company_id ,
+//             cartItems
+//          })
+//          await cartExist.save() ;
+//       }
+//       else{
+//          cartExist.cartItems = cartItems
+//          cartExist.company = company_id
+//          await cartExist.save() ;
+//       }
+//       res.json({message:"success" , cartExist})
+//    }
+// )
 
 
 
@@ -225,7 +257,7 @@ export const removeTestFromCart = catchError(
       }
 
 
-      res.json({ message: "success", cartExist });
+      res.json({ message: "success", cart:cartExist });
    }
 );
 

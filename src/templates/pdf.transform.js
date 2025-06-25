@@ -4,6 +4,11 @@ const date = generate_Date() ;
 
 
 export let pdf_transform = (data)=>{
+
+   const total = data.orderItems.reduce((acc , ele)=>{
+      return acc + ele.contract_Price ;
+   } , 0) ;
+   
    return (
       `
       <!DOCTYPE html>
@@ -158,6 +163,7 @@ export let pdf_transform = (data)=>{
       
                   <tr class="heading">
                      <td>Item</td>
+                     <td>Contract Price</td>
       
                      <td></td>
                   </tr>
@@ -165,16 +171,17 @@ export let pdf_transform = (data)=>{
                   ${data.orderItems.map((ele)=>`
                            <tr class="item">
                               <td>${ele.test?.name}</td>
+                              <td>${ele.contract_Price}</td>
                               <td></td>
                            </tr>
                         `
                   ).join(" ")}
 
+
                   <tr class="total">
-                  <td style="font-weight:bold;"></td>
-   
-                  <td></td>
-               </tr>
+                     <td style="font-weight:bold;">Total</td>
+                     <td>${total}</td>
+                  </tr>
       
                </table>
             </div>

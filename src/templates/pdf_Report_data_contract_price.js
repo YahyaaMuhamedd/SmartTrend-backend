@@ -122,8 +122,6 @@ export const pdf_Report_data_contract_price = (data)=>{
                   <tr class="top">
 
                               <h1 style=" text-align: center ; "> TREND </h1>
-
-      
                               <ul style="font-weight:bold;  list-style:none; margin-top:20px ;">
                                  <li>Created At:  ${date}</li>
                                  ${data.date?.start ? `<li>From   : ${data.date?.start.split("-").reverse().join("-")} <span style="margin-left:300px;"> To : ${data.date?.end ? data.date?.end.split("-").reverse().join("-")  : `Today ${date}`}</span> </li>` : ""}

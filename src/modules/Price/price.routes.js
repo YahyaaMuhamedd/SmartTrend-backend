@@ -5,19 +5,24 @@ import { addPriceVal, paramsIdVal, updatePriceByIdVal, updatePriceVal } from "./
 import { protectedRoutes } from "../../middleWare/authentication.js";
 import { authorize } from "../../middleWare/authorization.js";
 import { ROLES } from "../../utilities/enums.js";
+import { multerLocal, validExtension } from "../../services/multer.Local.js";
 
 
 
 
 const router = Router() ;
 
-   //^=========================== Get All Prices =============================================
-   router.route("/")
-      .get( priceControl.getAllPrice)
-      // .get(protectedRoutes  , authorize(ROLES.ADMIN , ROLES.MODERATOR) , priceControl.getAllPrice)
-      .post(protectedRoutes  , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(addPriceVal) , priceControl.addPrice)
-      .put(protectedRoutes  , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(updatePriceVal) , priceControl.updatePrice)
-      
+      //^=========================== Get All Prices =============================================
+      router.route("/")
+         .get( priceControl.getAllPrice)
+         // .get(protectedRoutes  , authorize(ROLES.ADMIN , ROLES.MODERATOR) , priceControl.getAllPrice)
+         .post(protectedRoutes  , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(addPriceVal) , priceControl.addPrice)
+         .put(protectedRoutes  , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(updatePriceVal) , priceControl.updatePrice)
+
+         
+      //^=========================== Add Tests By Excel Sheet  ==============================
+      router.route("/addAllPriceByExcelSheet")
+         .post(protectedRoutes , authorize(ROLES.ADMIN) , multerLocal(validExtension.excel , "excel").single("file") , priceControl.addPriceSheetExcelToDatabase)
       
       
       

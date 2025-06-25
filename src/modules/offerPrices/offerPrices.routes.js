@@ -15,7 +15,7 @@ const router = Router() ;
 
 //^=========================== Get Offers =====================================
    router.route("/prices")
-   // .post(validation(priceListIdVal)  , offerControl.getOffers)
-   .post(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(priceListIdVal) , offerControl.getOffers)
+      .post(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(priceListIdVal) , offerControl.getOffers)
 
 export default router ;
+

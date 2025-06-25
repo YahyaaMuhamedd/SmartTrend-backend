@@ -1,6 +1,6 @@
 import { excelModel } from "../../../DataBase/models/excel.model.js";
 import { orderModel } from "../../../DataBase/models/order.model.js";
-import { exportDataToExcel } from "../../services/exportExcel.js";
+import {exportDataToExcelWithoutId} from "../../services/exportExcel.js";
 import { importExcelData } from "../../services/importExcel.js";
 import { AppError } from "../../utilities/AppError.js";
 import { catchError } from "../../utilities/catchError.js"
@@ -43,12 +43,12 @@ export const addExcelToDatabase = catchError(
 
 
 
-//& Add Excel :
+//& Create Excel :
 export const generateExcel = catchError(async (req, res, next) => {
    const data = await excelModel.find().select("-_id name age");
    const plainData = data.map(doc => doc.toObject());
 
-   const filePath = await exportDataToExcel(plainData);
+   const filePath = await exportDataToExcelWithoutId(plainData);
 
    if (filePath) {
    res.download(filePath, 'data.xlsx', (err) => {

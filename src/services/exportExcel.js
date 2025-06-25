@@ -2,8 +2,11 @@
 import path from "path";
 import fs from "fs";
 import XLSX  from "xlsx" ;
-// دالة لتحويل البيانات إلى Excel
-export const exportDataToExcel =  async(data) =>{
+import ExcelJS from 'exceljs';
+
+
+// ! Not Appear id Into Object in Excel Sheet :
+export const exportDataToExcelWithoutId =  async(data) =>{
 
    if (data && data.length > 0) {
       // تحويل البيانات إلى ورقة Excel
@@ -31,40 +34,39 @@ export const exportDataToExcel =  async(data) =>{
 
 
 
-//! Appear Data Object Into Object :
-// import ExcelJS from 'exceljs';
-// import path from 'path';
-// import fs from 'fs';
+// ! Appear id Into Object in Excel Sheet :
+export const exportDataToExcelWithinId = async (data) => {
+   if (!data || data.length === 0) {
+      console.log('🚫 No data to export.');
+      return null;
+   }
 
-// export const exportDataToExcel = async (data) => {
-//    if (!data || data.length === 0) {
-//       console.log('🚫 No data to export.');
-//       return null;
-//    }
+   // إنشاء ملف Excel جديد وورقة بيانات
+   const workbook = new ExcelJS.Workbook();
+   const worksheet = workbook.addWorksheet('Sheet1');
 
-//    // إنشاء ملف Excel جديد وورقة بيانات
-//    const workbook = new ExcelJS.Workbook();
-//    const worksheet = workbook.addWorksheet('Sheet1');
+   // تعيين الأعمدة بناءً على مفاتيح أول عنصر
+   worksheet.columns = Object.keys(data[0]).map(key => ({
+      header: key,
+      key: key,
+      width: 20
+   }));
 
-//    // تعيين الأعمدة بناءً على مفاتيح أول عنصر
-//    worksheet.columns = Object.keys(data[0]).map(key => ({
-//       header: key,
-//       key: key,
-//       width: 20
-//    }));
+   // (id) إضافة الصفوف وحزف علامة التنصيص فى اى دى
+   data.forEach(item =>{
+      item._id = item._id.toString() ;
+      worksheet.addRow(item) ;
+   });
 
-//    // إضافة الصفوف
-//    data.forEach(item => worksheet.addRow(item));
+   // تحضير المسار
+   const dirPath = path.resolve('Uploads/excel');
+   if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+   }
 
-//    // تحضير المسار
-//    const dirPath = path.resolve('Uploads/excel');
-//    if (!fs.existsSync(dirPath)) {
-//       fs.mkdirSync(dirPath, { recursive: true });
-//    }
+   const filePath = path.join(dirPath, `data-${Date.now()}.xlsx`);
+   await workbook.xlsx.writeFile(filePath);
 
-//    const filePath = path.join(dirPath, `data-${Date.now()}.xlsx`);
-//    await workbook.xlsx.writeFile(filePath);
-
-//    console.log('✅ Excel file created at:', filePath);
-//    return filePath;
-// };
+   console.log('✅ Excel file created at:', filePath);
+   return filePath;
+};

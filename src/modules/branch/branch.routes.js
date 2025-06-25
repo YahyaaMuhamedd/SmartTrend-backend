@@ -5,6 +5,7 @@ import { protectedRoutes } from "../../middleWare/authentication.js";
 import { authorize } from "../../middleWare/authorization.js";
 import { addBranchVal, paramsIdVal, updateBranchVal } from "./branch.validate.js";
 import { ROLES } from "../../utilities/enums.js";
+import { multerLocal, validExtension } from "../../services/multer.Local.js";
 
 
 
@@ -25,6 +26,14 @@ const router = Router() ;
    router.route("/getBranchCount")
       // .get(BC.getBranchCount)
       .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR)  , BC.getBranchCount)
+
+
+
+//^=========================== Add branches By Excel Sheet  ==============================
+router.route("/addAllBranchByExcelSheet")
+      .post(protectedRoutes , authorize(ROLES.ADMIN)  ,  multerLocal(validExtension.excel , "excel").single("file") , BC.addBranchSheetExcelToDatabase)
+
+
 
 
 //^=========================== Get Single Company, Update, Delete, Change Image =================

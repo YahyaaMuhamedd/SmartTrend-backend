@@ -42,9 +42,9 @@ export let create_pdf = async (template , data , fileName) => {
          bottom: '30px',
          left: '10px',
          right: '10px',
-      },
+      } ,
       displayHeaderFooter: true,
-      headerTemplate: `<div style="text-align: center; color:blue;">Email: Fekrah_Company@gmail.com</div>`,
+      headerTemplate: `<div style="text-align: center; color:blue;">Email: info@sm-trend.com </div>`,
       footerTemplate: `
          <div style="text-align: center; color: #444;">
             ${date} | Page <span class="pageNumber"></span> of <span class="totalPages"></span>
