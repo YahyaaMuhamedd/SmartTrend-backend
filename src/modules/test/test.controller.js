@@ -240,7 +240,8 @@ export const addTestSheetExcelToDatabase = catchError(
       const excelPath = req.file.path ;
       const data = await importExcelData(excelPath) ;
       for (const ele of data) {
-         ele.createdBy = req.user._id
+         ele.createdBy = req.user._id ;
+         ele.slug = slugify(ele.name) ;
       }
       const tests = await testModel.insertMany(data) ;
       res.json({message:"Insert Tests Successfully 🥰"})
@@ -253,7 +254,6 @@ export const addTestSheetExcelToDatabase = catchError(
 export const generateExcelListTest = catchError(async (req, res, next) => {
    const data = await testModel.find();
    const plainData = data.map(doc => doc.toObject()) ;
-   console.log(plainData);
    
    const filePath = await exportDataToExcelWithinId(plainData) ;
    if (filePath) {

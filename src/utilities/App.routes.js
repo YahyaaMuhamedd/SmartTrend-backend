@@ -17,6 +17,7 @@ import advertRouter from "../modules/advert/advert.routes.js"
 import excelRouter from "../modules/excelSheet/excelSheet.routes.js"
 import profileRouter from "../modules/profile/profile.routes.js"
 import historyRouter from "../modules/history/history.routes.js"
+import radiologyRouter from "../modules/radiology/radiology.routes.js"
 
 
 const router = Router()
@@ -40,6 +41,7 @@ const router = Router()
    router.use("/excel" , excelRouter) ;
    router.use("/profile" , profileRouter) ;
    router.use("/history" , historyRouter) ;
+   router.use("/radiology" , radiologyRouter) ;
 
    router.use("/onlineSystem" , onlineSystemRouter) ;
 

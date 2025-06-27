@@ -52,7 +52,7 @@ export const transformOnlineSystem = catchError(
       const {company} = req.branch ;
       const transform_number =  transform_nanoid();
       
-      const order = await orderModel.findOne({
+      let order = await orderModel.findOne({
          invoice_number , 
          is_Cancel:false , 
          is_Paid:true , 
@@ -73,6 +73,7 @@ export const transformOnlineSystem = catchError(
       order.transform_pdf  = `transform_${patient_Name_Slug}_${order._id}.pdf`
       await order.save() ;
 
+      order = await orderModel.findById(order._id) ;
       //! Create Transformation invoice Pdf  Orders :
       await create_pdf(pdf_transform , order , `transform_${patient_Name_Slug}_${order._id}`);
 

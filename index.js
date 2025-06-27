@@ -93,5 +93,3 @@ export const server = app.listen(PORT, () => console.log(`Server is running ....
 process.on("unhandledRejection", (error) => {
    console.log("Error", error);
 });
-
-
