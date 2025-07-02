@@ -1,7 +1,7 @@
 import { Router } from "express";
 import * as UC from "./user.controller.js";
 import { validation } from "../../middleWare/validation.js";
-import { addUserVal, blockedAndActiveUserVal , completeUserInfoWhenLoginGoogleVal, paramsIdVal, singleVal, updateUserRoleVal, updateUserVal } from "./user.validate.js";
+import { addUserVal, blockedAndActiveUserVal, completeUserInfoWhenLoginGoogleVal, paramsIdVal, singleVal, updateUserRoleVal, updateUserVal } from "./user.validate.js";
 import { protectedRoutes } from "../../middleWare/authentication.js";
 import { authorize } from "../../middleWare/authorization.js";
 import { multerLocal, validExtension } from "../../services/multer.Local.js";
@@ -10,51 +10,51 @@ import { accountExist } from "../../middleWare/accountExist.js";
 
 
 
-const router  = Router() ; 
+const router = Router();
 
 
 //^=========================== Get Users, Add User, Change Image ==============================================
-	router.route("/")
-		.get(UC.getAllUser)
-		// .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) , UC.getAllUser)
+router.route("/")
+	.get(UC.getAllUser)
+	// .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) , UC.getAllUser)
 
-		.post (protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) , validation(addUserVal) ,  accountExist  ,  UC.addUser) 
-		.patch (protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , multerLocal(validExtension.image , "users").single("file") ,  validation(singleVal) ,  UC.changeImgCover) 
-		.put (protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER ) ,  validation(updateUserVal) , UC.updateUser) 
-
-
-
-//^=========================== Get Information Users To Dashboard =============================================
-	router.route("/completeProfile")
-		.put (protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) ,  validation(completeUserInfoWhenLoginGoogleVal) , UC.completeUserInfoWhenLoginGoogle) 
-
+	.post(protectedRoutes, authorize(ROLES.ADMIN, ROLES.MODERATOR), validation(addUserVal), accountExist, UC.addUser)
+	.patch(protectedRoutes, authorize(ROLES.ADMIN, ROLES.MODERATOR, ROLES.USER), multerLocal(validExtension.image, "users").single("file"), validation(singleVal), UC.changeImgCover)
+	.put(protectedRoutes, authorize(ROLES.ADMIN, ROLES.MODERATOR, ROLES.USER), validation(updateUserVal), UC.updateUser)
 
 
 
 //^=========================== Get Information Users To Dashboard =============================================
-	router.route("/userCount")
-		// .get(UC.getUserCount)
-		.get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) , UC.getUserCount)
+router.route("/completeProfile")
+	.put(protectedRoutes, authorize(ROLES.ADMIN, ROLES.MODERATOR, ROLES.USER), validation(completeUserInfoWhenLoginGoogleVal), UC.completeUserInfoWhenLoginGoogle)
+
+
+
+
+//^=========================== Get Information Users To Dashboard =============================================
+router.route("/userCount")
+	// .get(UC.getUserCount)
+	.get(protectedRoutes, authorize(ROLES.ADMIN, ROLES.MODERATOR), UC.getUserCount)
 
 
 
 
 //^=========================== Get User, Update, Block, Delete User ===========================================
-	router.route("/:id")
-		.get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER ) , validation(paramsIdVal) , UC.getSingleUser)
-		.delete (validation(paramsIdVal) , UC.deleteUser) 
-		// .delete (protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) ,  validation(paramsIdVal) , UC.deleteUser) 
-		.patch (protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR) ,  validation(blockedAndActiveUserVal) , UC.blockUser) 
+router.route("/:id")
+	.get(protectedRoutes, authorize(ROLES.ADMIN, ROLES.MODERATOR, ROLES.USER), validation(paramsIdVal), UC.getSingleUser)
+	// .delete (validation(paramsIdVal) , UC.deleteUser) 
+	.delete(protectedRoutes, authorize(ROLES.ADMIN), validation(paramsIdVal), UC.deleteUser)
+	.patch(protectedRoutes, authorize(ROLES.ADMIN, ROLES.MODERATOR), validation(blockedAndActiveUserVal), UC.blockUser)
 
 
 
 
 
 //^=========================== Update User Role ===============================================================
-	router.route("/role/:id")
-		.patch (protectedRoutes , authorize(ROLES.ADMIN) ,  validation(updateUserRoleVal) , UC.updateUserRole) 
+router.route("/role/:id")
+	.patch(protectedRoutes, authorize(ROLES.ADMIN), validation(updateUserRoleVal), UC.updateUserRole)
 
 
-export default router ;
+export default router;
 
 

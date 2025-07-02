@@ -43,7 +43,7 @@ router.route("/:id")
 
    // .put(validation(updateCompanyVal) ,  companyControl.updateCompany)
    .put(protectedRoutes,
-      authorize(ROLES.ADMIN, ROLES.MODERATOR),
+      authorize(ROLES.ADMIN),
       validation(updateCompanyVal),
       companyControl.updateCompany)
 
@@ -51,7 +51,7 @@ router.route("/:id")
 
    // .patch(multerLocal(validExtension.image , "company").single("image") , validation(changeCoverVal) ,  companyControl.changeImgCover) 
    .patch(protectedRoutes,
-      authorize(ROLES.ADMIN, ROLES.MODERATOR),
+      authorize(ROLES.ADMIN),
       multerLocal(validExtension.image, "company").single("file"),
       validation(changeCoverVal),
       companyControl.changeImgCover)
@@ -60,7 +60,7 @@ router.route("/:id")
 
    // .delete( validation(paramsIdVal)  , companyControl.deleteCompany)
    .delete(protectedRoutes,
-      authorize(ROLES.ADMIN, ROLES.MODERATOR),
+      authorize(ROLES.ADMIN),
       validation(paramsIdVal),
       companyControl.deleteCompany)
 

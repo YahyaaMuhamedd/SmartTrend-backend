@@ -107,7 +107,7 @@ router.route("/:id")
 
 
    .delete(protectedRoutes,
-      authorize(ROLES.ADMIN, ROLES.MODERATOR),
+      authorize(ROLES.ADMIN),
       validation(paramsIdVal),
       orderControl.deleteOrder)
 
@@ -118,7 +118,7 @@ router.route("/:id")
 //^================================== Delete Order Media =====================================
 router.route("/media/:id")
    .delete(protectedRoutes,
-      authorize(ROLES.ADMIN, ROLES.MODERATOR),
+      authorize(ROLES.ADMIN),
       validation(paramsIdVal),
       orderControl.deleteOrderMedia)
 
