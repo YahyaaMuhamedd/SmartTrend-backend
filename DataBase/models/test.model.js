@@ -18,12 +18,12 @@ const schema = new Schema({
    condition :{
       type:String ,
       minLength:[2 , "Should be Character Count More Than 2 Character"] ,
-      maxLength:[400 , "Should be Character Count Less Than 50 Character"] ,
+      maxLength:[800 , "Should be Character Count Less Than 800 Character"] ,
    } ,
    description:{
       type:String ,
       minLength:[10 , "Should be Character Count More Than 2 Character"] ,
-      maxLength:[400 , "Should be Character Count Less Than 50 Character"] ,
+      maxLength:[400 , "Should be Character Count Less Than 400 Character"] ,
    } ,
    isActive:{
       type:Boolean ,

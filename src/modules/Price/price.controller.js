@@ -241,6 +241,7 @@ export const deletePrice = catchError(
 //& Add All Test Price By Excel Sheet :
 export const addTestPriceSheetExcelToDatabase = catchError(
    async(req , res , next)=>{
+      const {company} = req.body ;
       if(!req.file) return next(new AppError("Please Choose Excel Sheet" , 404))
 
       if((req.file.size > uploadImageSize)){
@@ -253,7 +254,6 @@ export const addTestPriceSheetExcelToDatabase = catchError(
 
       for (let ele of data) {
          const test = ele.test ;
-         const company = ele.company ;
          const price = ele.price ;
          const priceAfterDiscount = ele.priceAfterDiscount ;
 
