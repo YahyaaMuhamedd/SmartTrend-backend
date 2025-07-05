@@ -14,7 +14,6 @@ import prescriptionRouter from "../modules/prescription/prescription.routes.js"
 import onlineSystemRouter from "../modules/onlineSystem/onlineSystem.routes.js"
 import branchRouter from "../modules/branch/branch.routes.js"
 import advertRouter from "../modules/advert/advert.routes.js"
-import excelRouter from "../modules/excelSheet/excelSheet.routes.js"
 import profileRouter from "../modules/profile/profile.routes.js"
 import historyRouter from "../modules/history/history.routes.js"
 import radiologyRouter from "../modules/radiology/radiology.routes.js"
@@ -38,16 +37,11 @@ const router = Router()
    router.use("/patient" , patientRouter) ;
    router.use("/branch" , branchRouter) ;
    router.use("/advert" , advertRouter) ;
-   router.use("/excel" , excelRouter) ;
    router.use("/profile" , profileRouter) ;
    router.use("/history" , historyRouter) ;
    router.use("/radiology" , radiologyRouter) ;
 
    router.use("/onlineSystem" , onlineSystemRouter) ;
-
-
-
-
 
 
 export default router ;

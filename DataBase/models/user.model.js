@@ -24,6 +24,7 @@ const schema = new Schema({
    phone:{
       type:String ,
       unique:[true , "Phone is Unique"] ,
+      sparse: true , // sparse: true معناها إن الـ index مش هيتم تطبيقه على الوثائق اللي مش فيها القيمة دي (يعني null أو undefined).
       match: [/^01[0125][0-9]{8}$/, "Invalid Egyptian phone number"]
    } ,
    email:{
