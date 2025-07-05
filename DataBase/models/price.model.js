@@ -8,7 +8,7 @@ const schema = new Schema({
       required : true ,
       lowercase:true ,
       minLength:[1 , "Should be Character Count More Than 1 Character"] ,
-      maxLength:[100 , "Should be Character Count Less Than 100 Character"] ,
+      maxLength:[400 , "Should be Character Count Less Than 400 Character"] ,
    } ,
    companyName:{
       type:String , 
