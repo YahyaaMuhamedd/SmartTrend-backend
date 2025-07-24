@@ -65,7 +65,7 @@ const schema = new Schema({
    } ,
    payment_Type:{
       type:String ,
-      enum:["cash" , "card"] ,
+      enum:["cash" , "card" , "instaPay"] ,
       default:"card" ,
    } ,
    invoice_number:{

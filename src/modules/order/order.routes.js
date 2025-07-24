@@ -73,6 +73,7 @@ const router = Router() ;
 
 
 
+
          
    //^================================== Create Cash Order By Admin ========================================
    router.route("/createCashOrderByAdmin")
@@ -81,6 +82,15 @@ const router = Router() ;
          validation(createCashOrderAdminVal) , 
          orderControl.checkExistPatientMiddleWare , 
          orderControl.createCashOrderByAdmin
+      )
+         
+   //^================================== Create Cash Order By InstaPay ========================================
+   router.route("/createCashOrderByInstaPay")
+      .post(protectedRoutes , 
+         authorize(ROLES.USER) , 
+         validation(createCashOrderAdminVal) , 
+         orderControl.checkExistPatientMiddleWare , 
+         orderControl.createCashOrderByInstaPay
       )
 
 

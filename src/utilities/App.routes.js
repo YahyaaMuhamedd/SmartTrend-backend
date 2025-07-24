@@ -16,7 +16,6 @@ import branchRouter from "../modules/branch/branch.routes.js"
 import advertRouter from "../modules/advert/advert.routes.js"
 import profileRouter from "../modules/profile/profile.routes.js"
 import historyRouter from "../modules/history/history.routes.js"
-import radiologyRouter from "../modules/radiology/radiology.routes.js"
 
 
 const router = Router()
@@ -39,7 +38,6 @@ const router = Router()
    router.use("/advert" , advertRouter) ;
    router.use("/profile" , profileRouter) ;
    router.use("/history" , historyRouter) ;
-   router.use("/radiology" , radiologyRouter) ;
 
    router.use("/onlineSystem" , onlineSystemRouter) ;
 

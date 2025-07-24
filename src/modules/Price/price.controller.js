@@ -5,7 +5,6 @@ import { catchError } from "../../utilities/catchError.js";
 import { companyModel } from "../../../DataBase/models/company.model.js";
 import { testModel } from "../../../DataBase/models/test.model.js";
 import { importExcelData } from "../../services/importExcel.js";
-import { radiologyModel } from "../../../DataBase/models/radiology.model.js";
 
 const uploadImageSize = Number(process.env.UPLOAD_IMAGE_SIZE) || 2000000;
 
@@ -138,46 +137,6 @@ export const addTestPrice = catchError(
 )
 
 
-//& Add Radiology Price :
-export const addRadiologyPrice = catchError(
-   async(req , res , next)=>{
-      const {contract_Price , price , priceAfterDiscount ,  company , test} = req.body ;
-
-      
-      const radiologyExist = await radiologyModel.findById(test) ;
-      if(!radiologyExist) return next(new AppError("Radiology Not Exist", 404) ) ;
-      
-      
-      const companyExist = await companyModel.findById(company) ;
-      if(!companyExist) return next(new AppError("Company Not Exist", 404) ) ;
-      
-      
-      const priceExist = await priceModel.findOne({company , test}) ;
-      if( priceExist ) return next(new AppError("Radiology Already Added To Price In This Company", 404) ) ;
-      
-      const testName = radiologyExist.name ;
-      const companyName = companyExist.name ;
-      const discount = (( price - priceAfterDiscount ) / price ) * 100 ;
-      
-      const newPrice = await priceModel.create({
-         discount ,
-         testName ,
-         companyName ,
-
-         price ,
-         contract_Price ,
-         test ,
-         company ,
-         priceAfterDiscount ,
-         createdBy:req.user._id
-      }) ;
-      
-      !newPrice && next(new AppError("Price Not Added", 404) ) ;
-      newPrice &&  res.json({message:"success" , newPrice}) ;
-   }
-)
-
-
 
 
 //& Update Price :
@@ -258,7 +217,7 @@ export const addTestPriceSheetExcelToDatabase = catchError(
          const priceAfterDiscount = ele.priceAfterDiscount ;
 
          const testExist = await testModel.findOne({name}) ;
-         if(!testExist) return next(new AppError("Test Not Exist", 404) ) ;
+         if(!testExist) return next(new AppError(`Test Not Exist [${name}]`, 404) ) ;
          
          const test = testExist._id ;
          
@@ -286,102 +245,4 @@ export const addTestPriceSheetExcelToDatabase = catchError(
    }
 ) ; 
 
-
-
-
-// //& Add All Test Price By Excel Sheet :
-// export const addTestPriceSheetExcelToDatabase = catchError(
-//    async(req , res , next)=>{
-//       const {company} = req.body ;
-//       if(!req.file) return next(new AppError("Please Choose Excel Sheet" , 404))
-
-//       if((req.file.size > uploadImageSize)){
-//          return next(new AppError("Size Media Should be Less than 200 k-Byte" , 404))
-//       }
-
-//       const excelPath = req.file.path ;
-//       const data = await importExcelData(excelPath) ;
-      
-
-//       for (let ele of data) {
-//          const test = ele.test ;
-//          const price = ele.price ;
-//          const priceAfterDiscount = ele.priceAfterDiscount ;
-
-//          const testExist = await testModel.findById(test) ;
-//          if(!testExist) return next(new AppError("Test Not Exist", 404) ) ;
-         
-         
-//          const companyExist = await companyModel.findById(company) ;
-//          if(!companyExist) return next(new AppError("Company Not Exist", 404) ) ;
-         
-         
-//          const priceExist = await priceModel.findOne({company , test}) ;
-//          if( priceExist ) return next(new AppError("Test Already Added To Price In This Company", 404) ) ;
-         
-
-
-//          ele.test = test ;
-//          ele.company = company ;
-//          ele.price = price ;
-//          ele.priceAfterDiscount = Math.round(priceAfterDiscount) ;
-//          ele.testName = testExist.name ;
-//          ele.companyName = companyExist.name ;
-//          ele.createdBy = req.user._id ;
-//          ele.discount = Math.round((( price - priceAfterDiscount ) / price ) * 100 ) ;
-//       }
-      
-//       const tests = await priceModel.insertMany(data) ;
-//       res.json({message:"Insert Tests Successfully 🥰"})
-//    }
-// ) ; 
-
-
-
-//& Add All Test Price By Excel Sheet :
-export const addRadiologyPriceSheetExcelToDatabase = catchError(
-   async(req , res , next)=>{
-      if(!req.file) return next(new AppError("Please Choose Excel Sheet" , 404))
-
-      if((req.file.size > uploadImageSize)){
-         return next(new AppError("Size Media Should be Less than 200 k-Byte" , 404))
-      }
-
-      const excelPath = req.file.path ;
-      const data = await importExcelData(excelPath) ;
-      
-
-      for (let ele of data) {
-         const test = ele.test ;
-         const company = ele.company ;
-         const price = ele.price ;
-         const priceAfterDiscount = ele.priceAfterDiscount ;
-
-         const radiologyExist = await radiologyModel.findById(test) ;
-         if(!radiologyExist) return next(new AppError(`Radiology Not Exist:${test}`, 404) ) ;
-         
-         
-         const companyExist = await companyModel.findById(company) ;
-         if(!companyExist) return next(new AppError("Company Not Exist", 404) ) ;
-         
-         
-         const priceExist = await priceModel.findOne({company , test}) ;
-         if( priceExist ) return next(new AppError("Radiology Already Added To Price In This Company", 404) ) ;
-         
-
-
-         ele.test = test ;
-         ele.company = company ;
-         ele.price = price ;
-         ele.priceAfterDiscount = Math.round(priceAfterDiscount) ;
-         ele.testName = radiologyExist.name ;
-         ele.companyName = companyExist.name ;
-         ele.createdBy = req.user._id ;
-         ele.discount = Math.round((( price - priceAfterDiscount ) / price ) * 100 ) ;
-      }
-      
-      const tests = await priceModel.insertMany(data) ;
-      res.json({message:"Insert Tests Successfully 🥰"})
-   }
-) ; 
 

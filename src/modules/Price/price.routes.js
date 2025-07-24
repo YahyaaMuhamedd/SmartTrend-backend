@@ -20,21 +20,12 @@ const router = Router() ;
          .put(protectedRoutes  , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(updateTestPriceVal) , priceControl.updatePrice)
          
          
-         //^=========================== Add Tests By Excel Sheet  ==============================
-         router.route("/addRadiologyPrice")
-         .post(protectedRoutes  , authorize(ROLES.ADMIN , ROLES.MODERATOR) , validation(addRadiologyPriceVal) , priceControl.addRadiologyPrice)
-      
+
       
          
       //^=========================== Add Tests By Excel Sheet  ==============================
       router.route("/addAllTestPriceByExcelSheet")
          .post(protectedRoutes , authorize(ROLES.ADMIN) , multerLocal(validExtension.excel , "excel").single("file") , priceControl.addTestPriceSheetExcelToDatabase)
-      
-      
-         
-      //^=========================== Add Radiology By Excel Sheet  ==============================
-      router.route("/addAllRadiologyPriceByExcelSheet")
-         .post(protectedRoutes , authorize(ROLES.ADMIN) , multerLocal(validExtension.excel , "excel").single("file") , priceControl.addRadiologyPriceSheetExcelToDatabase)
       
       
       

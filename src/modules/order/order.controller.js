@@ -356,6 +356,105 @@ export const createCashOrder = catchError(
 
 
 
+//*============================================Create Cash Order By instaPay ============================================== 
+export const createCashOrderByInstaPay = catchError(
+   async(req , res , next)=>{
+
+      const {patient_Name , patient_Age , gender , patient_Phone , birthDay} = req.patient ;
+      const {listIdTest ,  companyId} = req.body ;
+      
+      let priceList = [] ;
+      for (const element of listIdTest) {
+         const priceTestExist = await priceModel.findOne({test:element , company:companyId}) ;
+         if(!priceTestExist)  return next(new AppError(`Price Test Not Found in This Company` , 404)) ;
+         priceList.push(priceTestExist)
+      }
+      let cartItems = priceList.map((price)=>{
+         return {
+               test:price.test ,
+               price:price
+            }
+      })
+      
+
+      //^ Delete Cart Admin :
+      await cartModel.findOneAndDelete({user:req.user._id }) ;
+
+
+      const cart = new cartModel({
+         user:req.user._id ,
+         company :companyId ,
+         cartItems
+      })
+      await cart.save() ;
+
+
+
+
+      const company = companyId ;
+      const invoice_number = invoice_nanoid() ;
+      const transform_number =  transform_nanoid();
+      const order_Number = await getNextOrderNumber() ;
+
+      const order = await orderModel.create({
+         order_Number ,
+         user:req.user._id ,
+         patient_Name , 
+         birthDay ,
+         patient_Age , 
+         patient_Phone ,
+         gender ,
+         payment_Type:"instaPay" ,
+         is_Paid:false ,
+         invoice_number ,
+         is_Approved: false ,
+         approved_At: Date.now() ,
+         transform_number ,
+         company ,
+         orderItems:cart.cartItems.map(({test , price:{price , priceAfterDiscount , contract_Price}})=>({
+            test:test ,
+            price:price ,
+            priceAfterDiscount:priceAfterDiscount ,
+            contract_Price
+         }))
+      })
+
+      //! Added invoice to this Order :
+      const patient_Name_Slug = slugify(order.patient_Name) ;
+      const add_Invoice_Order = await orderModel.findByIdAndUpdate(order._id , 
+         {invoice_pdf  : `invoice_${patient_Name_Slug}_${order._id}.pdf` ,
+         transform_pdf : `transform_${patient_Name_Slug}_${order._id}.pdf` ,
+      } , {new:true}) ;
+
+      //! Create Invoice Pdf  orders :
+      try {
+         await create_pdf(pdf_invoice , add_Invoice_Order , `invoice_${patient_Name_Slug}_${order._id}`);
+         await create_pdf(pdf_transform , add_Invoice_Order , `transform_${patient_Name_Slug}_${order._id}`);
+      } catch (error) {
+         return next(new AppError(error.message, 500));
+      }
+
+
+      //! Delete Cart After Create Order:
+      await cartModel.findByIdAndDelete(cart._id , {new:true}) ;
+
+      //& Increase the number of times the test is done : 
+      const options =  order.orderItems.map(({test:{_id }})=>({
+         updateOne:{
+            filter:{_id} ,
+            update:{$inc:{count:1}}
+         }
+      }));
+      await testModel.bulkWrite(options);
+
+      if(!order) return next(new AppError("Order Failed", 400)) ;      
+      res.json({message:"success", add_Invoice_Order, patient:req.patient});
+   }
+)
+
+
+
+
 
 
 //& Check Patient Exist MiddleWare :
@@ -907,10 +1006,18 @@ export const createCashOrderByAdmin = catchError(
 
 
 
+
+
+
+
+
+
+
 //^================================== Create Online Order And Payment With Paymob  ==================================
 const PAYMOB_API_KEY = process.env.PAYMOB_API_KEY ;
 const PAYMOB_INTEGRATION_ID = process.env.PAYMOB_INTEGRATION_ID ;
 let authToken = "" ;
+
 
 
 //& 1- Create Token In Paymob :
@@ -924,7 +1031,6 @@ const getAuthToken = async () => {
       console.error("Error getting auth token:", error.response?.data || error.message);
    }
 };
-
 //& 2- Create Payment Method :
 export const createSession = async (req , res , next) => {
    try {
@@ -934,22 +1040,12 @@ export const createSession = async (req , res , next) => {
       const {patient_Name  , gender , birthDay,  patient_Phone , patient_Age} = req.patient ;
       const {payment , profile} = req.query;
 
-      let integration_id ;
+      let integration_id = "" ;
       if(payment === "credit"){
          integration_id = "4822951" ;
-      }else if(payment === "vodafone"){
+      }else if(payment === "wallet"){
          integration_id = "4822951" ;
-      }else if(payment === "orange"){
-         integration_id = "4822951" ;
-      }else if(payment === "etisalat"){
-         integration_id = "4822951" ;
-      }else if(payment === "we"){
-         integration_id = "4822951" ;
-      }else if(payment === "fawry"){
-         integration_id = "4822951" ;
-      }else if(payment === "instapay"){
-         integration_id = "4822951" ;
-      } ;
+      };
 
 
 
@@ -1025,10 +1121,6 @@ export const createSession = async (req , res , next) => {
       res.status(500).json({ error: "Payment creation failed !" });
    }
 };
-
-
-
-
 //& 3- Receive Webhook From Paymob :
 export const webhookMiddleWre = catchError(
    async(req , res , next)=>{
@@ -1050,7 +1142,6 @@ export const webhookMiddleWre = catchError(
       }
    }
 )
-
 //& 4- Create Online Order :
 export const createOnlineOrder = async (data)=>{
    const{
@@ -1079,6 +1170,7 @@ export const createOnlineOrder = async (data)=>{
       gender ,
       invoice_number ,
       is_Paid : true ,
+      payment_Type:"card" ,
       company ,
       orderItems:cart.cartItems.map(({test , price:{price , priceAfterDiscount , contract_Price}})=>({
          test:test ,
