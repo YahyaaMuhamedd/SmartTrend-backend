@@ -404,7 +404,7 @@ export const createCashOrderByInstaPay = catchError(
          patient_Age , 
          patient_Phone ,
          gender ,
-         payment_Type:"instaPay" ,
+         payment_Type:"cash" ,
          is_Paid:false ,
          invoice_number ,
          is_Approved: false ,
@@ -524,6 +524,26 @@ export const addHouseCall = catchError(
          await order.save() ;
       }
       res.json({message:"success" })
+   }
+)
+
+
+
+
+
+//& Paid Order By Admin :
+export const paidOrderByAdmin = catchError(
+   async(req , res , next)=>{
+      const {is_Paid , orderId} = req.body ;
+      
+      const order = await orderModel.findById(orderId) ;
+      if(!order) return next(new AppError("Order Not Exist" , 404)) ;
+
+      if(is_Paid){
+         order.is_Paid = is_Paid;
+         await order.save() ;
+      }
+      res.json({message:`${order.is_Paid? "The order has been paid successfully. !" : "Failed, The order has not been paid."}` })
    }
 )
 

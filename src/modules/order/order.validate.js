@@ -65,7 +65,6 @@ export const cancelOrderVal = Joi.object({
 
 
 
-
 export const addHouseCallVal = Joi.object({
 	id:Joi.string().hex().length(24).required() ,
 	isHouse_Call:Joi.string()
@@ -75,3 +74,10 @@ export const addHouseCallVal = Joi.object({
 export const generateInvoiceOrderVal = Joi.object({
 	order_Number:Joi.string().required() ,
 })
+
+
+export const paidOrderVal = Joi.object({
+	orderId:Joi.string().hex().length(24).required() ,
+	is_Paid:Joi.string().valid('true', 'false') ,
+})
+
