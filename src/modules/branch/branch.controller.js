@@ -212,6 +212,7 @@ export const deleteBranch = catchError(
 //& Add All Branches By Excel Sheet :
 export const addBranchSheetExcelToDatabase = catchError(
    async(req , res , next)=>{
+      const {company} = req.body ;
       if(!req.file) return next(new AppError("Please Choose Excel Sheet" , 404))
 
       if((req.file.size > uploadImageSize)){
@@ -227,6 +228,7 @@ export const addBranchSheetExcelToDatabase = catchError(
          if (branch.password) {
             branch.password = bcrypt.hashSync(branch.password , 8);
          }
+         branch.company = company
          branch.createdBy = req.user._id
       }
 

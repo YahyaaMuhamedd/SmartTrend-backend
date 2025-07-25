@@ -3,7 +3,7 @@ import * as orderControl from "./order.controller.js";
 import { validation } from "../../middleWare/validation.js";
 import { protectedRoutes } from "../../middleWare/authentication.js";
 import { authorize } from "../../middleWare/authorization.js";
-import { addHouseCallVal, cancelOrderVal, createCashOrderAdminVal, createOnlineOrderVal, createOrderVal, generateInvoiceOrderVal, paramsIdVal } from "./order.validate.js";
+import { addHouseCallVal, cancelOrderVal, createCashOrderAdminVal, createOnlineOrderVal, createOrderVal, generateInvoiceOrderVal, paidOrderVal, paramsIdVal } from "./order.validate.js";
 import { ROLES } from "../../utilities/enums.js";
 
 
@@ -74,6 +74,7 @@ router.route("/createCashOrder")
 
 
 
+
 //^================================== Create Cash Order By Admin ========================================
 router.route("/createCashOrderByAdmin")
    .post(protectedRoutes,
@@ -81,6 +82,22 @@ router.route("/createCashOrderByAdmin")
       validation(createCashOrderAdminVal),
       orderControl.checkExistPatientMiddleWare,
       orderControl.createCashOrderByAdmin
+   )
+
+//^================================== Create Cash Order By InstaPay ========================================
+router.route("/createCashOrderByInstaPay")
+   .post(protectedRoutes,
+      authorize(ROLES.USER),
+      validation(createCashOrderAdminVal),
+      orderControl.checkExistPatientMiddleWare,
+      orderControl.createCashOrderByInstaPay
+   )
+//^================================== Create Cash Order By InstaPay ========================================
+router.route("/paidOrder")
+   .patch(protectedRoutes,
+      authorize(ROLES.ADMIN, ROLES.MODERATOR),
+      validation(paidOrderVal),
+      orderControl.paidOrderByAdmin
    )
 
 
@@ -107,7 +124,7 @@ router.route("/:id")
 
 
    .delete(protectedRoutes,
-      authorize(ROLES.ADMIN),
+      authorize(ROLES.ADMIN, ROLES.MODERATOR),
       validation(paramsIdVal),
       orderControl.deleteOrder)
 
@@ -118,7 +135,7 @@ router.route("/:id")
 //^================================== Delete Order Media =====================================
 router.route("/media/:id")
    .delete(protectedRoutes,
-      authorize(ROLES.ADMIN),
+      authorize(ROLES.ADMIN, ROLES.MODERATOR),
       validation(paramsIdVal),
       orderControl.deleteOrderMedia)
 
