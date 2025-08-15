@@ -1035,7 +1035,6 @@ export const createCashOrderByAdmin = catchError(
 
 //^================================== Create Online Order And Payment With Paymob  ==================================
 const PAYMOB_API_KEY = process.env.PAYMOB_API_KEY ;
-const PAYMOB_INTEGRATION_ID = process.env.PAYMOB_INTEGRATION_ID ;
 let authToken = "" ;
 
 
@@ -1062,9 +1061,9 @@ export const createSession = async (req , res , next) => {
 
       let integration_id = "" ;
       if(payment === "credit"){
-         integration_id = "4822951" ;
+         integration_id = "5195748" ;
       }else if(payment === "wallet"){
-         integration_id = "4822951" ;
+         integration_id = "5195747" ;
       };
 
 
@@ -1127,12 +1126,13 @@ export const createSession = async (req , res , next) => {
             floor: "1",
          },
          currency: "EGP",
-         integration_id: PAYMOB_INTEGRATION_ID ,
+         integration_id ,
       });
 
       const paymentKey = paymentKeyResponse.data.token ;
+      
       res.json({
-         redirect_url: `https://accept.paymob.com/api/acceptance/iframes/865137?payment_token=${paymentKey}`,
+         redirect_url: `https://accept.paymob.com/api/acceptance/iframes/931835?payment_token=${paymentKey}`,
       });
 
    } catch (error) {

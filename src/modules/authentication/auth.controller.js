@@ -6,6 +6,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import QRCode  from'qrcode' ;
 import { customAlphabet, } from 'nanoid' ;
+import generateToken from "../../handlers/generateToken.js";
 const nanoid = customAlphabet('0123456789', 6) ;
 
 
@@ -32,13 +33,7 @@ export const signUp = catchError(
 
 
       const user = await userModel.create({name , age , gender , phone , birthDay , email  , password}) ;
-
-
-      const token = jwt.sign(
-         {_id:user._id , name:user.name , gender:user.gender , phone: user.phone , email:user.email , role:user.role , birthDay:user.birthDay , age:user.age , imgCover:user.imgCover} , 
-         process.env.SECRET_KEY , 
-         {expiresIn:process.env.TOKEN_EXPIRATION} // expired Token After 2 hours or ==> expiresIn:"2h" 
-      ) 
+      const token = generateToken(user) ;
 
       !user && next(new AppError("User Not Added" , 404))
       user && res.json({message:"success" ,  token})
@@ -57,13 +52,7 @@ export const signIn = catchError(
 
       // const loggedUser = await userModel.findById(user._id).select("-_id name role  phone birthDay email  age imgCover") ;
       if(user && bcrypt.compareSync(password , user?.password)) {
-         const token = jwt.sign(
-            {_id:user._id , name:user.name , gender:user.gender ,  phone: user.phone , email:user.email , role:user.role , birthDay:user.birthDay , age:user.age , imgCover:user.imgCover} , 
-            process.env.SECRET_KEY , 
-            {expiresIn:process.env.TOKEN_EXPIRATION} // expired Token After 2 hours or ==> expiresIn:"2h" 
-            // {expiresIn:60*60*2} // expired Token After 2 hours or ==> expiresIn:"2h" 
-         ) 
-
+         const token = generateToken(user) ;
          return res.json({message:"success" ,  token }) ;
       }
       return next(new AppError("Email Or Password InCorrect" , 401)) ;
@@ -88,16 +77,10 @@ export const changePassword = catchError(
             return next(new AppError("Email Or Old Password InCorrect" , 404)) ;
          }
 
-
          //& Generate Token :
-         const token = jwt.sign(
-            {_id:user._id , name:user.name , gender:user.gender ,  phone: user.phone , email:user.email , role:user.role , birthDay:user.birthDay , age:user.age , imgCover:user.imgCover} , 
-            process.env.SECRET_KEY , 
-            {expiresIn:process.env.TOKEN_EXPIRATION} // expired Token After 2 hours or ==> expiresIn:"2h" 
-            // {expiresIn:60*60*2} // expired Token After 2 hours or ==> expiresIn:"2h" 
-         ) 
+         const token = generateToken(user) ;
 
-      await user.save()
+         await user.save()
       return res.json({message:"success" , token})
    }
 )
@@ -280,11 +263,8 @@ export const loginWithGoogle = catchError(
          await user.save() ;
       }
 
-      const token = jwt.sign(
-         {_id:user._id , name:user.name , gender:user.gender ,  phone: user.phone , email:user.email , role:user.role , birthDay:user.birthDay , age:user.age , imgCover:user.imgCover} , 
-         process.env.SECRET_KEY , 
-         {expiresIn:process.env.TOKEN_EXPIRATION} // expired Token After 2 hours or ==> expiresIn:"2h" 
-      ) 
+      const token = generateToken(user) ;
+
 
       // res.redirect(`https://eng-mahmoudothman.github.io/Fekrah_Medical_Front-End/#/LoginSuccessGoogle?token=${token}`);
       res.redirect(`${process.env.REDIRECT_URL_GOOGLE}/#/LoginSuccessGoogle?token=${token}`);
