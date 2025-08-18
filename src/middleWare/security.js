@@ -46,8 +46,8 @@ export const applySecurityMiddlewares = (app) => {
 
    //^3️⃣ Rate limiting - Control in request count more than 100 request server in blocked 15 minutes:
       const limiter = rateLimit({
-         windowMs: 15 * 60 * 1000, // 15 minute
-         max: 100,
+         windowMs: 10 * 60 * 1000, // 10 minute
+         max: 150,
          standardHeaders: true, // Enable New headers As : Retry-After
          legacyHeaders: false,  // Disable Old HeadersAs : X-RateLimit-*
 
@@ -57,9 +57,10 @@ export const applySecurityMiddlewares = (app) => {
             const seconds = retryAfterSeconds % 60;
 
 
+
             res.status(429).json({
                success: false,
-               message: `Too many requests from this IP :[ ${req.ip}], please try again after 15 minutes` ,
+               message: `Too many requests from this IP :[ ${req.ip}], please try again after 10 minutes` ,
                ip: req.ip,
                retryAfter: {
                   totalSeconds: retryAfterSeconds,

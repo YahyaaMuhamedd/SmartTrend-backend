@@ -60,7 +60,6 @@ export const getReportOrders = catchError(
          if(orders.length <= 0) return next(new AppError("Not Data Exist" , 404))
          const userId = req.user._id.toString() ;
          const order_Info = {date:{start , end} , orders} ;
-         console.log("orders", order_Info);
          const pathFile = await create_pdf(pdf_Report_data , order_Info , `${userId}_report_data`) ;
          
          res.json({message:"success" , orders , pathFile}) ;
