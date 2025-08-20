@@ -92,7 +92,7 @@ const router = Router() ;
          orderControl.checkExistPatientMiddleWare , 
          orderControl.createCashOrderByInstaPay
       )
-   //^================================== Create Cash Order By InstaPay ========================================
+   //^==================================  Approved Order By InstaPay ========================================
    router.route("/paidOrder")
       .patch(protectedRoutes , 
          authorize(ROLES.ADMIN , ROLES.MODERATOR) , 

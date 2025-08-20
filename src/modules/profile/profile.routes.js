@@ -18,10 +18,10 @@ const router = Router() ;
 
       .post(protectedRoutes ,  
          authorize(ROLES.ADMIN , ROLES.MODERATOR) , 
-         multerLocal(validExtension.image , "Profile").single("file"), 
+         multerLocal(validExtension.image , "profile").single("file"), 
          validation(addProfileVal) ,
          profileControl.addProfile)
-
+         
 
 //^=========================== Get Single Profile, Update, Delete, Create Order Profile =================
    router.route("/:id")

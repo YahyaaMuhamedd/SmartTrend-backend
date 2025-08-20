@@ -37,7 +37,7 @@ export const multerLocal = (validationType , folderName)=>{
       } ,
       filename : function (req , file ,cb){
          //& Use nanoid Module Production Only Number Random + Name File :
-         const uniqueName = uniqueNumber() + file.originalname 
+         const uniqueName = uniqueNumber() + file.originalname ; 
          cb(null , uniqueName);
 
          //& Use nanoid Module Production (Number And Character) Random + Name File :

@@ -377,18 +377,17 @@ export const createCashOrderByInstaPay = catchError(
       })
       
 
-      //^ Delete Cart Admin :
-      await cartModel.findOneAndDelete({user:req.user._id }) ;
+      // //^ Delete Cart Admin :
+      // await cartModel.findOneAndDelete({user:req.user._id }) ;
 
 
-      const cart = new cartModel({
-         user:req.user._id ,
-         company :companyId ,
-         cartItems
-      })
-      await cart.save() ;
-
-
+      // const cart = new cartModel({
+      //    user:req.user._id ,
+      //    company :companyId ,
+      //    cartItems
+      // })
+      // await cart.save() ;
+      const cart = await cartModel.findOne({user:req.user._id }) ;
 
 
       const company = companyId ;
@@ -414,9 +413,10 @@ export const createCashOrderByInstaPay = catchError(
          orderItems:cart.cartItems.map(({test , price:{price , priceAfterDiscount , contract_Price}})=>({
             test:test ,
             price:price ,
-            priceAfterDiscount:priceAfterDiscount ,
+            priceAfterDiscount: priceAfterDiscount ,
             contract_Price
-         }))
+         })) ,
+         profilePrice: cart.profilePrice
       })
 
       //! Added invoice to this Order :
@@ -1243,4 +1243,3 @@ export const createOnlineOrder = async (data)=>{
 
 
 
-// ${new Date(data.approved_At).toISOString().split('T')[0] }
