@@ -24,7 +24,7 @@ const schema = new Schema({
    phone:{
       type:String ,
       unique:[true , "Phone is Unique"] ,
-      sparse: true , // sparse: true معناها إن الـ index مش هيتم تطبيقه على الوثائق اللي مش فيها القيمة دي (يعني null أو undefined).
+      sparse: true ,   // Create Index put I use it when not all documents have the same field that I want to index. 
       match: [/^01[0125][0-9]{8}$/, "Invalid Egyptian phone number"]
    } ,
    email:{
@@ -100,6 +100,7 @@ schema.pre("save"  , function(next){
    }
    next()
 }) ;
+
 
 
 // // & Hash Password Before Save When Update User :

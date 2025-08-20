@@ -173,12 +173,14 @@ export const createProfileOrder = catchError(
 
       const cart = new cartModel({
          user:req.user._id ,
-         company :profileExist.company._id ,
+         company :profileExist.company ,
          cartItems ,
          profilePrice: Math.round (profileExist.price) 
       })
       await cart.save() ;
+
+      const newCart = await cartModel.findById(cart._id)
       
-      res.json({message:"success" , cart})
+      res.json({message:"success" , cart:newCart})
    }
 )

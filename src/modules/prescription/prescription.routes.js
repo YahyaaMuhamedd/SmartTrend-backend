@@ -21,7 +21,7 @@ const router = Router() ;
 
 
       //& Add Prescription :
-      .post(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) ,  multerLocal(validExtension.image , "Prescription").single("image"), validation(addPrescriptionVal) ,prescriptionControl.addPrescription)
+      .post(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) ,  multerLocal(validExtension.image , "prescription").single("image"), validation(addPrescriptionVal) ,prescriptionControl.addPrescription)
 
 
 
