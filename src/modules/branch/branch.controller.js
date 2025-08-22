@@ -228,8 +228,12 @@ export const addBranchSheetExcelToDatabase = catchError(
          if (branch.password) {
             branch.password = bcrypt.hashSync(branch.password , 8);
          }
-         branch.company = company
-         branch.createdBy = req.user._id
+         branch.address.street = branch.street ;
+         branch.address.city = branch.city ;
+         branch.address.area = branch.area ;
+
+         branch.company = company ;
+         branch.createdBy = req.user._id ;
       }
 
       const branches = await branchModel.insertMany(data) ;

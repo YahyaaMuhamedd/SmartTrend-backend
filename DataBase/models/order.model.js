@@ -132,7 +132,7 @@ schema.pre("save"  , function(next){
    this.total_Price = Math.round(this.orderItems.reduce((acc, entry) => acc + entry.price, 0)) ;
    this.Contract_Price = Math.round(this.orderItems.reduce((acc, entry) => acc + entry.contract_Price, 0)) ;
    // this.Net_Amount = Math.round(this.Contract_Price - this.priceAfterDiscount) ;
-   this.total_Price_After_Discount = Math.round(this.orderItems.reduce((acc, entry) => acc + entry.priceAfterDiscount, 0)) ;
+   this.total_Price_After_Discount = this.profilePrice || Math.round(this.orderItems.reduce((acc, entry) => acc + entry.priceAfterDiscount, 0)) ;
    this.Net_Amount = this.profilePrice? Math.round((this.profilePrice || 0) - this.Contract_Price) :  Math.round((this.total_Price_After_Discount || 0) - this.Contract_Price);
 
 

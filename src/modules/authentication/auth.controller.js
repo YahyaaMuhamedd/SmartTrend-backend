@@ -46,7 +46,7 @@ export const signUp = catchError(
 export const signIn = catchError(
    async (req , res , next)=>{
       const{userAccount ,  password} = req.body ;
-
+      
       const user = await userModel.findOne({$or:[{email : userAccount } , {phone : userAccount }]}) ;
       !user && next(new AppError("User Not Exist" , 401)) ; 
 
