@@ -134,13 +134,13 @@ export let pdf_invoice = (data) => {
 
             <table cellpadding="0" cellspacing="0">
                <tr class="top">
-                  <h1 style=" text-align: center ; ">TREND</h1>
+                  <h1 style=" text-align: center ; margin-bottom: 16px ;">SMART TREND</h1>
 
                   <ul style="font-weight:bold; list-style:none;">
                      <li>Invoice Number: ${data.invoice_number}</li>
                      <li>Order Number: ${data.order_Number}</li>
                      <li>Company Name: ${data.company.name}</li>
-                     <li>Created At: ${new Date(data.createdAt).toISOString().split('T')[0] }</li>
+                     <li>Created At: ${new Date(data.createdAt).toISOString().split('T')[0]}</li>
                   </ul>
                </tr>
                <hr/>
@@ -153,8 +153,8 @@ export let pdf_invoice = (data) => {
                               Patient Information :- <br />
                               Patient Name : ${data.patient_Name} <br />
                               Patient Age : ${data.patient_Age} <br />
-                              Patient Birth Date : ${data.birthDay.toString().split(" ").slice(1 , 4)}  <br />
-                              Patient Phone : ${data.patient_Phone? data.patient_Phone :"لا يوجد"} <br />
+                              Patient Birth Date : ${data.birthDay.toString().split(" ").slice(1, 4)}  <br />
+                              Patient Phone : ${data.patient_Phone ? data.patient_Phone : "لا يوجد"} <br />
                            </td>
    
                         </tr>

@@ -117,7 +117,7 @@ export let pdf_transform = (data)=>{
                <table cellpadding="0" cellspacing="0">
                   <tr class="top">
 
-                     <h1 style=" text-align: center ; "> TREND </h1>
+                     <h1 style=" text-align: center ; margin-bottom: 16px ;">SMART TREND </h1>
                      <ul style="font-weight:bold;  list-style:none;">
                         <li>Order Number: ${data.order_Number}</li>
                         <li>Invoice Number: ${data.invoice_number}</li>
