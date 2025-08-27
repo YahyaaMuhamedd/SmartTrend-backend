@@ -24,12 +24,14 @@ export const singleVal = {
 
 
 export const createOnlineOrderVal = Joi.object({
-	patient_Name:Joi.string().min(2).max(50).trim().required() ,
-   birthDay:Joi.date().format('YYYY-MM-DD').required() , 
+	name:Joi.string().min(2).max(50).trim().required() ,
+   email: Joi.string().email().required().trim() ,
+   phone:Joi.string().pattern(/^(002)?01[0125][0-9]{8}$/).trim().required() ,
    gender:Joi.string().required() ,
-   payment :Joi.string().required() ,
+   age:Joi.number().required() ,
+   birthDay:Joi.date().format('YYYY-MM-DD').required() , 
    profile :Joi.string().required() ,
-   patient_Phone:Joi.string().pattern(/^(002)?01[0125][0-9]{8}$/).trim().required() 
+	payment_method_id:Joi.number().required() ,
 })
 
 export const createOrderVal = Joi.object({

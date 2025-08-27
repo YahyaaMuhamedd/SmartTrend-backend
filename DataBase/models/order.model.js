@@ -142,6 +142,7 @@ schema.pre("save"  , function(next){
 
 
 
+
 schema.pre("init" , function (doc){
    doc.invoice_pdf = process.env.BASE_URL + "/pdf/" +  doc.invoice_pdf
    doc.transform_pdf = process.env.BASE_URL + "/pdf/" +   doc.transform_pdf

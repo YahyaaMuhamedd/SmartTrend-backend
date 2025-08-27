@@ -3,8 +3,7 @@ import { generate_Date } from "../services/generateDate_Time.js"
 const date = generate_Date() ;
 
 export const pdf_Report_data = (data)=>{
-
-
+   
    const total_Net_Amount = data?.orders.reduce((acc , entry)=>{
       return acc + entry.Net_Amount
    } , 0)
