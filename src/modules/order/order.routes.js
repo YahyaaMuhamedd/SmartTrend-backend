@@ -44,6 +44,10 @@ const router = Router() ;
    router.route("/getLoggedUserOrder")
       .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) ,  orderControl.getLoggedUserOrder)
 
+   //^=========================== Get Logged User Order =============================================
+   router.route("/payment")
+      .get(orderControl.getPaymentMethods)
+
 
 
 

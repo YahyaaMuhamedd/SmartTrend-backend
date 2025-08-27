@@ -30,8 +30,11 @@ const PORT = process.env.PORT || 5000 ;
 
 
 
+   // Encoded Server data (Json) :
    app.use(express.json({ limit: '3000kb' })) ;
 
+   // Encoded Server data (Form-data , Application/x-www-form-urlencoded) :
+   app.use(express.urlencoded({ extended: true })); 
 //!================= MIDDLEWARE SECURITY SETUP ============================================
    applySecurityMiddlewares(app);
 

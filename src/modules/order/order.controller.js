@@ -103,6 +103,7 @@ export const getAllOrder = catchError(
 export const getLoggedUserOrder = catchError(
    async(req , res , next)=>{
       let result = await orderModel.find({user:req.user._id});
+      const approvedOrder = await orderModel.find({user:req.user._id , is_Approved:false});
 
       //^ Merge Params
       let filterObj = {user:req.user._id};
@@ -130,7 +131,7 @@ export const getLoggedUserOrder = catchError(
          if(currentPag <=  numberOfPages  && prevPage != 0 ){
             metadata.prevPage  = prevPage
          }
-      res.json({message:"success" , results:result.length ,  metadata: metadata ,  orders}) ;
+      res.json({message:"success" , results:result.length , orderCount:approvedOrder.length ,  metadata: metadata ,  orders}) ;
    }
 )
 
@@ -457,10 +458,13 @@ export const createCashOrderByInstaPay = catchError(
 
 
 
+
 //& Check Patient Exist MiddleWare :
 export const checkExistPatientMiddleWare = catchError(
    async(req , res , next)=>{
-      const {patient_Name , birthDay , gender  , patient_Phone} = req.body ;
+      const {name , birthDay , gender  , phone} = req.body ;
+      const patient_Name = name ;
+      const patient_Phone = phone ;
 
       const createdBy = req.user._id ;
       //& Calculation Age From BirthDay :
@@ -540,7 +544,8 @@ export const paidOrderByAdmin = catchError(
       if(!order) return next(new AppError("Order Not Exist" , 404)) ;
 
       if(is_Paid){
-         order.is_Paid = is_Paid;
+         order.is_Paid = is_Paid ;
+         order.is_Approved = is_Paid ,
          await order.save() ;
       }
       res.json({message:`${order.is_Paid? "The order has been paid successfully. !" : "Failed, The order has not been paid."}` })
@@ -1033,201 +1038,426 @@ export const createCashOrderByAdmin = catchError(
 
 
 
-//^================================== Create Online Order And Payment With Paymob  ==================================
-const PAYMOB_API_KEY = process.env.PAYMOB_API_KEY ;
-let authToken = "" ;
+//^================================== Create Online Order And Payment With Fawaterak  ==================================
+const FAWATERK_API_KEY = process.env.FAWATERK_API_KEY ;
+const PROVIDER_KEY = process.env.PROVIDER_KEY ;
+const FAWATERK_BASE_URL = process.env.FAWATERK_BASE_URL ;
+const BASE_URL = process.env.BASE_URL ;
 
 
 
-//& 1- Create Token In Paymob :
-const getAuthToken = async () => {
-   try {
-      const response = await axios.post("https://accept.paymob.com/api/auth/tokens", {
-         api_key: PAYMOB_API_KEY,
-      });
-      authToken = response.data.token;
-   } catch (error) {
-      console.error("Error getting auth token:", error.response?.data || error.message);
-   }
-};
-//& 2- Create Payment Method :
-export const createSession = async (req , res , next) => {
-   try {
-      await getAuthToken() ;
+//& Create Payment Method :
+   export const getPaymentMethods = catchError(async(req , res , next)=>{
+      const  headers =  { Authorization: `Bearer ${FAWATERK_API_KEY}`,"Content-Type": "application/json"} ;
+      const {data} = await axios.get("https://staging.fawaterk.com/api/v2/getPaymentmethods",{headers});
+      res.json({message:"success" , payment_method :data})
+      // console.log("Payment Method" , data);
+   }) ;
 
-
-      const {patient_Name  , gender , birthDay,  patient_Phone , patient_Age} = req.patient ;
-      const {payment , profile} = req.query;
-
-      let integration_id = "" ;
-      if(payment === "credit"){
-         integration_id = "5195748" ;
-      }else if(payment === "wallet"){
-         integration_id = "5195747" ;
-      };
-
-
-
-      const cart = await cartModel.findOne({user:req.user._id}) ;
-      if(!cart) return next(new AppError("Cart Not Found" , 404)) ;
-
-      const amount_num = cart.total_After_Discount ; 
-      let amount ;  
-
-
-      //^ Check Order Type if Tests Or Profiles :
-      if(profile === "true"){
-         if(!cart.profilePrice) return next(new AppError("Profile Price Not Exist" , 404)) ;
-         amount = Math.round(cart.profilePrice) * 100  ;
-      }else{
-         amount = Math.round(amount_num) * 100 ; 
-      }
-
-
-      const orderData = {
-         user: req.user._id , 
-         patient_Name :patient_Name , 
-         patient_Age ,
-         gender ,  
-         patient_Phone , 
-         birthDay , 
-      } ;
-
-
-      // تحويل المبلغ إلى قروش (100 جنيه = 10000 قرش)
-      const orderResponse = await axios.post("https://accept.paymob.com/api/ecommerce/orders", {
-         auth_token: authToken,
-         delivery_needed: "false",
-         amount_cents: amount ,
-         currency: "EGP",
-         merchant_order_id: new Date().getTime(),
-         items: [],
-      });
-      const orderId = orderResponse.data.id;
-
-      // طلب Payment Key
-      const paymentKeyResponse = await axios.post("https://accept.paymob.com/api/acceptance/payment_keys", {
-         auth_token: authToken,
-         amount_cents: amount ,
-         expiration: 3600,
-         order_id: orderId,
-         extra:orderData ,
-         billing_data: {
-            phone_number: patient_Phone ,
-            first_name: "Example" ,
-            last_name: "Example" ,
-            email: "email@example.com" ,
-            country: "EG",
-            city: "......",
-            state: "......", 
-            street: "......",
-            building: "1",
-            apartment: "1",
-            floor: "1",
-         },
-         currency: "EGP",
-         integration_id ,
-      });
-
-      const paymentKey = paymentKeyResponse.data.token ;
-      
-      res.json({
-         redirect_url: `https://accept.paymob.com/api/acceptance/iframes/931835?payment_token=${paymentKey}`,
-      });
-
-   } catch (error) {
-      // console.error("Error creating payment:", error);
-      console.error("Error Payment creation failed !", error.response?.data || error.message);
-      res.status(500).json({ error: "Payment creation failed !" });
-   }
-};
-//& 3- Receive Webhook From Paymob :
-export const webhookMiddleWre = catchError(
-   async(req , res , next)=>{
-      const {success , pending , amount_cents , data , order , payment_key_claims} = req.body.obj ;  // البيانات اللي جاية من PayMob
-         console.log("Done Webhook");
-         console.log("Success" , success);
-         console.log("Pending" , pending);
-         // console.log("order_url" , order.order_url);
-         // console.log(req.body.obj);
-         console.log("Extra ==>" , payment_key_claims.extra);
+//& Create Session :
+   export const createSession = async (req , res , next) => {
+      try {
+         const { name , age ,  email , phone , gender , birthDay , payment_method_id } = req.body ;
+         const {profile} = req.query ;
+         console.log(req.body);
          
-      if (success) {
+         const first_name = name.split(" ")[0] ;
+         const last_name = name.split(" ")[1] ;
+         const cart = await cartModel.findOne({user:req.user._id}) ;
+         if(!cart) return next(new AppError("Cart Not Found" , 404)) ;
+
+         const amount_num = cart.total_After_Discount ; 
+         let amount ;  
+
+         //^ Check Order Type if Tests Or Profiles :
+         if(profile === "true"){
+            if(!cart.profilePrice) return next(new AppError("Profile Price Not Exist" , 404)) ;
+            amount = Math.round(cart.profilePrice);
+         }else{
+            amount = Math.round(amount_num); 
+         }
+
+         const payLoad = {
+            user: req.user._id , 
+            patient_Name :name , 
+            patient_Age : age ,
+            gender ,  
+            patient_Phone : phone , 
+            birthDay , 
+         } ;
+
+         const response = await axios.post(`${FAWATERK_BASE_URL}/invoiceInitPay`,
+            {
+               providerKey: PROVIDER_KEY,
+               customer: { first_name , last_name , email , phone},
+               cartItems: [
+                  {
+                     name: "Order Payment",
+                     price: amount,
+                     quantity: 1,
+                  },
+               ],
+               cartTotal: amount , // مجموع كل المنتجات
+               payLoad , 
+               currency: "EGP",
+               payment_method_id ,
+               successUrl: `${BASE_URL}/api/payments/success`,
+               failUrl: `${BASE_URL}/api/payments/fail` ,
+            },
+            {
+            headers: {
+               Authorization: `Bearer ${FAWATERK_API_KEY}`,
+               "Content-Type": "application/json",
+            },
+            }
+         );
+
+         const invoice = response.data ;
+         res.json({ success: true, invoice: invoice.data });
+      } catch (error) {
+         console.error(error.response?.data || error.message);
+         res.status(500).json({ success: false, message: "Error creating invoice" });
+      }
+   };
+//& Success Payment :
+   export const paymentSuccess = catchError(
+      async(req , res , next)=>{
+         res.send("✅ Payment Successful");
+      }
+   )
+//& Failed Payment 
+   export const paymentFailed = catchError(
+      async(req , res , next)=>{
+         res.send("❌ Payment Failed");
+      }
+   )
+//& 3- Receive Webhook From Paymob :
+   export const webhookMiddleWre = catchError(
+      async(req , res , next)=>{
          console.log(`💰 Successfully Payment Message`);
-         await createOnlineOrder(payment_key_claims.extra)
-         console.log(`💰 Successfully Payment Message : ${data.message} ${amount_cents / 100} EGP`);
-      } else {
-         console.log(`❌ Failed Payment Message : ${data.message}`);
-         return next(new AppError(`❌ Failed Payment Message : ${data.message}` , 401)) ;
-      }
+         console.log("==================");
+         console.log("req.body.pay_load" ,  req.body.pay_load)
+
+         if(req.body.invoice_status === "paid"){
+            const pay_load_obj = JSON.parse(req.body.pay_load);
+            await createOnlineOrder(pay_load_obj) ;
+         }
+         res.json({message:"💰 Successfully Payment Message"});
    }
-)
+   )
 //& 4- Create Online Order :
-export const createOnlineOrder = async (data)=>{
-   const{
-      user , 
-      patient_Name , 
-      patient_Age , 
-      patient_Phone , 
-      gender , 
-      birthDay
-   } = data ;
+   export const createOnlineOrder = async (data)=>{
+      const{
+         user , 
+         patient_Name , 
+         patient_Age , 
+         patient_Phone , 
+         gender , 
+         birthDay
+      } = data ;
 
-   const cart = await cartModel.findOne({user:user}) ;
-   const company = cart.cartItems[0].price.company ;
-   const invoice_number = invoice_nanoid() ;
-   const order_Number = await getNextOrderNumber() ;
+      const cart = await cartModel.findOne({user:user}) ;
+      const company = cart.cartItems[0].price.company ;
+      const invoice_number = invoice_nanoid() ;
+      const order_Number = await getNextOrderNumber() ;
 
 
-   const order = await orderModel.create({
-      order_Number ,
-      user:user ,
-      patient_Name ,
-      patient_Age , 
-      cart:cart._id ,
-      patient_Phone ,
-      birthDay , 
-      gender ,
-      invoice_number ,
-      is_Paid : true ,
-      payment_Type:"card" ,
-      company ,
-      orderItems:cart.cartItems.map(({test , price:{price , priceAfterDiscount , contract_Price}})=>({
-         test:test ,
-         price:price ,
-         priceAfterDiscount:priceAfterDiscount ,
-         contract_Price
-      })) ,
-   })
+      const order = await orderModel.create({
+         order_Number ,
+         user:user ,
+         patient_Name ,
+         patient_Age , 
+         cart:cart._id ,
+         patient_Phone ,
+         birthDay , 
+         gender ,
+         invoice_number ,
+         is_Paid : true ,
+         payment_Type:"card" ,
+         company ,
+         orderItems:cart.cartItems.map(({test , price:{price , priceAfterDiscount , contract_Price}})=>({
+            test:test ,
+            price:price ,
+            priceAfterDiscount:priceAfterDiscount ,
+            contract_Price
+         })) ,
+      })
 
-   //! Added invoice to this Order :
-   const patient_Name_Slug = slugify(`${order.patient_Name}`) ;
-   const add_Invoice_Order = await orderModel.findByIdAndUpdate(order._id , {invoice_pdf  : `invoice_${patient_Name_Slug}_${order._id}.pdf` } , {new:true})
-   
-   //! Create Invoice Pdf  orders :
-   try {
-      await create_pdf(pdf_invoice , add_Invoice_Order , `invoice_${patient_Name_Slug}_${order._id}`);
-   } catch (error) {
-      console.error('Invoice PDF creation failed', error.response?.data || error.message);
-      return next(new AppError("Invoice PDF creation failed" , 404)) ;
+      //! Added invoice to this Order :
+      const patient_Name_Slug = slugify(`${order.patient_Name}`) ;
+      const add_Invoice_Order = await orderModel.findByIdAndUpdate(order._id , {invoice_pdf  : `invoice_${patient_Name_Slug}_${order._id}.pdf` } , {new:true})
+      
+      //! Create Invoice Pdf  orders :
+      try {
+         await create_pdf(pdf_invoice , add_Invoice_Order , `invoice_${patient_Name_Slug}_${order._id}`);
+      } catch (error) {
+         console.error('Invoice PDF creation failed', error.response?.data || error.message);
+         return next(new AppError("Invoice PDF creation failed" , 404)) ;
+      }
+
+
+      //!Delete Cart After Create Order:
+      const cartDeleted = await cartModel.findByIdAndDelete(cart._id , {new:true})  ; 
+
+
+      //& Increase the number of times the test is done : 
+      const options =  order.orderItems.map(({test:{_id }})=>({
+         updateOne:{
+            filter:{_id} ,
+            update:{$inc:{count:1}}
+         }
+      }));
+      await testModel.bulkWrite(options);
+      
+      res.json({message:"Successfully Created New Orders By Paymob Online!" , order:add_Invoice_Order})
    }
 
 
-   //!Delete Cart After Create Order:
-   const cartDeleted = await cartModel.findByIdAndDelete(cart._id , {new:true})  ; 
 
 
-   //& Increase the number of times the test is done : 
-   const options =  order.orderItems.map(({test:{_id }})=>({
-      updateOne:{
-         filter:{_id} ,
-         update:{$inc:{count:1}}
-      }
-   }));
-   await testModel.bulkWrite(options);
+// 🏦 بيانات بطاقة فيزا للاختبار
+
+// يمكنك استخدام بطاقة فيزا التالية لاختبار المعاملات الناجحة:
+// رقم البطاقة: 4005 5500 0000 0001
+// اسم حامل البطاقة: Fawaterak test
+// تاريخ الانتهاء: 12/26
+// CVV: 100
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//^================================== Create Online Order And Payment With Paymob  ==================================
+// const PAYMOB_API_KEY = process.env.PAYMOB_API_KEY ;
+// let authToken = "" ;
+
+
+
+// //& 1- Create Token In Paymob :
+// const getAuthToken = async () => {
+//    try {
+//       const response = await axios.post("https://accept.paymob.com/api/auth/tokens", {
+//          api_key: PAYMOB_API_KEY,
+//       });
+//       authToken = response.data.token;
+//    } catch (error) {
+//       console.error("Error getting auth token:", error.response?.data || error.message);
+//    }
+// };
+// //& 2- Create Payment Method :
+// export const createSession = async (req , res , next) => {
+//    try {
+//       await getAuthToken() ;
+
+
+//       const {patient_Name  , gender , birthDay,  patient_Phone , patient_Age} = req.patient ;
+//       const {payment , profile} = req.query;
+
+//       let integration_id = "" ;
+//       if(payment === "credit"){
+//          integration_id = "5195748" ;
+//       }else if(payment === "wallet"){
+//          integration_id = "5195747" ;
+//       };
+
+
+
+//       const cart = await cartModel.findOne({user:req.user._id}) ;
+//       if(!cart) return next(new AppError("Cart Not Found" , 404)) ;
+
+//       const amount_num = cart.total_After_Discount ; 
+//       let amount ;  
+
+
+//       //^ Check Order Type if Tests Or Profiles :
+//       if(profile === "true"){
+//          if(!cart.profilePrice) return next(new AppError("Profile Price Not Exist" , 404)) ;
+//          amount = Math.round(cart.profilePrice) * 100  ;
+//       }else{
+//          amount = Math.round(amount_num) * 100 ; 
+//       }
+
+
+//       const orderData = {
+//          user: req.user._id , 
+//          patient_Name :patient_Name , 
+//          patient_Age ,
+//          gender ,  
+//          patient_Phone , 
+//          birthDay , 
+//       } ;
+
+
+//       // تحويل المبلغ إلى قروش (100 جنيه = 10000 قرش)
+//       const orderResponse = await axios.post("https://accept.paymob.com/api/ecommerce/orders", {
+//          auth_token: authToken,
+//          delivery_needed: "false",
+//          amount_cents: amount ,
+//          currency: "EGP",
+//          merchant_order_id: new Date().getTime(),
+//          items: [],
+//       });
+//       const orderId = orderResponse.data.id;
+
+//       // طلب Payment Key
+//       const paymentKeyResponse = await axios.post("https://accept.paymob.com/api/acceptance/payment_keys", {
+//          auth_token: authToken,
+//          amount_cents: amount ,
+//          expiration: 3600,
+//          order_id: orderId,
+//          extra:orderData ,
+//          billing_data: {
+//             phone_number: patient_Phone ,
+//             first_name: "Example" ,
+//             last_name: "Example" ,
+//             email: "email@example.com" ,
+//             country: "EG",
+//             city: "......",
+//             state: "......", 
+//             street: "......",
+//             building: "1",
+//             apartment: "1",
+//             floor: "1",
+//          },
+//          currency: "EGP",
+//          integration_id ,
+//       });
+
+//       const paymentKey = paymentKeyResponse.data.token ;
+      
+//       res.json({
+//          redirect_url: `https://accept.paymob.com/api/acceptance/iframes/931835?payment_token=${paymentKey}`,
+//       });
+
+//    } catch (error) {
+//       // console.error("Error creating payment:", error);
+//       console.error("Error Payment creation failed !", error.response?.data || error.message);
+//       res.status(500).json({ error: "Payment creation failed !" });
+//    }
+// };
+// //& 3- Receive Webhook From Paymob :
+// export const webhookMiddleWre = catchError(
+//    async(req , res , next)=>{
+//       const {success , pending , amount_cents , data , order , payment_key_claims} = req.body.obj ;  // البيانات اللي جاية من PayMob
+//          console.log("Done Webhook");
+//          console.log("Success" , success);
+//          console.log("Pending" , pending);
+//          // console.log("order_url" , order.order_url);
+//          // console.log(req.body.obj);
+//          console.log("Extra ==>" , payment_key_claims.extra);
+         
+//       if (success) {
+//          console.log(`💰 Successfully Payment Message`);
+//          await createOnlineOrder(payment_key_claims.extra)
+//          console.log(`💰 Successfully Payment Message : ${data.message} ${amount_cents / 100} EGP`);
+//       } else {
+//          console.log(`❌ Failed Payment Message : ${data.message}`);
+//          return next(new AppError(`❌ Failed Payment Message : ${data.message}` , 401)) ;
+//       }
+//    }
+// )
+// //& 4- Create Online Order :
+// export const createOnlineOrder = async (data)=>{
+//    const{
+//       user , 
+//       patient_Name , 
+//       patient_Age , 
+//       patient_Phone , 
+//       gender , 
+//       birthDay
+//    } = data ;
+
+//    const cart = await cartModel.findOne({user:user}) ;
+//    const company = cart.cartItems[0].price.company ;
+//    const invoice_number = invoice_nanoid() ;
+//    const order_Number = await getNextOrderNumber() ;
+
+
+//    const order = await orderModel.create({
+//       order_Number ,
+//       user:user ,
+//       patient_Name ,
+//       patient_Age , 
+//       cart:cart._id ,
+//       patient_Phone ,
+//       birthDay , 
+//       gender ,
+//       invoice_number ,
+//       is_Paid : true ,
+//       payment_Type:"card" ,
+//       company ,
+//       orderItems:cart.cartItems.map(({test , price:{price , priceAfterDiscount , contract_Price}})=>({
+//          test:test ,
+//          price:price ,
+//          priceAfterDiscount:priceAfterDiscount ,
+//          contract_Price
+//       })) ,
+//    })
+
+//    //! Added invoice to this Order :
+//    const patient_Name_Slug = slugify(`${order.patient_Name}`) ;
+//    const add_Invoice_Order = await orderModel.findByIdAndUpdate(order._id , {invoice_pdf  : `invoice_${patient_Name_Slug}_${order._id}.pdf` } , {new:true})
    
-   res.json({message:"Successfully Created New Orders By Paymob Online!" , order:add_Invoice_Order})
-}
+//    //! Create Invoice Pdf  orders :
+//    try {
+//       await create_pdf(pdf_invoice , add_Invoice_Order , `invoice_${patient_Name_Slug}_${order._id}`);
+//    } catch (error) {
+//       console.error('Invoice PDF creation failed', error.response?.data || error.message);
+//       return next(new AppError("Invoice PDF creation failed" , 404)) ;
+//    }
+
+
+//    //!Delete Cart After Create Order:
+//    const cartDeleted = await cartModel.findByIdAndDelete(cart._id , {new:true})  ; 
+
+
+//    //& Increase the number of times the test is done : 
+//    const options =  order.orderItems.map(({test:{_id }})=>({
+//       updateOne:{
+//          filter:{_id} ,
+//          update:{$inc:{count:1}}
+//       }
+//    }));
+//    await testModel.bulkWrite(options);
+   
+//    res.json({message:"Successfully Created New Orders By Paymob Online!" , order:add_Invoice_Order})
+// }
 
 
 
