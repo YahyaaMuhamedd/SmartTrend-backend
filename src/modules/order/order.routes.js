@@ -44,22 +44,40 @@ const router = Router() ;
    router.route("/getLoggedUserOrder")
       .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) ,  orderControl.getLoggedUserOrder)
 
-   //^=========================== Get Logged User Order =============================================
-   router.route("/payment")
-      .get(orderControl.getPaymentMethods)
+      
+      
+      
+      
+      
+   //&================================== Create Online Order And Payment With Fawaterak =====================================
 
+   //^ 1- Get Payment Method =============================================
+      router.route("/paymentMethod")
+         .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) ,  orderControl.getPaymentMethods)
+   
 
-
-
-
-   //^================================== Create Online Order And Payment With Paymob =====================================
-   // & Create Payment Method :
-   router.route("/create-session")
+   //^ 2- Create Payment Method ===========================================
+      router.route("/create-session")
       .post(protectedRoutes , 
          authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , 
          validation(createOnlineOrderVal) , 
          orderControl.checkExistPatientMiddleWare , 
          orderControl.createSession )
+         
+      
+   //^ 3-Receive Payment Success =============================================
+      router.route("/success")
+         .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) ,  orderControl.paymentSuccess)
+   
+   
+   //^ 4-  Receive Payment Failed  =============================================
+      router.route("/fail")
+         .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , orderControl.paymentFailed)
+   //&====================================================================================================================
+
+
+
+
 
 
 
@@ -87,7 +105,9 @@ const router = Router() ;
          orderControl.checkExistPatientMiddleWare , 
          orderControl.createCashOrderByAdmin
       )
-         
+   
+
+
    //^================================== Create Cash Order By InstaPay ========================================
    router.route("/createCashOrderByInstaPay")
       .post(protectedRoutes , 
@@ -103,6 +123,10 @@ const router = Router() ;
          validation(paidOrderVal) , 
          orderControl.paidOrderByAdmin
       )
+
+
+
+
 
 
 
