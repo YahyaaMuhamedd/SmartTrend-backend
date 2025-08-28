@@ -1049,7 +1049,7 @@ const BASE_URL = process.env.BASE_URL ;
 //& Create Payment Method :
    export const getPaymentMethods = catchError(async(req , res , next)=>{
       const  headers =  { Authorization: `Bearer ${FAWATERK_API_KEY}`,"Content-Type": "application/json"} ;
-      const {data} = await axios.get("https://staging.fawaterk.com/api/v2/getPaymentmethods",{headers});
+      const {data} = await axios.get(`${FAWATERK_BASE_URL}/getPaymentmethods`,{headers});
       res.json({message:"success" , payment_method :data})
       // console.log("Payment Method" , data);
    }) ;
@@ -1059,7 +1059,6 @@ const BASE_URL = process.env.BASE_URL ;
       try {
          const { name , age ,  email , phone , gender , birthDay , payment_method_id } = req.body ;
          const {profile} = req.query ;
-         console.log(req.body);
          
          const first_name = name.split(" ")[0] ;
          const last_name = name.split(" ")[1] ;
