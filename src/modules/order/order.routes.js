@@ -67,12 +67,12 @@ const router = Router() ;
       
    //^ 3-Receive Payment Success =============================================
       router.route("/success")
-         .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) ,  orderControl.paymentSuccess)
+         .get(orderControl.paymentSuccess)
    
    
    //^ 4-  Receive Payment Failed  =============================================
       router.route("/fail")
-         .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , orderControl.paymentFailed)
+         .get(orderControl.paymentFailed)
    //&====================================================================================================================
 
 

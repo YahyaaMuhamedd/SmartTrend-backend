@@ -149,6 +149,7 @@ export const getReportContractPrice = catchError(
          }else if(saveMethod === "excel"){
             const selectedFields = [
                "order_Number",  
+               "patient_Name" , 
                "invoice_number" , 
                "transform_number" , 
                "date" ,
@@ -159,6 +160,7 @@ export const getReportContractPrice = catchError(
             const newOrder = orders.map((ele)=>{
                return {
                   order_Number:ele.order_Number ,
+                  patient_Name:ele.patient_Name ,
                   invoice_number:ele.invoice_number ,
                   transform_number:ele.transform_number ,
                   date:ele.createdAt? new Date(ele.createdAt) : "" ,
