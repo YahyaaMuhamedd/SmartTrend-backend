@@ -147,6 +147,7 @@ export const pdf_Report_data_contract_price = (data)=>{
                   <tr class="heading">
                      <td>Number</td>
                      <td>Order Number</td>
+                     <td>Patient Name</td>
                      <td>Invoice Number</td>
                      <td>Transform Number</td>
                      <td>Date</td>
@@ -157,6 +158,7 @@ export const pdf_Report_data_contract_price = (data)=>{
                            <tr class="item">
                               <td>${index + 1}</td>
                               <td>${ele.order_Number}</td>
+                              <td>${ele.patient_Name}</td>
                               <td>${ele.invoice_number}</td>
                               <td>${ele.transform_number}</td>
                               <td>${new Date(ele.createdAtOrder).toString().slice(0 , 24)}</td>
@@ -168,6 +170,8 @@ export const pdf_Report_data_contract_price = (data)=>{
 
                   <tr class="total heading">
                      <td>Total</td>
+                     <td></td>
+                     <td></td>
                      <td></td>
                      <td></td>
                      <td></td>      
