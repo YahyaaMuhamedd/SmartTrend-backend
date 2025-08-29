@@ -1049,11 +1049,9 @@ const BASE_URL = process.env.BASE_URL ;
 //& Create Payment Method :
    export const getPaymentMethods = catchError(async(req , res , next)=>{
       const  headers =  { Authorization: `Bearer ${FAWATERK_API_KEY}`,"Content-Type": "application/json"} ;
-      const {data} = await axios.get(`${FAWATERK_BASE_URL}/getPaymentmethods`,{headers});
+      const {data} = await axios.get(`${FAWATERK_BASE_URL}/api/v2/getPaymentmethods`,{headers});
       res.json({message:"success" , payment_method :data})
-      // console.log("Payment Method" , data);
    }) ;
-
 //& Create Session :
    export const createSession = async (req , res , next) => {
       try {
@@ -1085,7 +1083,7 @@ const BASE_URL = process.env.BASE_URL ;
             birthDay , 
          } ;
 
-         const response = await axios.post(`${FAWATERK_BASE_URL}/invoiceInitPay`,
+         const response = await axios.post(`${FAWATERK_BASE_URL}/api/v2/invoiceInitPay`,
             {
                providerKey: PROVIDER_KEY,
                customer: { first_name , last_name , email , phone},
@@ -1100,8 +1098,8 @@ const BASE_URL = process.env.BASE_URL ;
                payLoad , 
                currency: "EGP",
                payment_method_id ,
-               successUrl: `${BASE_URL}/api/payments/success`,
-               failUrl: `${BASE_URL}/api/payments/fail` ,
+               successUrl: `https://sm-trend.com/#/allOrderLoggedUser`,
+               failUrl: `https://smarttrend-backend-production.up.railway.app/api/v1/order/fail` ,
             },
             {
             headers: {
@@ -1210,6 +1208,7 @@ const BASE_URL = process.env.BASE_URL ;
       
       res.json({message:"Successfully Created New Orders By Paymob Online!" , order:add_Invoice_Order})
    }
+
 
 
 

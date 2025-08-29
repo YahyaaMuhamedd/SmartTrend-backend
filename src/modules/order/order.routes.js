@@ -56,6 +56,7 @@ const router = Router() ;
          .get(protectedRoutes , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) ,  orderControl.getPaymentMethods)
    
 
+
    //^ 2- Create Payment Method ===========================================
       router.route("/create-session")
       .post(protectedRoutes , 
@@ -63,7 +64,7 @@ const router = Router() ;
          validation(createOnlineOrderVal) , 
          orderControl.checkExistPatientMiddleWare , 
          orderControl.createSession )
-         
+      
       
    //^ 3-Receive Payment Success =============================================
       router.route("/success")
