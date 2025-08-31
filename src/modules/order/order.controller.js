@@ -292,75 +292,10 @@ export const getSpecificOrder = catchError(
 
 
 
-//*============================================ Cash Order ============================================== 
-
-//& Create Cash Order Logged User Or Old User :
-export const createCashOrder = catchError(
-   async(req , res , next)=>{
-
-      const {patient_Name, patient_Age, gender, patient_Phone , birthDay} = req.patient ;
-      const cart = await cartModel.findOne({user:req.user._id}) ;
-      if(!cart) return next(new AppError("Cart Not Found", 404)) ;
-
-      const company = cart.cartItems[0].price.company ;
-      const invoice_number = invoice_nanoid() ;
-      const order_Number = await getNextOrderNumber() ;
-
-      const order = await orderModel.create({
-         order_Number ,
-         user:req.user._id ,
-         patient_Name , 
-         birthDay ,
-         patient_Age , 
-         cart:cart._id ,
-         patient_Phone ,
-         gender ,
-         is_Paid:true ,
-         invoice_number ,
-         company ,
-         orderItems:cart.cartItems.map(({test , price:{price , priceAfterDiscount , contract_Price}})=>({
-            test:test ,
-            price:price ,
-            priceAfterDiscount:priceAfterDiscount ,
-            contract_Price
-         }))
-      })
-      
-      //! Added invoice to this Order :
-      const patient_Name_Slug = slugify(order.patient_Name) ;
-      const add_Invoice_Order = await orderModel.findByIdAndUpdate(order._id , {invoice_pdf  : `invoice_${patient_Name_Slug}_${order._id}.pdf`} , {new:true})
-      
-      //! Create Invoice Pdf  orders :
-      try {
-         await create_pdf(pdf_invoice , add_Invoice_Order , `invoice_${patient_Name_Slug}_${order._id}`);
-      } catch (error) {
-         return next(new AppError(error.message, 500));
-         // return next(new AppError("Invoice PDF creation failed", 500));
-      }
-
-      //! Delete Cart After Create Order:
-      // const cartDeleted = await cartModel.findByIdAndDelete(cart._id , {new:true}) ;
-
-      //& Increase the number of times the test is done : 
-      const options =  order.orderItems.map(({test:{_id }})=>({
-         updateOne:{
-            filter:{_id} ,
-            update:{$inc:{count:1}}
-         }
-      }));
-      await testModel.bulkWrite(options);
-
-      if(!order) return next(new AppError("Order Failed", 400)) ;
-      res.json({message:"success", add_Invoice_Order, patient:req.patient});
-   }
-)
-
-
 
 //*============================================Create Cash Order By instaPay ============================================== 
 export const createCashOrderByInstaPay = catchError(
    async(req , res , next)=>{
-
       const {patient_Name , patient_Age , gender , patient_Phone , birthDay} = req.patient ;
       const {listIdTest ,  companyId} = req.body ;
       
@@ -462,9 +397,7 @@ export const createCashOrderByInstaPay = catchError(
 //& Check Patient Exist MiddleWare :
 export const checkExistPatientMiddleWare = catchError(
    async(req , res , next)=>{
-      const {name , birthDay , gender  , phone} = req.body ;
-      const patient_Name = name ;
-      const patient_Phone = phone ;
+      const {patient_Name , birthDay , gender  , patient_Phone} = req.body ;
 
       const createdBy = req.user._id ;
       //& Calculation Age From BirthDay :
@@ -1055,11 +988,11 @@ const BASE_URL = process.env.BASE_URL ;
 //& Create Session :
    export const createSession = async (req , res , next) => {
       try {
-         const { name , age ,  email , phone , gender , birthDay , payment_method_id } = req.body ;
+         const { patient_Name , age ,  email , patient_Phone , gender , birthDay , payment_method_id } = req.body ;
          const {profile} = req.query ;
          
-         const first_name = name.split(" ")[0] ;
-         const last_name = name.split(" ")[1] ;
+         const first_name = patient_Name.split(" ")[0] ;
+         const last_name = patient_Name.split(" ")[1] ;
          const cart = await cartModel.findOne({user:req.user._id}) ;
          if(!cart) return next(new AppError("Cart Not Found" , 404)) ;
 
@@ -1076,17 +1009,17 @@ const BASE_URL = process.env.BASE_URL ;
 
          const payLoad = {
             user: req.user._id , 
-            patient_Name :name , 
+            patient_Name , 
             patient_Age : age ,
             gender ,  
-            patient_Phone : phone , 
+            patient_Phone , 
             birthDay , 
          } ;
 
          const response = await axios.post(`${FAWATERK_BASE_URL}/api/v2/invoiceInitPay`,
             {
                providerKey: PROVIDER_KEY,
-               customer: { first_name , last_name , email , phone},
+               customer: { first_name , last_name , email , patient_Phone},
                cartItems: [
                   {
                      name: "Order Payment",

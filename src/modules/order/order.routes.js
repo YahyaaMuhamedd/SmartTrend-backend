@@ -3,7 +3,7 @@ import * as orderControl from "./order.controller.js";
 import {validation} from "../../middleWare/validation.js";
 import { protectedRoutes } from "../../middleWare/authentication.js";
 import { authorize } from "../../middleWare/authorization.js";
-import { addHouseCallVal , cancelOrderVal , createCashOrderAdminVal , createOnlineOrderVal, createOrderVal , generateInvoiceOrderVal , paidOrderVal, paramsIdVal } from "./order.validate.js";
+import { addHouseCallVal , cancelOrderVal , createCashOrderAdminVal , createOnlineOrderVal , generateInvoiceOrderVal , paidOrderVal, paramsIdVal } from "./order.validate.js";
 import { ROLES } from "../../utilities/enums.js";
 
 
@@ -84,15 +84,6 @@ const router = Router() ;
 
 
 
-         
-   //^================================== Create Cash Order ========================================
-   router.route("/createCashOrder")
-      .post(protectedRoutes , 
-         authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , 
-         validation(createOrderVal) , 
-         orderControl.checkExistPatientMiddleWare , 
-         orderControl.createCashOrder
-      )
 
 
 
