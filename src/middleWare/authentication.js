@@ -18,9 +18,22 @@ export const protectedRoutes = catchError(
 
 
       //& 2- verify Token
-      let decoded = jwt.verify(bearerToken , process.env.SECRET_KEY) ;
-      if(!decoded) return next(new AppError("Token Not Valid" , 498)) ;
-
+      try {
+         let decoded = jwt.verify(token , process.env.SECRET_KEY_ACCESS) ;
+         if(!decoded) return next(new AppError("Token Not Valid" , 498)) ;
+      } catch (error) {
+         let message = "Authentication Failed, Token Not Valid.!";
+         if (error.message === "jwt malformed") {
+            message = "Invalid Token Format.!";
+         } else if (error.message === "jwt expired") {
+            message = "Token Expired, please login again.!";
+         } else if (error.message === "invalid signature") {
+            message = "Invalid Token Signature.!";
+         } else if (error.message === "jwt not active") {
+            message = "Token Not Active Yet.!";
+         }
+         return next(new AppError(message, 498));
+      }
       
       //& 3- Check Exist User Or Not
       const user = await userModel.findById(decoded._id).select("-password") ;
