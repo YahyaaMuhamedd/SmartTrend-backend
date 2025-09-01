@@ -17,10 +17,24 @@ export const protectedRoutes = catchError(
       const bearerToken = token.split(' ')[1] ;
 
 
-      //& 2- verify Token
       try {
-         let decoded = jwt.verify(token , process.env.SECRET_KEY_ACCESS) ;
+         //& 2- verify Token
+         let decoded = jwt.verify(bearerToken , process.env.SECRET_KEY) ;
          if(!decoded) return next(new AppError("Token Not Valid" , 498)) ;
+
+         //& 3- Check Exist User Or Not
+         const user = await userModel.findById(decoded._id).select("-password") ;
+         if(!user) return next(new AppError("User Not Exist ProtectedRoute" , 401)) ;
+
+         if(user.passwordChangedAt){
+            //& 4- Change Password And Token Expired
+            let time = parseInt(user?.passwordChangedAt / 1000) ;
+            // console.log(time , "|" , decoded.iat);
+            if(time > decoded.iat) return next(new AppError("Token Not Valid..Login again" , 401)) ;
+         }
+
+         req.user = user
+         next();
       } catch (error) {
          let message = "Authentication Failed, Token Not Valid.!";
          if (error.message === "jwt malformed") {
@@ -34,19 +48,5 @@ export const protectedRoutes = catchError(
          }
          return next(new AppError(message, 498));
       }
-      
-      //& 3- Check Exist User Or Not
-      const user = await userModel.findById(decoded._id).select("-password") ;
-      if(!user) return next(new AppError("User Not Exist ProtectedRoute" , 401)) ;
-
-      if(user.passwordChangedAt){
-         //& 4- Change Password And Token Expired
-         let time = parseInt(user?.passwordChangedAt / 1000) ;
-         // console.log(time , "|" , decoded.iat);
-         if(time > decoded.iat) return next(new AppError("Token Not Valid..Login again" , 401)) ;
-      }
-
-      req.user = user
-      next();
    }
 )
