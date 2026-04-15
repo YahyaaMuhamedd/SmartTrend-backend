@@ -26,12 +26,53 @@ const router = Router() ;
       //^=========================== Add Tests By Excel Sheet  ==============================
       router.route("/addAllTestPriceByExcelSheet")
          .post(protectedRoutes , authorize(ROLES.ADMIN) , multerLocal(validExtension.excel , "excel").single("file") , priceControl.addTestPriceSheetExcelToDatabase)
-      
-      
-      
-      
-      
-      
+
+
+
+      //^=========================== Bulk Update Tests and Prices with Conditions ===============
+      router.route("/bulkUpdateTestsAndPrices")
+         .post(protectedRoutes , authorize(ROLES.ADMIN) , multerLocal(validExtension.excel , "excel").fields([
+            { name: 'testPriceFile', maxCount: 1 },
+            { name: 'testConditionsFile', maxCount: 1 },
+            { name: 'radiologyPriceFile', maxCount: 1 },
+            { name: 'radiologyConditionsFile', maxCount: 1 }
+         ]) , priceControl.bulkUpdateTestsAndPrices)
+
+
+
+      //^=========================== Add Tests Only (No Prices) from Excel =====================
+      router.route("/addTestsOnlyFromExcel")
+         .post(protectedRoutes , authorize(ROLES.ADMIN) , multerLocal(validExtension.excel , "excel").fields([
+            { name: 'testPriceFile', maxCount: 1 },
+            { name: 'testConditionsFile', maxCount: 1 },
+            { name: 'radiologyPriceFile', maxCount: 1 },
+            { name: 'radiologyConditionsFile', maxCount: 1 }
+         ]) , priceControl.addTestsOnlyFromExcel)
+
+
+
+      //^=========================== Add ONLY Missing Tests with Prices =======================
+      router.route("/addMissingTestsWithPrices")
+         .post(protectedRoutes , authorize(ROLES.ADMIN) , multerLocal(validExtension.excel , "excel").fields([
+            { name: 'testPriceFile', maxCount: 1 },
+            { name: 'testConditionsFile', maxCount: 1 },
+            { name: 'radiologyPriceFile', maxCount: 1 },
+            { name: 'radiologyConditionsFile', maxCount: 1 }
+         ]) , priceControl.addMissingTestsWithPrices)
+
+
+
+      //^=========================== Remove Tests NOT in Excel (Cleanup) =======================
+      router.route("/removeTestsNotInExcel")
+         .delete(protectedRoutes , authorize(ROLES.ADMIN) , multerLocal(validExtension.excel , "excel").fields([
+            { name: 'testPriceFile', maxCount: 1 },
+            { name: 'testConditionsFile', maxCount: 1 },
+            { name: 'radiologyPriceFile', maxCount: 1 },
+            { name: 'radiologyConditionsFile', maxCount: 1 }
+         ]) , priceControl.removeTestsNotInExcel)
+
+
+
       //^=========================== Get Prices Specific Company =================================
       router.route("/getPriceCompany/:id")
       .get(protectedRoutes  , authorize(ROLES.ADMIN , ROLES.MODERATOR , ROLES.USER) , validation(paramsIdVal) , priceControl.getPriceCompany)
