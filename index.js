@@ -27,8 +27,7 @@ env.config();
 const app = express() ;
 const PORT = process.env.PORT || 5000 ;
 
-
-
+   app.set('trust proxy' , true)
 
    // Encoded Server data (Json) :
    app.use(express.json({ limit: '3000kb' })) ;
